@@ -1,0 +1,5 @@
+[x] load folders - June 21
+[ ] create folders
+[ ] load files
+[ ] file preview
+[ ] upload files
