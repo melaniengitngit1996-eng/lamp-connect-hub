@@ -25,26 +25,42 @@ onMounted(async () => {
          </div>
       </div>
       <nav class="flex-1 p-3 space-y-1">
-         <a class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition bg-sidebar-accent text-sidebar-accent-foreground font-medium active" href="/feed" data-status="active" aria-current="page">
+         <RouterLink
+               to="/"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
+               :class="
+                  $route.path === '/'
+                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               "
+            >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house h-4 w-4" aria-hidden="true">
                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
                <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
             </svg>
             Feed
-         </a>
+         </RouterLink>
          <!-- <a href="/chat" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition hover:bg-sidebar-accent/60 text-sidebar-foreground/80">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square h-4 w-4" aria-hidden="true">
                <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
             </svg>
             Chat
-         </a>
-         <a href="/drive" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition hover:bg-sidebar-accent/60 text-sidebar-foreground/80">
+         </a> -->
+         <RouterLink
+               to="/drive"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
+               :class="
+                  $route.path === '/drive'
+                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               "
+            >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open h-4 w-4" aria-hidden="true">
                <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path>
             </svg>
             Drive
-         </a>
-         <a href="/members" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition hover:bg-sidebar-accent/60 text-sidebar-foreground/80">
+         </RouterLink>
+         <!-- <a href="/members" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition hover:bg-sidebar-accent/60 text-sidebar-foreground/80">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users h-4 w-4" aria-hidden="true">
                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>

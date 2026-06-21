@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import AppLayout from '../layouts/AppLayout.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import DashboardPage from '../pages/dashboard/DashboardPage.vue'
+import DrivePage from '../pages/drive/DrivePage.vue'
 
 const routes = [
     {
@@ -12,14 +13,14 @@ const routes = [
         children: [
             {
                 path: '',
-                name: 'dashboard',
+                name: 'feed',
                 component: DashboardPage,
             },
-            // {
-            //     path: 'members',
-            //     name: 'members',
-            //     component: MembersPage,
-            // },
+            {
+                path: 'drive',
+                name: 'drive',
+                component: DrivePage,
+            },
         ],
     },
     {
