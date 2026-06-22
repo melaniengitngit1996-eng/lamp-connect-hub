@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
+import Dialog from '../../components/Dialog.vue'
+import Button from '../../components/Button.vue'
 import FolderPlusIcon from '../../icons/FolderPlusIcon.vue'
 import UploadIcon from '../../icons/UploadIcon.vue'
 import HomeIcon from '../../icons/HomeIcon.vue'
@@ -8,11 +10,18 @@ import FolderOrangeIcon from '../../icons/FolderOrangeIcon.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
 
+import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
+
+const showDialog = ref(false)
 const folders = ref([])
 const files = ref([])
 
 const currentFolder = ref(null)
 const breadcrumbs = ref([])
+
+const refreshFolders = async () => {
+    await loadFolders(currentFolder.value?.id)
+}
 
 const loadFolders = async (parentId = null) => {
     let url = '/api/drive/folders'
@@ -75,14 +84,15 @@ onMounted(async () => {
             <p class="text-sm text-muted-foreground">Shared files for the LAMP community.</p>
         </div>
         <div class="flex gap-2">
-            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
+            <Button type="plain" @click="showDialog = true">
                 <FolderPlusIcon />
                 New folder
-            </button>
-            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+            </Button>
+
+            <Button type="primary">
                 <UploadIcon />
                 Upload
-            </button>
+            </Button>
             <input multiple="" class="hidden" type="file">
         </div>
     </header>
@@ -138,36 +148,17 @@ onMounted(async () => {
                 </span>
             </div>
 
-            <button class="inline-flex items-center justify-center h-9 w-9 hover:bg-accent rounded-md">
+            <Button type="icon">
                 <TrashIcon />
-            </button>
+            </Button>
         </div>
-      <!-- <div class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition">
-         <button class="flex items-center gap-3 flex-1 min-w-0 text-left">
-            <FileGreen />
-            <div class="flex-1 min-w-0">
-               <div class="text-sm font-medium truncate">car.png</div>
-               <div class="text-xs text-muted-foreground">21.3 KB · 6h</div>
-            </div>
-         </button>
-         <div class="hidden sm:flex items-center gap-2"><span class="relative flex shrink-0 overflow-hidden rounded-full h-6 w-6"><img class="aspect-square h-full w-full" src="https://lh3.googleusercontent.com/a/ACg8ocJvyec3OlWtfxjG3D5RG9t3tain8GGu6KW5yqx3Jg5V6uoylENt=s96-c"></span><span class="text-xs text-muted-foreground">Melanie Ngitngit</span></div>
-         <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9">
-            <Trash />
-         </button>
-      </div>
-      <div class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition">
-         <button class="flex items-center gap-3 flex-1 min-w-0 text-left">
-            <FileBlue />
-            <div class="flex-1 min-w-0">
-               <div class="text-sm font-medium truncate">Welcome.txt</div>
-               <div class="text-xs text-muted-foreground">312 B · 6h</div>
-            </div>
-         </button>
-         <div class="hidden sm:flex items-center gap-2"><span class="relative flex shrink-0 overflow-hidden rounded-full h-6 w-6"><img class="aspect-square h-full w-full" src="https://lh3.googleusercontent.com/a/ACg8ocJvyec3OlWtfxjG3D5RG9t3tain8GGu6KW5yqx3Jg5V6uoylENt=s96-c"></span><span class="text-xs text-muted-foreground">Melanie Ngitngit</span></div>
-         <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9">
-            <Trash />
-         </button>
-      </div> -->
     </div>
+
+    <CreateFolderDialog
+        :open="showDialog"
+        :parent-id="currentFolder?.id"
+        @close="showDialog = false"
+        @created="refreshFolders"
+    />
 </div>
 </template>

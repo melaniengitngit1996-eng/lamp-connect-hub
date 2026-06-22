@@ -21,7 +21,7 @@ onMounted(async () => {
          </div>
          <div>
             <div class="font-display text-lg leading-none">LAMP</div>
-            <div class="text-xs text-muted-foreground">Church Portal</div>
+            <div class="text-xs text-muted-foreground">Church Connect</div>
          </div>
       </div>
       <nav class="flex-1 p-3 space-y-1">

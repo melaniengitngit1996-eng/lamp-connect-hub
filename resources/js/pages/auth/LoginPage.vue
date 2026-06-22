@@ -96,7 +96,7 @@ const login = async () => {
          </div>
          <div>
             <div class="font-display text-xl leading-none">LAMP</div>
-            <div class="text-xs opacity-70">Church Portal</div>
+            <div class="text-xs opacity-70">Church Connect</div>
          </div>
       </div>
       <div class="space-y-4 max-w-md">
@@ -113,7 +113,7 @@ const login = async () => {
                   <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"></path>
                </svg>
             </div>
-            <div class="font-display text-lg">LAMP Church Portal</div>
+            <div class="font-display text-lg">LAMP Church Connect</div>
          </div>
          <div dir="ltr" data-orientation="horizontal">
             <!-- <div role="tablist" aria-orientation="horizontal" class="h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground grid grid-cols-2 w-full" tabindex="0" data-orientation="horizontal" style="outline: none;"><button type="button" role="tab" aria-selected="true" aria-controls="radix-_r_3_-content-signin" data-state="active" id="radix-_r_3_-trigger-signin" class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">Sign in</button><button type="button" role="tab" aria-selected="false" aria-controls="radix-_r_3_-content-signup" data-state="inactive" id="radix-_r_3_-trigger-signup" class="inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium ring-offset-background cursor-pointer transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow" tabindex="-1" data-orientation="horizontal" data-radix-collection-item="">Request access</button></div> -->
