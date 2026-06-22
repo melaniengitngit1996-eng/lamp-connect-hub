@@ -26,6 +26,8 @@ class File extends Model
         'size_human',
         'created_human',
         'url',
+        'path_human',
+        'path_folders'
     ];
 
     public function getSizeHumanAttribute()
@@ -60,13 +62,53 @@ class File extends Model
         return $this->created_at->diffForHumans();
     }
 
+    public function getPathHumanAttribute()
+    {
+        $path = [];
+
+        $folder = $this->folder;
+
+        while ($folder) {
+            array_unshift($path, $folder->name);
+
+            $folder = $folder->parent;
+        }
+
+        return empty($path)
+            ? 'Drive'
+            : implode(' / ', $path);
+    }
+
     public function getUrlAttribute()
     {
         return Storage::disk($this->disk)->url($this->path);
     }
 
+    public function getPathFoldersAttribute()
+    {
+        $path = [];
+
+        $folder = $this->folder;
+
+        while ($folder) {
+            array_unshift($path, [
+                'id' => $folder->id,
+                'name' => $folder->name,
+            ]);
+
+            $folder = $folder->parent;
+        }
+
+        return $path;
+    }
+
     public function uploader()
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    public function folder()
+    {
+        return $this->belongsTo(FileFolder::class);
     }
 }

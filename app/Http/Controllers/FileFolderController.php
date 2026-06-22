@@ -13,11 +13,29 @@ class FileFolderController extends Controller
     // show all/per file folder
     public function index(Request $request)
     {
-        $parentId = $request->parent_id;
+        $search = trim($request->search ?? '');
+
+        if ($search) {
+            return response()->json([
+                'folders' => FileFolder::with('owner')
+                    ->where('name', 'like', "%{$search}%")
+                    ->latest()
+                    ->get(),
+
+                'files' => File::with('uploader')
+                    ->where(function ($query) use ($search) {
+                        $query->where('name', 'like', "%{$search}%")
+                            ->orWhere('original_name', 'like', "%{$search}%");
+                    })
+                    ->latest()
+                    ->get(),
+            ]);
+        }
 
         return response()->json([
             'folders' => FileFolder::with('owner')
-                ->where('parent_id', $parentId)
+                ->where('parent_id', $request->parent_id)
+                ->latest()
                 ->get(),
 
             'files' => File::with('uploader')

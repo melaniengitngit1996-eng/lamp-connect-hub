@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 
 import Dialog from '../../components/Dialog.vue'
 import Button from '../../components/Button.vue'
@@ -10,12 +10,14 @@ import FolderOrangeIcon from '../../icons/FolderOrangeIcon.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
 import FileBlueIcon from '../../icons/FileBlueIcon.vue'
+import SearchIcon from '../../icons/SearchIcon.vue'
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
 import UploadFileDialog from '../../pages/drive/UploadFileDialog.vue'
 import PreviewDialog from '../../pages/drive/PreviewDialog.vue'
 import DeleteFileDialog from '../../pages/drive/DeleteFileDialog.vue'
+import FolderShrink from '../../icons/FolderShrink.vue'
  
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
@@ -32,27 +34,46 @@ const breadcrumbs = ref([])
 const selectedFolder = ref(null)
 const selectedFile = ref(null)
 
+const search = ref('')
+
+let searchTimeout
+
+watch(search, () => {
+    clearTimeout(searchTimeout)
+
+    searchTimeout = setTimeout(() => {
+        loadFolders(currentFolder.value?.id)
+    }, 300)
+})
+
 const refreshFolders = async () => {
     await loadFolders(currentFolder.value?.id)
 }
 
 const loadFolders = async (parentId = null) => {
-    let url = '/api/drive/folders'
+    const params = new URLSearchParams()
 
     if (parentId) {
-        url += `?parent_id=${parentId}`
+        params.append('parent_id', parentId)
     }
 
-    const response = await fetch(url, {
-        credentials: 'include',
-        headers: {
-            Accept: 'application/json',
-        },
-    })
+    if (search.value) {
+        params.append('search', search.value)
+    }
+
+    const response = await fetch(
+        `/api/drive/folders?${params.toString()}`,
+        {
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
+            },
+        }
+    )
 
     const data = await response.json()
 
-    folders.value = data.folders ?? data
+    folders.value = data.folders ?? []
     files.value = data.files ?? []
 }
 
@@ -99,8 +120,40 @@ const previewFile = (file) => {
     showPreviewDialog.value = true
 }
 
+const openFileLocation = async (file) => {
+    search.value = ''
+
+    breadcrumbs.value = file.path_folders
+
+    currentFolder.value =
+        file.path_folders[file.path_folders.length - 1] ?? null
+
+    await loadFolders(currentFolder.value?.id)
+}
+
+const openFolderLocation = async (folder) => {
+    search.value = ''
+
+    breadcrumbs.value = folder.path_folders
+
+    currentFolder.value =
+        folder.path_folders[folder.path_folders.length - 1]
+
+    await loadFolders(folder.id)
+}
+
 onMounted(async () => {
     await loadFolders()
+})
+
+const totalMatches = computed(() => {
+    return folders.value.length + files.value.length
+})
+
+const matchLabel = computed(() => {
+    return totalMatches.value === 1
+        ? 'match'
+        : 'matches'
 })
 </script>
 
@@ -124,6 +177,25 @@ onMounted(async () => {
             <input multiple="" class="hidden" type="file">
         </div>
     </header>
+    <div class="relative">
+        <SearchIcon />
+
+        <input 
+            v-model="search"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-9 pr-9" 
+            placeholder="Search all files and folders…" 
+        >
+    </div>
+    <div
+        v-if="search"
+        class="text-sm text-muted-foreground"
+    >
+        Search results for
+        <span class="font-medium text-foreground">
+            "{{ search }}"
+        </span>
+        · {{ totalMatches }} {{ matchLabel }}
+    </div>
     <div class="flex items-center gap-1 text-sm flex-wrap">
         <button
             @click="goHome"
@@ -174,6 +246,16 @@ onMounted(async () => {
                 </div>
             </button>
 
+            <button 
+                v-if="search" 
+                @click.stop="openFolderLocation(folder)" 
+                class="hidden md:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent max-w-[40%] truncate" 
+                title="Open location"
+            >
+                <FolderShrink />
+                <span class="truncate">{{ folder.path_human }}</span>
+            </button>
+
             <div class="hidden sm:flex items-center gap-2">
                 <span class="text-xs text-muted-foreground">
                     {{ folder.owner?.name }}
@@ -202,6 +284,16 @@ onMounted(async () => {
                         {{ file.size_human }} · {{ file.created_human }}
                     </div>
                 </div>
+            </button>
+
+            <button 
+                v-if="search" 
+                @click.stop="openFileLocation(file)" 
+                class="hidden md:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent max-w-[40%] truncate" 
+                title="Open location"
+            >
+                <FolderShrink />
+                <span class="truncate">{{ file.path_human }}</span>
             </button>
 
             <div class="hidden sm:flex items-center gap-2">

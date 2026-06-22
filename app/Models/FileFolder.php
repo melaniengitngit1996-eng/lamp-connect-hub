@@ -14,6 +14,8 @@ class FileFolder extends Model
 
     protected $appends = [
         'created_human',
+        'path_human',
+        'path_folders',
     ];
 
     public function getCreatedHumanAttribute()
@@ -29,6 +31,24 @@ class FileFolder extends Model
         return $this->created_at->diffForHumans();
     }
 
+    public function getPathFoldersAttribute()
+    {
+        $path = [];
+
+        $folder = $this;
+
+        while ($folder) {
+            array_unshift($path, [
+                'id' => $folder->id,
+                'name' => $folder->name,
+            ]);
+
+            $folder = $folder->parent;
+        }
+
+        return $path;
+    }
+
     public function owner()
     {
         return $this->belongsTo(User::class, 'owner_id');
@@ -42,5 +62,30 @@ class FileFolder extends Model
     public function files()
     {
         return $this->hasMany(File::class, 'folder_id');
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(
+            FileFolder::class,
+            'parent_id'
+        );
+    }
+
+    public function getPathHumanAttribute()
+    {
+        $path = [];
+
+        $folder = $this->parent;
+
+        while ($folder) {
+            array_unshift($path, $folder->name);
+
+            $folder = $folder->parent;
+        }
+
+        return empty($path)
+            ? 'Drive'
+            : 'Drive / ' . implode(' / ', $path);
     }
 }
