@@ -11,13 +11,18 @@ import TrashIcon from '../../icons/TrashIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
+import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
 
-const showDialog = ref(false)
+const showNewFolderDialog = ref(false)
+const showDeleteFolderDialog = ref(false)
+
 const folders = ref([])
 const files = ref([])
 
 const currentFolder = ref(null)
 const breadcrumbs = ref([])
+
+const selectedFolder = ref(null)
 
 const refreshFolders = async () => {
     await loadFolders(currentFolder.value?.id)
@@ -71,6 +76,11 @@ const navigateBreadcrumb = async (index) => {
     await loadFolders(folder.id)
 }
 
+const confirmDeleteFolder = (folder) => {
+    selectedFolder.value = folder
+    showDeleteFolderDialog.value = true
+}
+
 onMounted(async () => {
     await loadFolders()
 })
@@ -84,7 +94,7 @@ onMounted(async () => {
             <p class="text-sm text-muted-foreground">Shared files for the LAMP community.</p>
         </div>
         <div class="flex gap-2">
-            <Button type="plain" @click="showDialog = true">
+            <Button type="plain" @click="showNewFolderDialog = true">
                 <FolderPlusIcon />
                 New folder
             </Button>
@@ -148,17 +158,24 @@ onMounted(async () => {
                 </span>
             </div>
 
-            <Button type="icon">
+            <Button type="icon" @click.stop="confirmDeleteFolder(folder)">
                 <TrashIcon />
             </Button>
         </div>
     </div>
 
     <CreateFolderDialog
-        :open="showDialog"
+        :open="showNewFolderDialog"
         :parent-id="currentFolder?.id"
-        @close="showDialog = false"
+        @close="showNewFolderDialog = false"
         @created="refreshFolders"
+    />
+
+    <DeleteFolderDialog
+        :open="showDeleteFolderDialog"
+        :folder="selectedFolder"
+        @close="showDeleteFolderDialog = false"
+        @deleted="refreshFolders"
     />
 </div>
 </template>

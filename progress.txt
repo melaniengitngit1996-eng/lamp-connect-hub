@@ -1,5 +1,6 @@
 [x] load folders - June 21
-[ ] create folders
+[x] create folders - June 22
+[ ] delete folders
 [ ] load files
 [ ] file preview
 [ ] upload files

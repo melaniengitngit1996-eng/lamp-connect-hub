@@ -33,4 +33,9 @@ class FileFolder extends Model
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
+
+    public function children()
+    {
+        return $this->hasMany(FileFolder::class, 'parent_id');
+    }
 }
