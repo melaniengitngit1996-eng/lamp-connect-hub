@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\FileFolder;
+use App\Models\File;
 
 class FileFolderController extends Controller
 {
@@ -18,7 +19,10 @@ class FileFolderController extends Controller
                 ->where('parent_id', $parentId)
                 ->get(),
 
-            'files' => [],
+            'files' => File::with('uploader')
+                ->where('folder_id', $request->parent_id)
+                ->latest()
+                ->get(),
         ]);
     }
 

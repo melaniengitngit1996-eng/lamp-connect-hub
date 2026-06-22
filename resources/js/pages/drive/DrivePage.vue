@@ -9,14 +9,17 @@ import HomeIcon from '../../icons/HomeIcon.vue'
 import FolderOrangeIcon from '../../icons/FolderOrangeIcon.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
+import FileBlueIcon from '../../icons/FileBlueIcon.vue'
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
 import UploadFileDialog from '../../pages/drive/UploadFileDialog.vue'
+import PreviewDialog from '../../pages/drive/PreviewDialog.vue'
 
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
 const showUploadDialog = ref(false)
+const showPreviewDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -25,6 +28,7 @@ const currentFolder = ref(null)
 const breadcrumbs = ref([])
 
 const selectedFolder = ref(null)
+const selectedFile = ref(null)
 
 const refreshFolders = async () => {
     await loadFolders(currentFolder.value?.id)
@@ -83,6 +87,11 @@ const confirmDeleteFolder = (folder) => {
     showDeleteFolderDialog.value = true
 }
 
+const previewFile = (file) => {
+    selectedFile.value = file
+    showPreviewDialog.value = true
+}
+
 onMounted(async () => {
     await loadFolders()
 })
@@ -133,9 +142,13 @@ onMounted(async () => {
 
     </div>
     <div class="rounded-xl border bg-card text-card-foreground shadow divide-y">
-        <div v-if="folders.length == 0" class="text-center py-16 text-sm text-muted-foreground">This folder is empty.</div>
         <div
-            v-else
+            v-if="folders.length === 0 && files.length === 0"
+            class="text-center py-16 text-sm text-muted-foreground"
+        >
+            This folder is empty.
+        </div>
+        <div
             v-for="folder in folders"
             :key="folder.id"
             class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition"
@@ -164,6 +177,36 @@ onMounted(async () => {
                 <TrashIcon />
             </Button>
         </div>
+
+        <div
+            v-for="file in files"
+            :key="file.id"
+            class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition"
+        >
+            <button class="flex items-center gap-3 flex-1 min-w-0 text-left">
+                <FileBlueIcon />
+
+                <div class="flex-1 min-w-0" @click="previewFile(file)">
+                    <div class="text-sm font-medium truncate">
+                        {{ file.original_name }}
+                    </div>
+
+                    <div class="text-xs text-muted-foreground">
+                        {{ file.size_human }} · {{ file.created_human }}
+                    </div>
+                </div>
+            </button>
+
+            <div class="hidden sm:flex items-center gap-2">
+                <span class="text-xs text-muted-foreground">
+                    {{ file.uploader?.name }}
+                </span>
+            </div>
+
+            <Button type="icon">
+                <TrashIcon />
+            </Button>
+        </div>
     </div>
 
     <CreateFolderDialog
@@ -185,6 +228,12 @@ onMounted(async () => {
         :folder-id="currentFolder?.id"
         @close="showUploadDialog = false"
         @uploaded="refreshFolders"
+    />
+
+    <PreviewDialog
+        :open="showPreviewDialog"
+        :file="selectedFile"
+        @close="showPreviewDialog = false"
     />
 </div>
 </template>
