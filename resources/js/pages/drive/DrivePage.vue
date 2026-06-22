@@ -12,9 +12,11 @@ import CaretIcon from '../../icons/CaretIcon.vue'
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
+import UploadFileDialog from '../../pages/drive/UploadFileDialog.vue'
 
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
+const showUploadDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -99,7 +101,7 @@ onMounted(async () => {
                 New folder
             </Button>
 
-            <Button type="primary">
+            <Button type="primary" @click="showUploadDialog = true">
                 <UploadIcon />
                 Upload
             </Button>
@@ -176,6 +178,13 @@ onMounted(async () => {
         :folder="selectedFolder"
         @close="showDeleteFolderDialog = false"
         @deleted="refreshFolders"
+    />
+
+    <UploadFileDialog
+        :open="showUploadDialog"
+        :folder-id="currentFolder?.id"
+        @close="showUploadDialog = false"
+        @uploaded="refreshFolders"
     />
 </div>
 </template>

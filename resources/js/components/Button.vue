@@ -16,7 +16,7 @@ const variants = {
         'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors h-9 px-4 py-2 bg-primary text-primary-foreground shadow hover:bg-primary/90',
 
     danger:
-        'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors h-9 px-4 py-2 bg-red-600 text-white hover:bg-red-700',
+        'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors h-9 px-4 py-2 bg-destructive text-primary-foreground hover:bg-red-700',
 
     icon:
         'inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-accent',
