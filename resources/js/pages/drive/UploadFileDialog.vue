@@ -19,6 +19,7 @@ const emit = defineEmits([
 
 const file = ref(null)
 const loading = ref(false)
+const fileInput = ref(null)
 
 const handleFileChange = (event) => {
     file.value = event.target.files?.[0] ?? null
@@ -48,11 +49,27 @@ const uploadFile = async () => {
             body: formData,
         })
 
+        file.value = null
+
+        if (fileInput.value) {
+            fileInput.value.value = ''
+        }
+
         emit('uploaded')
         emit('close')
     } finally {
         loading.value = false
     }
+}
+
+const close = () => {
+    file.value = null
+
+    if (fileInput.value) {
+        fileInput.value = ''
+    }
+
+    emit('close')
 }
 </script>
 
@@ -60,11 +77,12 @@ const uploadFile = async () => {
     <Dialog
         :open="open"
         title="Upload file"
-        @close="emit('close')"
+        @close="close"
     >
         <div class="space-y-4">
             <input
                 type="file"
+                ref="fileInput"
                 @change="handleFileChange"
             >
 
@@ -78,7 +96,7 @@ const uploadFile = async () => {
             <div class="flex justify-end gap-2">
                 <Button
                     type="plain"
-                    @click="emit('close')"
+                    @click="close"
                 >
                     Cancel
                 </Button>
