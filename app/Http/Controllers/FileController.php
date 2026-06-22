@@ -30,6 +30,7 @@ class FileController extends Controller
             'disk' => 'public',
             'path' => $path,
             'uploaded_by' => Auth::id(),
+            'visibility' => 'private'
         ]);
 
         return response()->json([

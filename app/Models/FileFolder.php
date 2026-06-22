@@ -18,6 +18,10 @@ class FileFolder extends Model
         'path_folders',
     ];
 
+    const VISIBILITY_PRIVATE = 'private';
+    const VISIBILITY_SHARED = 'shared';
+    const VISIBILITY_PUBLIC = 'public';
+
     public function getCreatedHumanAttribute()
     {
         if (! $this->created_at) {
@@ -87,5 +91,47 @@ class FileFolder extends Model
         return empty($path)
             ? 'Drive'
             : 'Drive / ' . implode(' / ', $path);
+    }
+
+    public function permissions()
+    {
+        return $this->hasMany(
+            FolderPermission::class,
+            'folder_id'
+        );
+    }
+
+    public function scopeVisibleTo($query, User $user)
+    {
+        return $query->where(function ($query) use ($user) {
+
+            $query->where('visibility', 'public')
+
+                ->orWhere('owner_id', $user->id)
+
+                ->orWhereHas('permissions', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                });
+        });
+    }
+
+    public function inheritedPermissionFor(User $user)
+    {
+        $folder = $this;
+
+        while ($folder) {
+
+            $permission = $folder->permissions()
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($permission) {
+                return $permission;
+            }
+
+            $folder = $folder->parent;
+        }
+
+        return null;
     }
 }

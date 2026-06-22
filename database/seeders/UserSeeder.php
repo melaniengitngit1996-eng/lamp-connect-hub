@@ -17,5 +17,13 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password123'),
             ]
         );
+
+        User::updateOrCreate(
+            ['email' => 'member@lamp.test'],
+            [
+                'name' => 'LAMP Member',
+                'password' => Hash::make('password123'),
+            ]
+        );
     }
 }

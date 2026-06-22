@@ -30,6 +30,10 @@ class File extends Model
         'path_folders'
     ];
 
+    const VISIBILITY_PRIVATE = 'private';
+    const VISIBILITY_SHARED = 'shared';
+    const VISIBILITY_PUBLIC = 'public';
+
     public function getSizeHumanAttribute()
     {
         $bytes = $this->size;
@@ -110,5 +114,52 @@ class File extends Model
     public function folder()
     {
         return $this->belongsTo(FileFolder::class);
+    }
+
+    public function inheritedPermissionFor(User $user)
+    {
+        if (! $this->folder) {
+            return null;
+        }
+
+        return $this->folder->inheritedPermissionFor($user);
+    }
+
+    public function scopeVisibleTo($query, User $user)
+    {
+        return $query->where(function ($query) use ($user) {
+
+            $query->where('visibility', 'public')
+
+                ->orWhere('uploaded_by', $user->id)
+
+                ->orWhereHas('folder.permissions', function ($query) use ($user) {
+                    $query->where('user_id', $user->id);
+                });
+        });
+    }
+
+    public function canView(User $user): bool
+    {
+        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+            return true;
+        }
+
+        if ($this->uploaded_by === $user->id) {
+            return true;
+        }
+
+        return (bool) $this->inheritedPermissionFor($user);
+    }
+
+    public function canEdit(User $user): bool
+    {
+        if ($this->uploaded_by === $user->id) {
+            return true;
+        }
+
+        $permission = $this->inheritedPermissionFor($user);
+
+        return $permission?->role === 'editor';
     }
 }

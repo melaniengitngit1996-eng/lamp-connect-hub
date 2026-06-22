@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\FileFolder;
+use App\Models\FolderPermission;
 use App\Models\File;
 
 class FileFolderController extends Controller
@@ -18,11 +19,13 @@ class FileFolderController extends Controller
         if ($search) {
             return response()->json([
                 'folders' => FileFolder::with('owner')
+                    ->visibleTo(Auth::user())
                     ->where('name', 'like', "%{$search}%")
                     ->latest()
                     ->get(),
 
                 'files' => File::with('uploader')
+                    ->visibleTo(Auth::user())
                     ->where(function ($query) use ($search) {
                         $query->where('name', 'like', "%{$search}%")
                             ->orWhere('original_name', 'like', "%{$search}%");
@@ -34,11 +37,13 @@ class FileFolderController extends Controller
 
         return response()->json([
             'folders' => FileFolder::with('owner')
+                ->visibleTo(Auth::user())
                 ->where('parent_id', $request->parent_id)
                 ->latest()
                 ->get(),
 
             'files' => File::with('uploader')
+                ->visibleTo(Auth::user())
                 ->where('folder_id', $request->parent_id)
                 ->latest()
                 ->get(),
@@ -57,6 +62,7 @@ class FileFolderController extends Controller
             'name' => $validated['name'],
             'parent_id' => $validated['parent_id'] ?? null,
             'owner_id' => Auth::id(),
+            'visibility' => 'private'
         ]);
 
         return response()->json([
@@ -68,6 +74,11 @@ class FileFolderController extends Controller
     // delete folder
     public function destroy(FileFolder $folder)
     {
+        abort_unless(
+            $folder->owner_id === Auth::id(),
+            403
+        );
+
         $this->deleteFolderRecursively($folder);
 
         return response()->json([
@@ -89,5 +100,38 @@ class FileFolderController extends Controller
         }
 
         $folder->delete();
+    }
+
+    public function share(
+        Request $request,
+        FileFolder $folder
+    ) {
+        abort_unless(
+            $folder->owner_id === Auth::id(),
+            403
+        );
+
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+            'role' => ['required', 'in:viewer,editor'],
+        ]);
+
+        FolderPermission::updateOrCreate(
+            [
+                'folder_id' => $folder->id,
+                'user_id' => $request->user_id,
+            ],
+            [
+                'role' => $request->role,
+            ]
+        );
+
+        $folder->update([
+            'visibility' => 'shared',
+        ]);
+
+        return response()->json([
+            'message' => 'Folder shared.',
+        ]);
     }
 }
