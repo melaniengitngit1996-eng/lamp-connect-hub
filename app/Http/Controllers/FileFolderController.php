@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\FileFolder;
 use App\Models\File;
@@ -61,6 +62,12 @@ class FileFolderController extends Controller
     {
         foreach ($folder->children as $child) {
             $this->deleteFolderRecursively($child);
+        }
+
+        foreach ($folder->files as $file) {
+            Storage::disk($file->disk)->delete($file->path);
+
+            $file->delete();
         }
 
         $folder->delete();

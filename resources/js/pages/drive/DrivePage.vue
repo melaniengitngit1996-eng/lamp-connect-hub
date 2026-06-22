@@ -15,11 +15,13 @@ import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
 import UploadFileDialog from '../../pages/drive/UploadFileDialog.vue'
 import PreviewDialog from '../../pages/drive/PreviewDialog.vue'
-
+import DeleteFileDialog from '../../pages/drive/DeleteFileDialog.vue'
+ 
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
 const showUploadDialog = ref(false)
 const showPreviewDialog = ref(false)
+const showDeleteFileDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -85,6 +87,11 @@ const navigateBreadcrumb = async (index) => {
 const confirmDeleteFolder = (folder) => {
     selectedFolder.value = folder
     showDeleteFolderDialog.value = true
+}
+
+const confirmDeleteFile = (file) => {
+    selectedFile.value = file
+    showDeleteFileDialog.value = true
 }
 
 const previewFile = (file) => {
@@ -203,7 +210,7 @@ onMounted(async () => {
                 </span>
             </div>
 
-            <Button type="icon">
+            <Button type="icon" @click.stop="confirmDeleteFile(file)">
                 <TrashIcon />
             </Button>
         </div>
@@ -220,6 +227,13 @@ onMounted(async () => {
         :open="showDeleteFolderDialog"
         :folder="selectedFolder"
         @close="showDeleteFolderDialog = false"
+        @deleted="refreshFolders"
+    />
+
+    <DeleteFileDialog
+        :open="showDeleteFileDialog"
+        :file="selectedFile"
+        @close="showDeleteFileDialog = false"
         @deleted="refreshFolders"
     />
 

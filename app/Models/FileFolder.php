@@ -38,4 +38,9 @@ class FileFolder extends Model
     {
         return $this->hasMany(FileFolder::class, 'parent_id');
     }
+
+    public function files()
+    {
+        return $this->hasMany(File::class, 'folder_id');
+    }
 }

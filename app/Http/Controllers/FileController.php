@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\File;
 
@@ -34,5 +35,16 @@ class FileController extends Controller
         return response()->json([
             'file' => $file,
         ], 201);
+    }
+
+    public function destroy(File $file)
+    {
+        Storage::disk($file->disk)->delete($file->path);
+
+        $file->delete();
+
+        return response()->json([
+            'message' => 'File deleted successfully.',
+        ]);
     }
 }
