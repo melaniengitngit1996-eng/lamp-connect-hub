@@ -4,6 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Models\FolderPermission;
+use App\Models\FilePermission;
+use App\Models\User;
 
 class File extends Model
 {
@@ -29,10 +32,6 @@ class File extends Model
         'path_human',
         'path_folders'
     ];
-
-    const VISIBILITY_PRIVATE = 'private';
-    const VISIBILITY_SHARED = 'shared';
-    const VISIBILITY_PUBLIC = 'public';
 
     public function getSizeHumanAttribute()
     {
@@ -134,32 +133,51 @@ class File extends Model
                 ->orWhere('uploaded_by', $user->id)
 
                 ->orWhereHas('folder.permissions', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
+                    $query->matchesUser($user);
                 });
         });
     }
 
     public function canView(User $user): bool
     {
-        if ($this->visibility === self::VISIBILITY_PUBLIC) {
+        if ($this->visibility === 'public') {
             return true;
         }
 
-        if ($this->uploaded_by === $user->id) {
-            return true;
-        }
-
-        return (bool) $this->inheritedPermissionFor($user);
+        return $this->roleFor($user) !== null;
     }
 
     public function canEdit(User $user): bool
     {
+        return in_array(
+            $this->roleFor($user),
+            [FolderPermission::CONTRIBUTOR, FolderPermission::MANAGER]
+        );
+    }
+
+    public function canManage(User $user): bool
+    {
+        return $this->roleFor($user) === FolderPermission::MANAGER;
+    }
+
+    public function roleFor(User $user): ?string
+    {
         if ($this->uploaded_by === $user->id) {
-            return true;
+            return FolderPermission::MANAGER;
         }
 
-        $permission = $this->inheritedPermissionFor($user);
+        if (!$this->folder) {
+            return null;
+        }
 
-        return $permission?->role === 'editor';
+        return $this->folder->roleFor($user);
+    }
+
+    public function permissions()
+    {
+        return $this->hasMany(
+            FilePermission::class,
+            'file_id'
+        );
     }
 }

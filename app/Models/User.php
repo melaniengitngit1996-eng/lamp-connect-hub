@@ -46,4 +46,52 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function localChurch()
+    {
+        return $this->belongsTo(LocalChurch::class);
+    }
+
+    public function clusters()
+    {
+        return $this->belongsToMany(Cluster::class);
+    }
+
+    public function ministries()
+    {
+        return $this->belongsToMany(Ministry::class);
+    }
+
+    public function principals(): array
+    {
+        $principals = [
+            [
+                'type' => 'user',
+                'id' => $this->id,
+            ],
+        ];
+
+        if ($this->local_church_id) {
+            $principals[] = [
+                'type' => 'church',
+                'id' => $this->local_church_id,
+            ];
+        }
+
+        foreach ($this->clusters as $cluster) {
+            $principals[] = [
+                'type' => 'cluster',
+                'id' => $cluster->id,
+            ];
+        }
+
+        foreach ($this->ministries as $ministry) {
+            $principals[] = [
+                'type' => 'ministry',
+                'id' => $ministry->id,
+            ];
+        }
+
+        return $principals;
+    }
 }

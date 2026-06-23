@@ -11,27 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('folder_permissions', function (Blueprint $table) {
+        Schema::create('file_permissions', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('folder_id')
-                ->constrained('file_folders')
+            $table->foreignId('file_id')
+                ->constrained()
                 ->cascadeOnDelete();
 
-            $table->string('principal_type')->after('folder_id');
-            $table->unsignedBigInteger('principal_id')->after('principal_type');
+            $table->string('principal_type');
+
+            $table->unsignedBigInteger('principal_id');
 
             $table->enum('role', [
                 'viewer',
-                'editor',
+                'contributor',
+                'manager',
             ]);
 
             $table->timestamps();
 
             $table->unique([
-                'folder_id',
-                'user_id',
-            ]);
+                'file_id',
+                'principal_type',
+                'principal_id',
+            ], 'file_permissions_unique');
         });
     }
 
@@ -40,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('folder_permissions');
+        Schema::dropIfExists('file_permissions');
     }
 };

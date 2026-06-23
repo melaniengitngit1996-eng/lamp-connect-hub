@@ -17,7 +17,11 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            FileFolderTableSeeder::class
+            FileFolderTableSeeder::class,
+            LocalChurchSeeder::class,
+            ClusterSeeder::class,
+            MinistrySeeder::class,
+            MembershipSeeder::class,
         ]);
     }
 }

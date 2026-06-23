@@ -5,3 +5,8 @@
 [x] upload files - June 22
 [x] delete files - June 22
 [x] search files - June 22
+[x] file permissions - June 23
+[x] folder permissions - June 23
+[ ] remove permissions
+[ ] remove permissions
+[ ] sharable link

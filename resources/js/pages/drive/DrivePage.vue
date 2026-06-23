@@ -11,19 +11,22 @@ import TrashIcon from '../../icons/TrashIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
 import FileBlueIcon from '../../icons/FileBlueIcon.vue'
 import SearchIcon from '../../icons/SearchIcon.vue'
+import FolderShrink from '../../icons/FolderShrink.vue'
+import ShareIcon from '.././../icons/ShareIcon.vue'
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
 import UploadFileDialog from '../../pages/drive/UploadFileDialog.vue'
 import PreviewDialog from '../../pages/drive/PreviewDialog.vue'
 import DeleteFileDialog from '../../pages/drive/DeleteFileDialog.vue'
-import FolderShrink from '../../icons/FolderShrink.vue'
+import ShareDialog from '../../pages/drive/ShareDialog.vue'
  
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
 const showUploadDialog = ref(false)
 const showPreviewDialog = ref(false)
 const showDeleteFileDialog = ref(false)
+const showShareDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -33,6 +36,8 @@ const breadcrumbs = ref([])
 
 const selectedFolder = ref(null)
 const selectedFile = ref(null)
+const selectedItem = ref(null)
+const itemType = ref(null)
 
 const search = ref('')
 
@@ -118,6 +123,12 @@ const confirmDeleteFile = (file) => {
 const previewFile = (file) => {
     selectedFile.value = file
     showPreviewDialog.value = true
+}
+
+const openShareDialog = (item, type) => {
+    selectedItem.value = item
+    itemType.value = type
+    showShareDialog.value = true
 }
 
 const openFileLocation = async (file) => {
@@ -262,7 +273,19 @@ const matchLabel = computed(() => {
                 </span>
             </div>
 
-            <Button type="icon" @click.stop="confirmDeleteFolder(folder)">
+            <Button
+                v-if="folder.can_manage"
+                type="icon"
+                @click.stop="openShareDialog(folder, 'folder')"
+            >
+                <ShareIcon />
+            </Button>
+
+            <Button 
+                v-if="folder.can_manage"
+                type="icon" 
+                @click.stop="confirmDeleteFolder(folder)"
+            >
                 <TrashIcon />
             </Button>
         </div>
@@ -302,7 +325,19 @@ const matchLabel = computed(() => {
                 </span>
             </div>
 
-            <Button type="icon" @click.stop="confirmDeleteFile(file)">
+            <Button
+                v-if="file.can_manage"
+                type="icon"
+                @click.stop="openShareDialog(file, 'file')"
+            >
+                <ShareIcon />
+            </Button>
+
+            <Button 
+                v-if="file.can_manage" 
+                type="icon" 
+                @click.stop="confirmDeleteFile(file)"
+            >
                 <TrashIcon />
             </Button>
         </div>
@@ -340,6 +375,13 @@ const matchLabel = computed(() => {
         :open="showPreviewDialog"
         :file="selectedFile"
         @close="showPreviewDialog = false"
+    />
+
+    <ShareDialog
+        :open="showShareDialog"
+        :item="selectedItem"
+        :type="itemType"
+        @close="showShareDialog = false"
     />
 </div>
 </template>

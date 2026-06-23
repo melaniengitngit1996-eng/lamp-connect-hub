@@ -22,7 +22,12 @@ class FileFolderController extends Controller
                     ->visibleTo(Auth::user())
                     ->where('name', 'like', "%{$search}%")
                     ->latest()
-                    ->get(),
+                    ->get()
+                    ->map(function ($folder) {
+                        $folder->can_manage = $folder->canManage(Auth::user());
+
+                        return $folder;
+                    }),
 
                 'files' => File::with('uploader')
                     ->visibleTo(Auth::user())
@@ -31,7 +36,12 @@ class FileFolderController extends Controller
                             ->orWhere('original_name', 'like', "%{$search}%");
                     })
                     ->latest()
-                    ->get(),
+                    ->get()
+                    ->map(function ($file) {
+                        $file->can_manage = $file->canManage(Auth::user());
+
+                        return $file;
+                    }),
             ]);
         }
 
@@ -40,13 +50,23 @@ class FileFolderController extends Controller
                 ->visibleTo(Auth::user())
                 ->where('parent_id', $request->parent_id)
                 ->latest()
-                ->get(),
+                ->get()
+                ->map(function ($folder) {
+                    $folder->can_manage = $folder->canManage(Auth::user());
+
+                    return $folder;
+                }),
 
             'files' => File::with('uploader')
                 ->visibleTo(Auth::user())
                 ->where('folder_id', $request->parent_id)
                 ->latest()
-                ->get(),
+                ->get()
+                ->map(function ($file) {
+                    $file->can_manage = $file->canManage(Auth::user());
+
+                    return $file;
+                }),
         ]);
     }
 

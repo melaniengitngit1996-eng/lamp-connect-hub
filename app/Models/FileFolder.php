@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\FolderPermission;
 
 class FileFolder extends Model
 {
@@ -17,10 +18,6 @@ class FileFolder extends Model
         'path_human',
         'path_folders',
     ];
-
-    const VISIBILITY_PRIVATE = 'private';
-    const VISIBILITY_SHARED = 'shared';
-    const VISIBILITY_PUBLIC = 'public';
 
     public function getCreatedHumanAttribute()
     {
@@ -110,7 +107,7 @@ class FileFolder extends Model
                 ->orWhere('owner_id', $user->id)
 
                 ->orWhereHas('permissions', function ($query) use ($user) {
-                    $query->where('user_id', $user->id);
+                    $query->matchesUser($user);
                 });
         });
     }
@@ -133,5 +130,52 @@ class FileFolder extends Model
         }
 
         return null;
+    }
+
+    public function roleFor(User $user): ?string
+    {
+        if ($this->owner_id === $user->id) {
+            return FolderPermission::MANAGER;
+        }
+
+        $roles = $this->permissions()
+            ->matchesUser($user)
+            ->pluck('role');
+
+        if ($roles->contains(FolderPermission::MANAGER)) {
+            return FolderPermission::MANAGER;
+        }
+
+        if ($roles->contains(FolderPermission::CONTRIBUTOR)) {
+            return FolderPermission::CONTRIBUTOR;
+        }
+
+        if ($roles->contains(FolderPermission::VIEWER)) {
+            return FolderPermission::VIEWER;
+        }
+
+        return null;
+    }
+
+    public function canView(User $user): bool
+    {
+        if ($this->visibility === 'public') {
+            return true;
+        }
+
+        return $this->roleFor($user) !== null;
+    }
+
+    public function canEdit(User $user): bool
+    {
+        return in_array(
+            $this->roleFor($user),
+            [FolderPermission::CONTRIBUTOR, FolderPermission::MANAGER]
+        );
+    }
+
+    public function canManage(User $user): bool
+    {
+        return $this->roleFor($user) === FolderPermission::MANAGER;
     }
 }
