@@ -2,6 +2,8 @@
 import { ref, watch, computed } from 'vue'
 import debounce from 'lodash/debounce'
 
+import TrashIcon from '../../icons/TrashIcon.vue'
+
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/Button.vue'
 
@@ -31,12 +33,16 @@ const role = ref('viewer')
 const selecting = ref(false)
 
 const endpoint = computed(() => {
-    if (props.type === 'folder') {
-        return `/api/drive/folders/${props.item.id}/permissions`
-    }
-
-    return `/api/drive/files/${props.item.id}/permissions`
+    return props.type === 'folder'
+        ? `/api/drive/folders/${props.item.id}/permissions`
+        : `/api/drive/files/${props.item.id}/permissions`
 })
+
+const permissionEndpoint = (permission) => {
+    return props.type === 'folder'
+        ? `/api/drive/folder-permissions/${permission.id}`
+        : `/api/drive/file-permissions/${permission.id}`
+}
 
 const permissionIcon = (type) => {
     switch (type) {
@@ -182,7 +188,7 @@ const loadPermissions = async () => {
 const updatePermission = async (permission, role) => {
     try {
         await axios.patch(
-            `/api/drive/folder-permissions/${permission.id}`, {
+            permissionEndpoint(permission), {
                 role,
             }
         )
@@ -190,7 +196,24 @@ const updatePermission = async (permission, role) => {
         permission.role = role
     } catch (error) {
         console.error(error)
+    }
+}
 
+const deletePermission = async (permission) => {
+    if (!confirm('Remove access?')) {
+        return
+    }
+
+    try {
+        await axios.delete(
+            permissionEndpoint(permission)
+        )
+
+        permissions.value = permissions.value.filter(
+            item => item.id !== permission.id
+        )
+    } catch (error) {
+        console.error(error)
     }
 }
 
@@ -303,6 +326,7 @@ const emit = defineEmits([
                         <option value="contributor">Contributor</option>
                         <option value="manager">Manager</option>
                     </select>
+                    <Button type="icon" @click.stop="deletePermission(permission)"><TrashIcon /></Button>
                 </div>
             </div>
         </div>

@@ -125,4 +125,13 @@ class FolderPermissionController extends Controller
             'success' => true,
         ]);
     }
+
+    public function destroy(FolderPermission $permission)
+    {
+        $permission->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
 }

@@ -34,6 +34,11 @@ return new class extends Migration
                 ->constrained('users')
                 ->cascadeOnDelete();
 
+            $table->enum('visibility', [
+                'private',
+                'public',
+            ])->default('private');
+
             $table->timestamps();
             $table->softDeletes();
 

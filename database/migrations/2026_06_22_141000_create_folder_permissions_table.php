@@ -18,20 +18,23 @@ return new class extends Migration
                 ->constrained('file_folders')
                 ->cascadeOnDelete();
 
-            $table->string('principal_type')->after('folder_id');
-            $table->unsignedBigInteger('principal_id')->after('principal_type');
+            $table->string('principal_type');
+
+            $table->unsignedBigInteger('principal_id');
 
             $table->enum('role', [
                 'viewer',
-                'editor',
+                'contributor',
+                'manager',
             ]);
 
             $table->timestamps();
 
             $table->unique([
                 'folder_id',
-                'user_id',
-            ]);
+                'principal_type',
+                'principal_id',
+            ], 'folder_permissions_unique');
         });
     }
 

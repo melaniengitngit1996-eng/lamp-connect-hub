@@ -24,6 +24,8 @@ Route::post('/drive/folders/{folder}/permissions', [FolderPermissionController::
 
 Route::patch('/drive/folder-permissions/{permission}', [FolderPermissionController::class, 'update']);
 
+Route::delete('/drive/folder-permissions/{permission}', [FolderPermissionController::class, 'destroy']);
+
 Route::get('/drive/files/{file}/permissions', [FilePermissionController::class, 'index']);
 
 Route::post('/drive/files/{file}/permissions', [FilePermissionController::class, 'store']);
