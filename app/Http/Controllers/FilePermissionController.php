@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\File;
 use App\Models\FilePermission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class FilePermissionController extends Controller
 {
@@ -18,6 +19,8 @@ class FilePermissionController extends Controller
         return response()->json([
             'owner' => $file->uploader,
             'permissions' => $file->permissions,
+            'visibility' => $file->visibility,
+            'share_token' => $file->share_token,
         ]);
     }
 
@@ -63,6 +66,30 @@ class FilePermissionController extends Controller
 
         return response()->json([
             'success' => true,
+        ]);
+    }
+
+    public function updateVisibility(Request $request, File $file)
+    {
+        $request->validate([
+            'visibility' => 'required|in:private,public,link',
+        ]);
+
+        if ($request->visibility === 'link') {
+            if (!$file->share_token) {
+                $file->share_token = Str::uuid();
+            }
+        } else {
+            $file->share_token = null;
+        }
+
+        $file->visibility = $request->visibility;
+
+        $file->save();
+
+        return response()->json([
+            'success' => true,
+            'share_token' => $file->share_token,
         ]);
     }
 }

@@ -3,6 +3,7 @@ import { ref, watch, computed } from 'vue'
 import debounce from 'lodash/debounce'
 
 import TrashIcon from '../../icons/TrashIcon.vue'
+import LinkIcon from '../../icons/LinkIcon.vue'
 
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/Button.vue'
@@ -25,6 +26,8 @@ const loading = ref(false)
 
 const owner = ref(null)
 const permissions = ref([])
+const visibility = ref('private')
+const shareToken = ref(null)
 
 const search = ref('')
 const results = ref([])
@@ -183,6 +186,8 @@ const loadPermissions = async () => {
 
     owner.value = data.owner
     permissions.value = data.permissions
+    visibility.value = data.visibility
+    shareToken.value = data.share_token
 }
 
 const updatePermission = async (permission, role) => {
@@ -215,6 +220,41 @@ const deletePermission = async (permission) => {
     } catch (error) {
         console.error(error)
     }
+}
+
+const updateVisibility = async () => {
+    const endpoint = props.type === 'folder'
+        ? `/api/drive/folders/${props.item.id}/visibility`
+        : `/api/drive/files/${props.item.id}/visibility`
+
+    const response = await axios.patch(
+        endpoint, {
+        visibility: visibility.value,
+    })
+
+    shareToken.value = response.data.share_token
+}
+
+const shareLink = computed(() => {
+    if (visibility.value !== 'link' || !shareToken.value) {
+        return null
+    }
+
+    return props.type === 'folder'
+        ? `${window.location.origin}/shared/folders/${shareToken.value}`
+        : `${window.location.origin}/shared/files/${shareToken.value}`
+})
+
+const copyLink = async () => {
+    if (!shareLink.value) {
+        return
+    }
+
+    await navigator.clipboard.writeText(
+        shareLink.value
+    )
+
+    alert('Link copied')
 }
 
 const emit = defineEmits([
@@ -341,23 +381,36 @@ const emit = defineEmits([
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <select class="flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-44 text-sm">
-                            <option>Restricted</option>
-                            <option>Anyone with the link</option>
+                        <select
+                            v-model="visibility"
+                            @change="updateVisibility"
+                            class="flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-44 text-sm"
+                        >
+                            <option value="private">
+                                Restricted
+                            </option>
+
+                            <option value="public">
+                                Public
+                            </option>
+
+                            <option v-show="type === 'file'" value="link">
+                                Anyone with the link
+                            </option>
                         </select>
                     </div>
                     <p class="text-xs text-muted-foreground mt-1">Only people with access can open.</p>
                 </div>
             </div>
         </div>
-        <div class="flex items-center justify-between pt-2">
-            <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-link h-4 w-4 mr-2" aria-hidden="true">
-                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                </svg>
+        <div v-if="visibility === 'link'" class="flex items-center justify-between pt-2">
+            <Button
+                type="secondary"
+                @click="copyLink"
+            >
+                <LinkIcon />
                 Copy link
-            </button>
+            </Button>
         </div>
     </Dialog>
 </template>

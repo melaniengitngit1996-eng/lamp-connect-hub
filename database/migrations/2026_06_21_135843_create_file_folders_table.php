@@ -29,7 +29,12 @@ return new class extends Migration
             $table->enum('visibility', [
                 'private',
                 'public',
+                'link',
             ])->default('private');
+
+            $table->string('share_token')
+                ->nullable()
+                ->unique();
 
             $table->timestamps();
             $table->softDeletes();

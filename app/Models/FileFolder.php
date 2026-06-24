@@ -10,13 +10,15 @@ class FileFolder extends Model
     protected $fillable = [
         'name',
         'owner_id',
-        'parent_id'
+        'parent_id',
+        'visibility',
+        'share_token'
     ];
 
     protected $appends = [
         'created_human',
         'path_human',
-        'path_folders',
+        'path_folders'
     ];
 
     public function getCreatedHumanAttribute()

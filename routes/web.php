@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use App\Http\Controllers\SharedDriveController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,18 @@ Route::post('/logout', function (Request $request) {
         'message' => 'Logged out successfully'
     ]);
 });
+
+// Route::middleware('auth')->group(function () {
+//     Route::get(
+//         '/shared/folders/{token}',
+//         [SharedDriveController::class, 'folder']
+//     );
+
+//     Route::get(
+//         '/shared/files/{token}',
+//         [SharedDriveController::class, 'file']
+//     );
+// });
 
 /*
 |--------------------------------------------------------------------------
