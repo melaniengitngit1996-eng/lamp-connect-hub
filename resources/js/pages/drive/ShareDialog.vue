@@ -25,6 +25,7 @@ const loading = ref(false)
 
 const owner = ref(null)
 const permissions = ref([])
+const visibility = ref('private')
 
 const search = ref('')
 const results = ref([])
@@ -183,6 +184,7 @@ const loadPermissions = async () => {
 
     owner.value = data.owner
     permissions.value = data.permissions
+    visibility.value = data.visibility
 }
 
 const updatePermission = async (permission, role) => {
@@ -215,6 +217,17 @@ const deletePermission = async (permission) => {
     } catch (error) {
         console.error(error)
     }
+}
+
+const updateVisibility = async () => {
+    const endpoint = props.type === 'folder'
+        ? `/api/drive/folders/${props.item.id}/visibility`
+        : `/api/drive/files/${props.item.id}/visibility`
+
+    await axios.patch(endpoint, {
+        visibility: visibility.value,
+    })
+
 }
 
 const emit = defineEmits([
@@ -341,9 +354,20 @@ const emit = defineEmits([
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <select class="flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-44 text-sm">
-                            <option>Restricted</option>
-                            <option>Anyone with the link</option>
+                        <select
+                            v-model="visibility"
+                            @change="updateVisibility"
+                            class="flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-44 text-sm"
+                        >
+                            <option value="private">
+                                Restricted
+                            </option>
+
+                            <option value="public">
+                                Public
+                            </option>
+
+                            <!-- <option>Anyone with the link</option> -->
                         </select>
                     </div>
                     <p class="text-xs text-muted-foreground mt-1">Only people with access can open.</p>

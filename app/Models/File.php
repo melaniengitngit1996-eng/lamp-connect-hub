@@ -22,7 +22,8 @@ class File extends Model
         'folder_id',
         'uploaded_by',
         'mime_type',
-        'size'
+        'size',
+        'visibility'
     ];
 
     protected $appends = [

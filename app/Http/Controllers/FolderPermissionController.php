@@ -22,7 +22,8 @@ class FolderPermissionController extends Controller
 
         return response()->json([
             'owner' => $folder->owner,
-            'permissions' => $folder->permissions
+            'permissions' => $folder->permissions,
+            'visibility' => $folder->visibility,
         ]);
     }
 
@@ -129,6 +130,21 @@ class FolderPermissionController extends Controller
     public function destroy(FolderPermission $permission)
     {
         $permission->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function updateVisibility(Request $request, FileFolder $folder)
+    {
+        $request->validate([
+            'visibility' => 'required|in:private,public',
+        ]);
+
+        $folder->update([
+            'visibility' => $request->visibility,
+        ]);
 
         return response()->json([
             'success' => true,

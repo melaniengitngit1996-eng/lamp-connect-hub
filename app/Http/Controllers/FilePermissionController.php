@@ -18,6 +18,7 @@ class FilePermissionController extends Controller
         return response()->json([
             'owner' => $file->uploader,
             'permissions' => $file->permissions,
+            'visibility' => $file->visibility,
         ]);
     }
 
@@ -60,6 +61,21 @@ class FilePermissionController extends Controller
     public function destroy(FilePermission $permission)
     {
         $permission->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function updateVisibility(Request $request, File $file)
+    {
+        $request->validate([
+            'visibility' => 'required|in:private,public',
+        ]);
+
+        $file->update([
+            'visibility' => $request->visibility,
+        ]);
 
         return response()->json([
             'success' => true,

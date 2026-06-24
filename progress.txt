@@ -7,6 +7,6 @@
 [x] search files - June 22
 [x] file permissions - June 23
 [x] folder permissions - June 23
-[ ] remove permissions
-[ ] remove permissions
+[x] remove permissions - June 24
+[x] remove permissions - June 24
 [ ] sharable link
