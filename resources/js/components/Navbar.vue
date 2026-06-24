@@ -40,12 +40,20 @@ onMounted(async () => {
             </svg>
             Feed
          </RouterLink>
-         <!-- <a href="/chat" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition hover:bg-sidebar-accent/60 text-sidebar-foreground/80">
+         <RouterLink
+               to="/chat"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
+               :class="
+                  $route.path === '/chat'
+                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               "
+            >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square h-4 w-4" aria-hidden="true">
                <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
             </svg>
             Chat
-         </a> -->
+         </RouterLink>
          <RouterLink
                to="/drive"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"

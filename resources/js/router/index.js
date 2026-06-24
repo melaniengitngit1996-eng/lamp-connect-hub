@@ -4,6 +4,7 @@ import AppLayout from '../layouts/AppLayout.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import DashboardPage from '../pages/dashboard/DashboardPage.vue'
 import DrivePage from '../pages/drive/DrivePage.vue'
+import ChatPage from '../pages/chat/ChatPage.vue'
 import SharedFolderPage from '../pages/drive/SharedFolderPage.vue'
 import SharedFilePage from '../pages/drive/SharedFilePage.vue'
 
@@ -22,6 +23,11 @@ const routes = [
                 path: 'drive',
                 name: 'drive',
                 component: DrivePage,
+            },
+            {
+                path: 'chat',
+                name: 'chat',
+                component: ChatPage,
             },
         ],
     },
