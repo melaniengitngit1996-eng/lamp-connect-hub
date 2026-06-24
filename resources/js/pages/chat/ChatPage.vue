@@ -1,4 +1,20 @@
-<script setup></script>
+<script setup>
+import { ref } from 'vue'
+
+import GroupChatDialog from '../../pages/chat/GroupChatDialog.vue'
+import DirectChatDialog from '../../pages/chat/DirectChatDialog.vue'
+
+const showNewGroupChatDialog = ref(false)
+const showNewDirectChatDialog = ref(false)
+
+const openNewGroupChatDialog = (item, type) => {
+    showNewGroupChatDialog.value = true
+}
+
+const openNewDirectChatDialog = (item, type) => {
+    showNewDirectChatDialog.value = true
+}
+</script>
 
 <template>
 <div class="h-screen flex">
@@ -29,7 +45,7 @@
 			<div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Group chats</span>
-					<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
+					<button @click="showNewGroupChatDialog = true" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
 						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3.5 w-3.5" aria-hidden="true">
 							<path d="M5 12h14"></path>
 							<path d="M12 5v14"></path>
@@ -68,7 +84,7 @@
 			<div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Direct messages</span>
-					<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
+					<button @click="showNewDirectChatDialog = true" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
 						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-3.5 w-3.5" aria-hidden="true">
 							<path d="M5 12h14"></path>
 							<path d="M12 5v14"></path>
@@ -141,5 +157,15 @@
 			</div>
 		</div>
 	</div>
+
+    <GroupChatDialog
+        :open="showNewGroupChatDialog"
+        @close="showNewGroupChatDialog = false"
+    />
+
+    <DirectChatDialog
+        :open="showNewDirectChatDialog"
+        @close="showNewDirectChatDialog = false"
+    />
 </div>
 </template>
