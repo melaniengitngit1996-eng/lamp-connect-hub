@@ -22,7 +22,9 @@ class File extends Model
         'folder_id',
         'uploaded_by',
         'mime_type',
-        'size'
+        'size',
+        'visibility',
+        'share_token'
     ];
 
     protected $appends = [
@@ -127,11 +129,23 @@ class File extends Model
     public function scopeVisibleTo($query, User $user)
     {
         return $query->where(function ($query) use ($user) {
-
+            // File itself is public
             $query->where('visibility', 'public')
 
+                // Parent folder is public
+                ->orWhereHas('folder', function ($query) {
+                    $query->where('visibility', 'public');
+                })
+
+                // Owner
                 ->orWhere('uploaded_by', $user->id)
 
+                // Explicit file permission
+                ->orWhereHas('permissions', function ($query) use ($user) {
+                    $query->matchesUser($user);
+                })
+
+                // Inherited folder permission
                 ->orWhereHas('folder.permissions', function ($query) use ($user) {
                     $query->matchesUser($user);
                 });

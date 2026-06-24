@@ -10,6 +10,7 @@ use App\Models\Ministry;
 use App\Models\User;
 use App\Models\FolderPermission;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class FolderPermissionController extends Controller
 {
@@ -22,7 +23,9 @@ class FolderPermissionController extends Controller
 
         return response()->json([
             'owner' => $folder->owner,
-            'permissions' => $folder->permissions
+            'permissions' => $folder->permissions,
+            'visibility' => $folder->visibility,
+            'share_token' => $folder->share_token,
         ]);
     }
 
@@ -123,6 +126,39 @@ class FolderPermissionController extends Controller
 
         return response()->json([
             'success' => true,
+        ]);
+    }
+
+    public function destroy(FolderPermission $permission)
+    {
+        $permission->delete();
+
+        return response()->json([
+            'success' => true,
+        ]);
+    }
+
+    public function updateVisibility(Request $request, FileFolder $folder)
+    {
+        $request->validate([
+            'visibility' => 'required|in:private,public,link',
+        ]);
+
+        if ($request->visibility === 'link') {
+            if (!$folder->share_token) {
+                $folder->share_token = Str::uuid();
+            }
+        } else {
+            $folder->share_token = null;
+        }
+
+        $folder->visibility = $request->visibility;
+
+        $folder->save();
+
+        return response()->json([
+            'success' => true,
+            'share_token' => $folder->share_token,
         ]);
     }
 }
