@@ -8,8 +8,8 @@ import Button from '../../components/Button.vue'
 const route = useRoute()
 
 const loading = ref(true)
-
 const file = ref(null)
+const notFound = ref(false)
 
 const uploadedAt = computed(() => {
     if (!file.value) {
@@ -56,6 +56,10 @@ onMounted(async () => {
         )
 
         file.value = data.file
+    } catch (error) {
+        if (error.response?.status === 404) {
+            notFound.value = true
+        }
     } finally {
         loading.value = false
     }
@@ -78,6 +82,19 @@ const isPdf = computed(() => {
             class="text-center text-muted-foreground"
         >
             Loading...
+        </div>
+
+        <div
+            v-else-if="notFound"
+            class="text-center py-20"
+        >
+            <h1 class="text-2xl font-semibold">
+                File not found
+            </h1>
+
+            <p class="text-muted-foreground mt-2">
+                This shared file does not exist or is no longer available.
+            </p>
         </div>
 
         <div

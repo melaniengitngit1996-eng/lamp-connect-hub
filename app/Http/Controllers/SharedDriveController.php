@@ -20,10 +20,9 @@ class SharedDriveController extends Controller
             'files.uploader',
         ]);
 
-        abort_unless(
-            $folder->visibility === 'link',
-            404
-        );
+        if ($folder->visibility !== 'link') {
+            abort(404);
+        }
 
         return response()->json([
             'folder' => $folder,
@@ -42,10 +41,9 @@ class SharedDriveController extends Controller
             'uploader',
         ]);
 
-        abort_unless(
-            $file->visibility === 'link',
-            404
-        );
+        if ($file->visibility !== 'link') {
+            abort(404);
+        }
 
         return response()->json([
             'file' => $file,

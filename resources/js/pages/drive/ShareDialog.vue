@@ -394,7 +394,7 @@ const emit = defineEmits([
                                 Public
                             </option>
 
-                            <option value="link">
+                            <option v-show="type === 'file'" value="link">
                                 Anyone with the link
                             </option>
                         </select>
