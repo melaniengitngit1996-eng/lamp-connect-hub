@@ -11,7 +11,8 @@ class FileFolder extends Model
         'name',
         'owner_id',
         'parent_id',
-        'visibility'
+        'visibility',
+        'share_token'
     ];
 
     protected $appends = [

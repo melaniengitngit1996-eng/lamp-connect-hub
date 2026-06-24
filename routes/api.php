@@ -5,6 +5,7 @@ use App\Http\Controllers\FileFolderController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FolderPermissionController;
 use App\Http\Controllers\FilePermissionController;
+use App\Http\Controllers\SharedDriveController;
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -39,3 +40,13 @@ Route::patch('/drive/file-permissions/{permission}', [FilePermissionController::
 Route::delete('/drive/file-permissions/{permission}', [FilePermissionController::class, 'destroy']);
 
 Route::get('/drive/share-search', [FolderPermissionController::class, 'search']);
+
+Route::get(
+    '/shared/folders/{token}',
+    [SharedDriveController::class, 'folder']
+);
+
+Route::get(
+    '/shared/files/{token}',
+    [SharedDriveController::class, 'file']
+);

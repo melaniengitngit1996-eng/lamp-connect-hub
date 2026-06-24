@@ -23,7 +23,8 @@ class File extends Model
         'uploaded_by',
         'mime_type',
         'size',
-        'visibility'
+        'visibility',
+        'share_token'
     ];
 
     protected $appends = [

@@ -9,4 +9,5 @@
 [x] folder permissions - June 23
 [x] remove permissions - June 24
 [x] remove permissions - June 24
+[x] folder and file visibility - June 24
 [ ] sharable link

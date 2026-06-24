@@ -4,6 +4,8 @@ import AppLayout from '../layouts/AppLayout.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import DashboardPage from '../pages/dashboard/DashboardPage.vue'
 import DrivePage from '../pages/drive/DrivePage.vue'
+import SharedFolderPage from '../pages/drive/SharedFolderPage.vue'
+import SharedFilePage from '../pages/drive/SharedFilePage.vue'
 
 const routes = [
     {
@@ -22,6 +24,21 @@ const routes = [
                 component: DrivePage,
             },
         ],
+    },
+    {
+        path: '/shared/folders/:token',
+        component: SharedFolderPage,
+        meta: {
+            requiresAuth: true,
+        },
+    },
+
+    {
+        path: '/shared/files/:token',
+        component: SharedFilePage,
+        meta: {
+            requiresAuth: true,
+        },
     },
     {
         path: '/login',
