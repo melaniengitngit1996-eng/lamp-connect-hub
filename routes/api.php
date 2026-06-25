@@ -6,6 +6,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\FolderPermissionController;
 use App\Http\Controllers\FilePermissionController;
 use App\Http\Controllers\SharedDriveController;
+use App\Http\Controllers\InvitationController;
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -41,12 +42,12 @@ Route::delete('/drive/file-permissions/{permission}', [FilePermissionController:
 
 Route::get('/drive/share-search', [FolderPermissionController::class, 'search']);
 
-Route::get(
-    '/shared/folders/{token}',
-    [SharedDriveController::class, 'folder']
-);
+Route::get('/shared/folders/{token}', [SharedDriveController::class, 'folder']);
 
-Route::get(
-    '/shared/files/{token}',
-    [SharedDriveController::class, 'file']
-);
+Route::get('/shared/files/{token}', [SharedDriveController::class, 'file']);
+
+Route::post('/invitations', [InvitationController::class, 'store']);
+
+Route::get('/invitations/{token}', [InvitationController::class, 'show']);
+
+Route::post('/invitations/{token}/signup', [InvitationController::class, 'signup']);

@@ -68,7 +68,15 @@ onMounted(async () => {
             </svg>
             Drive
          </RouterLink>
-         <!-- <a href="/members" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition hover:bg-sidebar-accent/60 text-sidebar-foreground/80">
+         <RouterLink
+               to="/members"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
+               :class="
+                  $route.path === '/members'
+                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               "
+            >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users h-4 w-4" aria-hidden="true">
                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
@@ -76,7 +84,7 @@ onMounted(async () => {
                <circle cx="9" cy="7" r="4"></circle>
             </svg>
             Members
-         </a> -->
+         </RouterLink>
       </nav>
       <div class="p-3 border-t flex items-center gap-3">
          <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9"><img class="aspect-square h-full w-full" src="https://lh3.googleusercontent.com/a/ACg8ocJvyec3OlWtfxjG3D5RG9t3tain8GGu6KW5yqx3Jg5V6uoylENt=s96-c"></span>

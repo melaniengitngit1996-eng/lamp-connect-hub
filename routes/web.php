@@ -64,18 +64,6 @@ Route::post('/logout', function (Request $request) {
     ]);
 });
 
-// Route::middleware('auth')->group(function () {
-//     Route::get(
-//         '/shared/folders/{token}',
-//         [SharedDriveController::class, 'folder']
-//     );
-
-//     Route::get(
-//         '/shared/files/{token}',
-//         [SharedDriveController::class, 'file']
-//     );
-// });
-
 /*
 |--------------------------------------------------------------------------
 | FRONTEND CATCH-ALL (LAST!)

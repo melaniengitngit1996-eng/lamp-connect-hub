@@ -7,6 +7,8 @@ import DrivePage from '../pages/drive/DrivePage.vue'
 import ChatPage from '../pages/chat/ChatPage.vue'
 import SharedFolderPage from '../pages/drive/SharedFolderPage.vue'
 import SharedFilePage from '../pages/drive/SharedFilePage.vue'
+import MemberPage from '../pages/members/MemberPage.vue'
+import SignupInvitationPage from '../pages/auth/SignupInvitationPage.vue'
 
 const routes = [
     {
@@ -29,6 +31,11 @@ const routes = [
                 name: 'chat',
                 component: ChatPage,
             },
+            {
+                path: 'members',
+                name: 'members',
+                component: MemberPage,
+            },
         ],
     },
     {
@@ -47,9 +54,19 @@ const routes = [
         },
     },
     {
+        path: '/signup/:token',
+        component: SignupInvitationPage,
+        meta: {
+            requiresAuth: false,
+        },
+    },
+    {
         path: '/login',
         name: 'login',
         component: LoginPage,
+        meta: {
+            requiresAuth: false,
+        },
     },
 ]
 
@@ -73,26 +90,29 @@ async function getUser() {
     }
 }
 
-// Route Guard
 router.beforeEach(async (to) => {
     const res = await fetch('/me', {
         credentials: 'include',
         headers: {
-            'Accept': 'application/json',
+            Accept: 'application/json',
         },
     })
 
     const loggedIn = res.ok
 
-    if (to.name !== 'login' && !loggedIn) {
+    if (to.meta.requiresAuth === false) {
+        return true
+    }
+
+    if (!loggedIn) {
         return { name: 'login' }
     }
 
-    if (to.name === 'login' && loggedIn) {
+    if (to.name === 'login') {
         return { name: 'dashboard' }
     }
 
     return true
-})
+});
 
 export default router

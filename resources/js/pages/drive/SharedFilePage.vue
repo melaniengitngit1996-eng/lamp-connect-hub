@@ -75,6 +75,13 @@ const isPdf = computed(() => {
 </script>
 
 <template>
+    <div v-if="notFound" class="flex min-h-screen items-center justify-center bg-background px-4">
+        <div class="max-w-md text-center">
+            <h1 class="text-7xl font-bold text-foreground">404</h1>
+            <h2 class="mt-4 text-xl font-semibold text-foreground">File not found</h2>
+            <p class="mt-2 text-sm text-muted-foreground">This shared file does not exist or is no longer available.</p>
+        </div>
+    </div>
     <div class="max-w-4xl mx-auto py-12 px-6">
 
         <div
@@ -82,19 +89,6 @@ const isPdf = computed(() => {
             class="text-center text-muted-foreground"
         >
             Loading...
-        </div>
-
-        <div
-            v-else-if="notFound"
-            class="text-center py-20"
-        >
-            <h1 class="text-2xl font-semibold">
-                File not found
-            </h1>
-
-            <p class="text-muted-foreground mt-2">
-                This shared file does not exist or is no longer available.
-            </p>
         </div>
 
         <div
