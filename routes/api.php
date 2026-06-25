@@ -7,6 +7,7 @@ use App\Http\Controllers\FolderPermissionController;
 use App\Http\Controllers\FilePermissionController;
 use App\Http\Controllers\SharedDriveController;
 use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\UserController;
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -51,3 +52,11 @@ Route::post('/invitations', [InvitationController::class, 'store']);
 Route::get('/invitations/{token}', [InvitationController::class, 'show']);
 
 Route::post('/invitations/{token}/signup', [InvitationController::class, 'signup']);
+
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/pending', [UserController::class, 'pending']);
+    Route::post('/{user}/approve', [UserController::class, 'approve']);
+    Route::post('/{user}/reject', [UserController::class, 'reject']);
+    Route::delete('/{user}', [UserController::class, 'destroy']);
+});

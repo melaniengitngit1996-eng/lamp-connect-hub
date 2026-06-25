@@ -33,10 +33,21 @@ const login = async () => {
     const data = await response.json()
 
     if (!response.ok) {
-      throw new Error(data.message || 'Login failed')
-    }
 
-    // NO localStorage token
+        if (data.code === 'PENDING_APPROVAL') {
+            error.value =
+                'Your account is awaiting approval from your local church administrator.'
+            return
+        }
+
+        if (data.code === 'ACCOUNT_REJECTED') {
+            error.value =
+                'Your account has been rejected. Please contact your church administrator.'
+            return
+        }
+
+        throw new Error(data.message || 'Login failed')
+    }
 
     window.location.href = '/'
   } catch (err) {
@@ -46,44 +57,6 @@ const login = async () => {
   }
 }
 </script>
-<!-- 
-<template>
-  <div class="min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-md rounded-xl border p-6 shadow">
-      <h1 class="mb-4 text-2xl font-bold">
-        LAMP Church Login
-      </h1>
-
-      <form @submit.prevent="login" class="space-y-4">
-        <input
-          v-model="email"
-          class="w-full rounded border p-3"
-          type="email"
-          placeholder="Email"
-        />
-
-        <input
-          v-model="password"
-          class="w-full rounded border p-3"
-          type="password"
-          placeholder="Password"
-        />
-
-        <p v-if="error" class="text-red-500">
-          {{ error }}
-        </p>
-
-        <button
-          type="submit"
-          :disabled="loading"
-          class="w-full rounded bg-blue-600 p-3 text-white"
-        >
-          {{ loading ? 'Logging in...' : 'Login' }}
-        </button>
-      </form>
-    </div>
-  </div>
-</template> -->
 
 <template>
 <div class="min-h-screen grid lg:grid-cols-2">
@@ -121,6 +94,12 @@ const login = async () => {
                <h2 class="font-display text-2xl">Welcome back</h2>
             </div>
             <div data-state="inactive" data-orientation="horizontal" role="tabpanel" aria-labelledby="radix-_r_3_-trigger-signup" hidden="" id="radix-_r_3_-content-signup" tabindex="0" class="ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 space-y-4 mt-6"></div>
+            <div
+                v-if="error"
+                class="bg-destructive/10 bg__error-message border border-destructive/20 mt-2 px-3 py-2 rounded-md text-destructive text-sm"
+            >
+                {{ error }}
+            </div>
             <form @submit.prevent="login" class="space-y-3 mt-4">
                <div class="space-y-1.5">
                     <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">

@@ -87,7 +87,9 @@ onMounted(async () => {
          </RouterLink>
       </nav>
       <div class="p-3 border-t flex items-center gap-3">
-         <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9"><img class="aspect-square h-full w-full" src="https://lh3.googleusercontent.com/a/ACg8ocJvyec3OlWtfxjG3D5RG9t3tain8GGu6KW5yqx3Jg5V6uoylENt=s96-c"></span>
+         <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
+            <span class="flex h-full w-full items-center justify-center rounded-full bg-muted">{{ user?.initials }}</span>
+         </span>
          <div class="flex-1 min-w-0">
             <div class="text-sm font-medium truncate">{{ user?.name }}</div>
             <div class="text-xs text-muted-foreground truncate">{{ user?.email }}</div>

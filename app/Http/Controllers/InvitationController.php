@@ -167,7 +167,7 @@ class InvitationController extends Controller
         });
 
         return response()->json([
-            'message' => 'Account created successfully.',
+            'message' => 'Account created successfully and is awaiting approval.',
         ]);
     }
 }

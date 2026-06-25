@@ -140,7 +140,7 @@ onMounted(loadInvitation)
                 </h3>
 
                 <p class="text-muted-foreground mt-2">
-                    Your account is awaiting admin approval.
+                    Your account is awaiting admin approval. You will be notified once your account is approved.
                 </p>
 
                 <a

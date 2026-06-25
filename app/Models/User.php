@@ -7,11 +7,12 @@ use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +25,17 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status'
     ];
+
+    protected $appends = [
+        'joined_ago',
+        'initials'
+    ];
+
+    const STATUS_PENDING = 'pending';
+    const STATUS_APPROVED = 'approved';
+    const STATUS_REJECTED = 'rejected';
 
     /**
      * The attributes that should be hidden for serialization.
@@ -95,5 +106,29 @@ class User extends Authenticatable
         }
 
         return $principals;
+    }
+
+    public function getJoinedAgoAttribute()
+    {
+        return $this->created_at
+            ->diffForHumans(short: true);
+    }
+
+    public function getInitialsAttribute(): string
+    {
+        $parts = collect(
+            preg_split('/\s+/', trim($this->name))
+        )->filter();
+
+        if ($parts->count() === 1) {
+            return strtoupper(
+                substr($parts->first(), 0, 2)
+            );
+        }
+
+        return strtoupper(
+            substr($parts->first(), 0, 1)
+                . substr($parts->last(), 0, 1)
+        );
     }
 }

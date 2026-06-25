@@ -3,7 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
-use App\Http\Controllers\SharedDriveController;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,16 +41,48 @@ Route::get('/me', function () {
 });
 
 Route::post('/login', function (Request $request) {
-    if (!Auth::attempt($request->only('email', 'password'))) {
+    $user = User::where(
+        'email',
+        $request->email
+    )->first();
+
+    if (! $user) {
         return response()->json([
-            'message' => 'Invalid credentials'
+            'code' => 'INVALID_CREDENTIALS',
+            'message' => 'Invalid credentials',
         ], 401);
     }
+
+    if (! Hash::check(
+        $request->password,
+        $user->password
+    )) {
+        return response()->json([
+            'code' => 'INVALID_CREDENTIALS',
+            'message' => 'Invalid credentials',
+        ], 401);
+    }
+
+    if ($user->status === 'pending') {
+        return response()->json([
+            'code' => 'PENDING_APPROVAL',
+            'message' => 'Your account is awaiting approval.',
+        ], 403);
+    }
+
+    if ($user->status === 'rejected') {
+        return response()->json([
+            'code' => 'ACCOUNT_REJECTED',
+            'message' => 'Your account has been rejected.',
+        ], 403);
+    }
+
+    Auth::login($user);
 
     $request->session()->regenerate();
 
     return response()->json([
-        'user' => Auth::user()
+        'user' => Auth::user(),
     ]);
 });
 
