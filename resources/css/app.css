@@ -19,3 +19,7 @@
     background-color: #ff00001c;
     border-color: #ff00001a;
 }
+
+.max-h-80 {
+    max-height: calc(.25rem * 64);
+}

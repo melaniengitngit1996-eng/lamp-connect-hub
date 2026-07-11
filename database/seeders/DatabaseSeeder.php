@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             ClusterSeeder::class,
             MinistrySeeder::class,
             MembershipSeeder::class,
+            RoleSeeder::class,
+            PermissionSeeder::class
         ]);
     }
 }

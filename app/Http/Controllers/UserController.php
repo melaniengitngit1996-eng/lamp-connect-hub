@@ -10,6 +10,7 @@ class UserController extends Controller
     public function index()
     {
         return User::query()
+            ->with('roles:id,name')
             ->with('localChurch')
             ->latest()
             ->get();

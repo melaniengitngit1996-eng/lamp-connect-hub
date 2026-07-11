@@ -9,6 +9,7 @@ import SharedFolderPage from '../pages/drive/SharedFolderPage.vue'
 import SharedFilePage from '../pages/drive/SharedFilePage.vue'
 import MemberPage from '../pages/members/MemberPage.vue'
 import SignupInvitationPage from '../pages/auth/SignupInvitationPage.vue'
+import UserPage from '../pages/users/UserPage.vue'
 
 const routes = [
     {
@@ -32,9 +33,14 @@ const routes = [
                 component: ChatPage,
             },
             {
-                path: 'members',
-                name: 'members',
+                path: 'signups',
+                name: 'signups',
                 component: MemberPage,
+            },
+            {
+                path: 'users',
+                name: 'users',
+                component: UserPage,
             },
         ],
     },

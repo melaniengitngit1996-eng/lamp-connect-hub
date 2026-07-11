@@ -148,7 +148,7 @@ onMounted(loadUsers)
 <template>
 <div class="max-w-3xl mx-auto px-4 py-8 space-y-8">
 	<header>
-		<h1 class="font-display text-3xl">Members</h1>
+		<h1 class="font-display text-3xl">Sign Ups</h1>
 		<p class="text-sm text-muted-foreground">Review and approve new sign-ups.</p>
 	</header>
 	<section class="space-y-3">
@@ -186,7 +186,7 @@ onMounted(loadUsers)
 		</div>
 	</section>
 	<section class="space-y-3">
-		<h2 class="text-sm font-medium uppercase text-muted-foreground tracking-wide">All members ({{ users.length }})</h2>
+		<h2 class="text-sm font-medium uppercase text-muted-foreground tracking-wide">All users ({{ users.length }})</h2>
 		<div class="rounded-xl border bg-card text-card-foreground shadow divide-y">
 			<div v-for="user in users" :key="user.id" class="flex items-center gap-3 px-4 py-3">
 				<span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -211,9 +211,9 @@ onMounted(loadUsers)
 				>
 					{{ user.status }}
 				</div>
-				<Button type="icon" @click="remove(user)">
+				<!-- <Button type="icon" @click="remove(user)">
 					<TrashIcon />
-				</button>
+				</button> -->
 			</div>
 		</div>
 	</section>
