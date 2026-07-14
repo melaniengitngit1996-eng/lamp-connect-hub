@@ -1,4 +1,8 @@
 <script setup>
+import { useAuth } from '../../stores/auth'
+
+const { can } = useAuth();
+
 import { ref, onMounted } from 'vue'
 
 import Button from '@/components/Button.vue'
@@ -36,7 +40,7 @@ onMounted(fetchUsers);
                         <th class="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">Church</th>
                         <th class="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">Status</th>
                         <th class="h-10 px-2 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">Roles</th>
-                        <th class="h-10 px-2 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">Actions</th>
+                        <th v-if="can('users.update') || can('users.delete')" class="h-10 px-2 align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="[&amp;_tr:last-child]:border-0">
@@ -99,11 +103,11 @@ onMounted(fetchUsers);
                                 </span>
                             </div>
                         </td>
-                        <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">
-                            <Button type="icon">
+                        <td v-if="can('users.update') || can('users.delete')" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">
+                            <Button v-if="can('users.update')" type="icon">
                                 <PencilIcon />
                             </button>
-                            <Button type="icon">
+                            <Button v-if="can('users.delete')" type="icon">
                                 <TrashIcon class="text-destructive" />
                             </button>
                         </td>

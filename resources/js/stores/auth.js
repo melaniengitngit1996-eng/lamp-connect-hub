@@ -4,6 +4,10 @@ import { useRouter } from 'vue-router'
 const user = ref(null)
 const loading = ref(false)
 
+const can = (permission) => {
+    return user.value?.permissions?.includes(permission) ?? false
+}
+
 export const useAuth = () => {
     const router = useRouter()
 
@@ -22,6 +26,8 @@ export const useAuth = () => {
             }
 
             user.value = await res.json()
+
+            console.log(user.value.permissions)
             return user.value
         } catch (e) {
             user.value = null
@@ -53,5 +59,6 @@ export const useAuth = () => {
         fetchUser,
         logout,
         loading,
+        can
     }
 }

@@ -31,13 +31,23 @@ Route::get('/debug-session-read', function () {
 });
 
 Route::get('/me', function () {
-    if (!Auth::check()) {
+    $user = Auth::user();
+
+    if (! $user) {
         return response()->json([
-            'message' => 'Unauthenticated'
+            'message' => 'Unauthenticated',
         ], 401);
     }
 
-    return response()->json(Auth::user());
+    return response()->json([
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'roles' => $user->getRoleNames(),
+        'permissions' => $user->getAllPermissions()
+            ->pluck('name')
+            ->values(),
+    ]);
 });
 
 Route::post('/login', function (Request $request) {

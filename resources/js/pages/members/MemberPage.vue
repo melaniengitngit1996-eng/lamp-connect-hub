@@ -1,5 +1,9 @@
 <script setup>
+import { useAuth } from '../../stores/auth'
+
 import { ref, onMounted, computed } from 'vue'
+
+const { can } = useAuth();
 
 const users = ref([])
 const loading = ref(false)
@@ -171,13 +175,13 @@ onMounted(loadUsers)
 					<div class="text-sm font-medium truncate">{{ user.name }}</div>
 					<div class="text-xs text-muted-foreground truncate">{{ user.email }}</div>
 				</div>
-				<Button type="primary"
+				<Button v-if="can('member.approve')" type="primary"
 					@click="approve(user)"
 				>
 					Approve
 				</Button>
 
-				<Button type="danger"
+				<Button v-if="can('member.approve')" type="danger"
 					@click="reject(user)"
 				>
 					Reject

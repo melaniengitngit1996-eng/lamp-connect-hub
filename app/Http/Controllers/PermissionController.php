@@ -20,6 +20,7 @@ class PermissionController extends Controller
                     'name' => $permission->name,
                     'module' => ucfirst($module),
                     'action' => ucfirst(str_replace('_', ' ', $action)),
+                    'description' => $permission->description,
                 ];
             });
     }

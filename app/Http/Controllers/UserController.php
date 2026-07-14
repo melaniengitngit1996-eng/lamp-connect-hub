@@ -9,6 +9,11 @@ class UserController extends Controller
 {
     public function index()
     {
+        abort_unless(
+            auth()->user()->can('users.view'),
+            403
+        );
+
         return User::query()
             ->with('roles:id,name')
             ->with('localChurch')
@@ -18,6 +23,11 @@ class UserController extends Controller
 
     public function pending()
     {
+        abort_unless(
+            auth()->user()->can('users.view'),
+            403
+        );
+
         return User::query()
             ->where('status', User::STATUS_PENDING)
             ->with('localChurch')
@@ -35,6 +45,11 @@ class UserController extends Controller
 
     public function approve(User $user)
     {
+        abort_unless(
+            auth()->user()->can('members.approve'),
+            403
+        );
+
         if ($user->status !== User::STATUS_PENDING) {
             return response()->json([
                 'message' => 'User is no longer pending approval.',
@@ -52,6 +67,11 @@ class UserController extends Controller
 
     public function reject(User $user)
     {
+        abort_unless(
+            auth()->user()->can('members.approve'),
+            403
+        );
+
         $user->update([
             'status' => User::STATUS_REJECTED,
         ]);
@@ -63,6 +83,11 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        abort_unless(
+            auth()->user()->can('users.delete'),
+            403
+        );
+
         $user->delete();
 
         return response()->json([

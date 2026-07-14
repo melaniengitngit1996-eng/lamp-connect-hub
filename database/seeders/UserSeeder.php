@@ -10,20 +10,26 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
+        $admin = User::updateOrCreate(
             ['email' => 'admin@lamp.test'],
             [
                 'name' => 'LAMP Admin',
                 'password' => Hash::make('password123'),
+                'status' => 'approved',
             ]
         );
 
-        User::updateOrCreate(
+        $admin->syncRoles(['Administrator']);
+
+        $member = User::updateOrCreate(
             ['email' => 'member@lamp.test'],
             [
                 'name' => 'LAMP Member',
                 'password' => Hash::make('password123'),
+                'status' => 'approved',
             ]
         );
+
+        $member->syncRoles(['Member']);
     }
 }

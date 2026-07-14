@@ -14,6 +14,11 @@ class FileFolderController extends Controller
     // show all/per file folder
     public function index(Request $request)
     {
+        abort_unless(
+            auth()->user()->can('drive.view'),
+            403
+        );
+
         $search = trim($request->search ?? '');
 
         if ($search) {
@@ -73,6 +78,11 @@ class FileFolderController extends Controller
     // create new folder
     public function store(Request $request)
     {
+        abort_unless(
+            auth()->user()->can('drive.upload'),
+            403
+        );
+
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'parent_id' => ['nullable', 'integer', 'exists:file_folders,id'],
@@ -95,6 +105,11 @@ class FileFolderController extends Controller
     public function destroy(FileFolder $folder)
     {
         abort_unless(
+            auth()->user()->can('drive.delete'),
+            403
+        );
+
+        abort_unless(
             $folder->owner_id === Auth::id(),
             403
         );
@@ -109,6 +124,11 @@ class FileFolderController extends Controller
     // delete sub folder
     private function deleteFolderRecursively(FileFolder $folder): void
     {
+        abort_unless(
+            auth()->user()->can('drive.delete'),
+            403
+        );
+
         foreach ($folder->children as $child) {
             $this->deleteFolderRecursively($child);
         }
@@ -126,6 +146,11 @@ class FileFolderController extends Controller
         Request $request,
         FileFolder $folder
     ) {
+        abort_unless(
+            auth()->user()->can('drive.share'),
+            403
+        );
+
         abort_unless(
             $folder->owner_id === Auth::id(),
             403

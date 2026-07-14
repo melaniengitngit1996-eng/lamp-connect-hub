@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { useAuth } from '../stores/auth'
+
 import AppLayout from '../layouts/AppLayout.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import DashboardPage from '../pages/dashboard/DashboardPage.vue'
@@ -10,6 +12,7 @@ import SharedFilePage from '../pages/drive/SharedFilePage.vue'
 import MemberPage from '../pages/members/MemberPage.vue'
 import SignupInvitationPage from '../pages/auth/SignupInvitationPage.vue'
 import UserPage from '../pages/users/UserPage.vue'
+import NotFoundPage from '../pages/auth/403Page.vue'
 
 const routes = [
     {
@@ -26,21 +29,33 @@ const routes = [
                 path: 'drive',
                 name: 'drive',
                 component: DrivePage,
+                meta: {
+                    permission: 'drive.view',
+                },
             },
             {
                 path: 'chat',
                 name: 'chat',
                 component: ChatPage,
+                meta: {
+                    permission: 'chat.view',
+                },
             },
             {
                 path: 'signups',
                 name: 'signups',
                 component: MemberPage,
+                meta: {
+                    permission: 'members.view',
+                },
             },
             {
                 path: 'users',
                 name: 'users',
                 component: UserPage,
+                meta: {
+                    permission: 'users.view',
+                },
             },
         ],
     },
@@ -74,11 +89,35 @@ const routes = [
             requiresAuth: false,
         },
     },
+    {
+        path: '/403',
+        name: '403',
+        component: NotFoundPage,
+    },
 ]
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
+})
+
+router.beforeEach(async (to) => {
+    const { user, fetchUser, can } = useAuth()
+
+    if (!user.value) {
+        await fetchUser()
+    }
+
+    if (to.meta.requiresAuth && !user.value) {
+        return '/login'
+    }
+
+    if (to.meta.permission && !can(to.meta.permission)) {
+        return '/403'
+    }
+
+    // allow navigation
+    return true
 })
 
 async function getUser() {

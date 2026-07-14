@@ -138,7 +138,7 @@ const groupedPermissions = computed(() => {
                                         </div>
 
                                         <div class="text-xs text-muted-foreground font-mono">
-                                            {{ permission.name }}
+                                            {{ permission.description }}
                                         </div>
                                     </div>
 

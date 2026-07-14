@@ -1,5 +1,9 @@
 <script setup>
+import { useAuth } from '../../stores/auth'
+
 import { ref, onMounted, watch, computed } from 'vue'
+
+const { can } = useAuth();
 
 import Dialog from '../../components/Dialog.vue'
 import Button from '../../components/Button.vue'
@@ -176,12 +180,12 @@ const matchLabel = computed(() => {
             <p class="text-sm text-muted-foreground">Shared files for the LAMP community.</p>
         </div>
         <div class="flex gap-2">
-            <Button type="plain" @click="showNewFolderDialog = true">
+            <Button v-if="can('drive.upload')" type="plain" @click="showNewFolderDialog = true">
                 <FolderPlusIcon />
                 New folder
             </Button>
 
-            <Button type="primary" @click="showUploadDialog = true">
+            <Button v-if="can('drive.upload')" type="primary" @click="showUploadDialog = true">
                 <UploadIcon />
                 Upload
             </Button>
@@ -274,7 +278,7 @@ const matchLabel = computed(() => {
             </div>
 
             <Button
-                v-if="folder.can_manage"
+                v-if="folder.can_manage && can('drive.share')"
                 type="icon"
                 @click.stop="openShareDialog(folder, 'folder')"
             >
@@ -282,7 +286,7 @@ const matchLabel = computed(() => {
             </Button>
 
             <Button 
-                v-if="folder.can_manage"
+                v-if="folder.can_manage && can('drive.delete')"
                 type="icon" 
                 @click.stop="confirmDeleteFolder(folder)"
             >
@@ -326,7 +330,7 @@ const matchLabel = computed(() => {
             </div>
 
             <Button
-                v-if="file.can_manage"
+                v-if="file.can_manage  && can('drive.share')"
                 type="icon"
                 @click.stop="openShareDialog(file, 'file')"
             >
@@ -334,7 +338,7 @@ const matchLabel = computed(() => {
             </Button>
 
             <Button 
-                v-if="file.can_manage" 
+                v-if="file.can_manage && can('drive.delete')" 
                 type="icon" 
                 @click.stop="confirmDeleteFile(file)"
             >

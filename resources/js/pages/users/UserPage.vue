@@ -1,5 +1,9 @@
 <script setup>
+import { useAuth } from '../../stores/auth'
+
 import { ref, onMounted } from 'vue'
+
+const { can } = useAuth();
 
 import UsersCard from '../../pages/users/UsersCard.vue'
 import RolesCard from '../../pages/users/RolesCard.vue'
@@ -17,6 +21,7 @@ const activeTab = ref('users')
         </header>
         <div dir="ltr" data-orientation="horizontal">
             <div 
+                v-if="can('roles.view')"
                 role="tablist" 
                 aria-orientation="horizontal" 
                 class="inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground" 

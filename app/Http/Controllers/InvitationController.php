@@ -153,13 +153,15 @@ class InvitationController extends Controller
             $invitation,
             $localChurch
         ) {
-            User::create([
+            $member = User::create([
                 'member_id' => $invitation->member_id,
                 'local_church_id' => $localChurch->id,
                 'name' => $invitation->full_name,
                 'email' => $invitation->email,
                 'password' => Hash::make($validated['password']),
             ]);
+
+            $member->syncRoles(['Member']);
 
             $invitation->update([
                 'accepted_at' => now(),

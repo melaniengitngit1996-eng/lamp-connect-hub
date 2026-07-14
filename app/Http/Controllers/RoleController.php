@@ -11,9 +11,13 @@ class RoleController extends Controller
     public function index()
     {
         return Role::query()
-            ->with('permissions:id,name')
-            ->withCount('users')
-            ->withCount('permissions')
+            ->with([
+                'permissions:id,name,description',
+            ])
+            ->withCount([
+                'users',
+                'permissions',
+            ])
             ->orderBy('name')
             ->get();
     }

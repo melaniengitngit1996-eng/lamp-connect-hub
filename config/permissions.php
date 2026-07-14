@@ -1,90 +1,98 @@
 <?php
 
 return [
+
     'users' => [
-        'view',
-        'create',
-        'update',
-        'delete',
-        'invite',
+        'view' => [
+            'description' => 'View users',
+        ],
+        'create' => [
+            'description' => 'Create users',
+        ],
+        'update' => [
+            'description' => 'Update user information',
+        ],
+        'delete' => [
+            'description' => 'Delete users',
+        ],
     ],
 
     'roles' => [
-        'view',
-        'create',
-        'update',
-        'delete',
-    ],
-
-    'churches' => [
-        'view',
-        'create',
-        'update',
-        'delete',
+        'view' => [
+            'description' => 'View roles',
+        ],
+        'create' => [
+            'description' => 'Create roles',
+        ],
+        'update' => [
+            'description' => 'Update role information',
+        ],
+        'delete' => [
+            'description' => 'Delete roles',
+        ],
     ],
 
     'members' => [
-        'view',
-        'create',
-        'update',
-        'delete',
-        'export',
-    ],
-
-    'clusters' => [
-        'view',
-        'create',
-        'update',
-        'delete',
-    ],
-
-    'ministries' => [
-        'view',
-        'create',
-        'update',
-        'delete',
+        'view' => [
+            'description' => 'View sign ups',
+        ],
+        'approve' => [
+            'description' => 'Approve or reject sign ups',
+        ],
     ],
 
     'drive' => [
-        'view',
-        'upload',
-        'download',
-        'share',
-        'delete',
-    ],
-
-    'events' => [
-        'view',
-        'create',
-        'update',
-        'delete',
-        'publish',
-        'checkin',
-    ],
-
-    'attendance' => [
-        'view',
-        'record',
-        'update',
-        'export',
+        'view' => [
+            'description' => 'View files and folders',
+        ],
+        'upload' => [
+            'description' => 'Upload files',
+        ],
+        'download' => [
+            'description' => 'Download files',
+        ],
+        'share' => [
+            'description' => 'Share files and folders',
+        ],
+        'delete' => [
+            'description' => 'Delete files and folders',
+        ],
     ],
 
     'posts' => [
-        'view',
-        'create',
-        'update',
-        'delete',
-        'publish',
+        'view' => [
+            'description' => 'View posts',
+        ],
+        'create' => [
+            'description' => 'Create posts',
+        ],
+        'update' => [
+            'description' => 'Update posts',
+        ],
+        'delete' => [
+            'description' => 'Delete posts',
+        ],
     ],
 
     'chat' => [
-        'view',
-        'moderate',
-        'delete',
+        'view' => [
+            'description' => 'View conversations',
+        ],
+        'moderate' => [
+            'description' => 'Moderate conversations',
+        ],
+        'delete' => [
+            'description' => 'Delete conversations',
+        ],
     ],
 
     'settings' => [
-        'view',
-        'update',
+        'view' => [
+            'description' => 'View system settings',
+        ],
+        'update' => [
+            'description' => 'Update system settings',
+        ],
     ],
+
 ];

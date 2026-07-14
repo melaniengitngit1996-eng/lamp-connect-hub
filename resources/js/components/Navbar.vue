@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useAuth } from '../stores/auth'
 
-const { logout, user, fetchUser } = useAuth()
+const { logout, user, fetchUser, can } = useAuth()
 
 onMounted(async () => {
     if (!user.value) {
@@ -55,6 +55,7 @@ onMounted(async () => {
             Chat
          </RouterLink>
          <RouterLink
+               v-if="can('drive.view')"
                to="/drive"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
                :class="
@@ -69,6 +70,7 @@ onMounted(async () => {
             Drive
          </RouterLink>
          <RouterLink
+               v-if="can('members.view')"
                to="/signups"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
                :class="
@@ -86,6 +88,7 @@ onMounted(async () => {
             Sign Ups
          </RouterLink>
          <RouterLink
+               v-if="can('users.view')"
                to="/users"
                class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
                :class="
