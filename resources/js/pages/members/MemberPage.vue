@@ -175,13 +175,13 @@ onMounted(loadUsers)
 					<div class="text-sm font-medium truncate">{{ user.name }}</div>
 					<div class="text-xs text-muted-foreground truncate">{{ user.email }}</div>
 				</div>
-				<Button v-if="can('member.approve')" type="primary"
+				<Button v-if="can('members.approve')" type="primary"
 					@click="approve(user)"
 				>
 					Approve
 				</Button>
 
-				<Button v-if="can('member.approve')" type="danger"
+				<Button v-if="can('members.approve')" type="danger"
 					@click="reject(user)"
 				>
 					Reject

@@ -10,6 +10,9 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LocalChurchController;
+use App\Http\Controllers\MinistryController;
+use App\Http\Controllers\ClusterGroupController;
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -61,6 +64,8 @@ Route::prefix('users')->group(function () {
     Route::post('/{user}/approve', [UserController::class, 'approve']);
     Route::post('/{user}/reject', [UserController::class, 'reject']);
     Route::delete('/{user}', [UserController::class, 'destroy']);
+    Route::post('/', [UserController::class, 'store']);
+    Route::put('/{user}', [UserController::class, 'update']);
 });
 
 Route::get('/roles', [RoleController::class, 'index']);
@@ -69,3 +74,7 @@ Route::put('/roles/{role}', [RoleController::class, 'update']);
 Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
 
 Route::get('/permissions', [PermissionController::class, 'index']);
+
+Route::get('/local-churches', [LocalChurchController::class, 'index']);
+Route::get('/local-churches/{localChurch}/ministries', [MinistryController::class, 'index']);
+Route::get('/local-churches/{localChurch}/clusters', [ClusterGroupController::class, 'index']);

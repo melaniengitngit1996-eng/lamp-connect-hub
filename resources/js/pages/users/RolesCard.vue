@@ -5,6 +5,11 @@ const { can } = useAuth();
 
 import { ref, onMounted } from 'vue'
 
+
+import Button from '@/components/Button.vue'
+import TrashIcon from '../../icons/TrashIcon.vue'
+import PencilIcon from '../../icons/PencilIcon.vue'
+
 import RoleDialog from '../../pages/users/RoleDialog.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
@@ -125,10 +130,7 @@ onMounted(fetchRoles);
                     </td>
                     <td v-if="can('roles.update') || can('roles.delete')" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right flex">
                         <button v-if="can('roles.update')" @click="editRole(role)" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-pencil h-4 w-4" aria-hidden="true">
-                                <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path>
-                                <path d="m15 5 4 4"></path>
-                            </svg>
+                            <PencilIcon />
                         </button>
                         <button v-if="can('roles.delete')" @click="openDeleteDialog(role)"
                                 :disabled="role.is_system"
@@ -138,13 +140,7 @@ onMounted(fetchRoles);
                                         ? 'opacity-50 cursor-not-allowed pointer-events-none'
                                         : 'cursor-pointer hover:bg-accent hover:text-accent-foreground'
                                 ]">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2 lucide-trash-2 h-4 w-4 text-destructive" aria-hidden="true">
-                                <path d="M10 11v6"></path>
-                                <path d="M14 11v6"></path>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
-                                <path d="M3 6h18"></path>
-                                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                            </svg>
+                            <TrashIcon class="text-destructive" />
                         </button>
                     </td>
                 </tr>

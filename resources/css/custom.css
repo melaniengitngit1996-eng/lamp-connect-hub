@@ -876,6 +876,10 @@
         max-height: calc(var(--spacing) * 52)
     }
 
+    .max-h-60 {
+        max-height: calc(var(--spacing) * 60)
+    }
+
     .max-h-64 {
         max-height: calc(var(--spacing) * 64)
     }
@@ -1006,6 +1010,10 @@
 
     .w-72 {
         width: calc(var(--spacing) * 72)
+    }
+
+    .w-\[--radix-popover-trigger-width\] {
+        width: --radix-popover-trigger-width
     }
 
     .w-\[1px\] {

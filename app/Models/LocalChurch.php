@@ -6,5 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class LocalChurch extends Model
 {
-    //
+    public function ministries()
+    {
+        return $this->hasMany(Ministry::class);
+    }
+
+    public function clusters()
+    {
+        return $this->hasMany(Cluster::class);
+    }
 }

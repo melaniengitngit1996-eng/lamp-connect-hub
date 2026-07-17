@@ -9,8 +9,30 @@ import Button from '@/components/Button.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
 import PencilIcon from '../../icons/PencilIcon.vue'
 
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import UserDialog from '../../pages/users/UserDialog.vue'
+
 const loading = ref(false);
 const users = ref([]);
+const deleteDialogOpen = ref(false)
+const selectedUser = ref(null)
+const deleting = ref(false)
+const dialogOpen = ref(false)
+
+const openDeleteDialog = (user) => {
+    selectedUser.value = user
+    deleteDialogOpen.value = true
+}
+
+const editUser = (user) => {
+    selectedUser.value = user
+    dialogOpen.value = true
+}
+
+const closeDialog = () => {
+    dialogOpen.value = false
+    selectedUser.value = null
+}
 
 const fetchUsers = async () => {
     loading.value = true;
@@ -23,6 +45,23 @@ const fetchUsers = async () => {
         loading.value = false;
     }
 };
+
+const deleteUser = async () => {
+    deleting.value = true
+
+    try {
+        await axios.delete(`/api/users/${selectedUser.value.id}`)
+
+        await fetchUsers()
+
+        deleteDialogOpen.value = false
+        selectedUser.value = null
+    } catch (error) {
+        alert(error.response?.data?.message ?? 'Unable to delete user.')
+    } finally {
+        deleting.value = false
+    }
+}
 
 onMounted(fetchUsers);
 </script>
@@ -104,10 +143,10 @@ onMounted(fetchUsers);
                             </div>
                         </td>
                         <td v-if="can('users.update') || can('users.delete')" class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">
-                            <Button v-if="can('users.update')" type="icon">
+                            <Button v-if="can('users.update')" @click="editUser(user)" type="icon">
                                 <PencilIcon />
                             </button>
-                            <Button v-if="can('users.delete')" type="icon">
+                            <Button v-if="can('users.delete')" @click="openDeleteDialog(user)" type="icon">
                                 <TrashIcon class="text-destructive" />
                             </button>
                         </td>
@@ -116,4 +155,21 @@ onMounted(fetchUsers);
             </table>
         </div>
     </div>
+
+    <UserDialog
+        :open="dialogOpen"
+        :user="selectedUser"
+        @saved="fetchUsers()"
+        @close="closeDialog"
+    />
+
+    <ConfirmDialog
+        :open="deleteDialogOpen"
+        title="Delete User"
+        :message="`Delete '${selectedUser?.name}'? This action cannot be undone.`"
+        confirm-text="Delete"
+        :loading="deleting"
+        @close="deleteDialogOpen = false"
+        @confirm="deleteUser"
+/>
 </template>
