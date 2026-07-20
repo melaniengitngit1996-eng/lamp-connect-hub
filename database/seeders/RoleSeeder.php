@@ -39,8 +39,6 @@ class RoleSeeder extends Seeder
 
                     'chat.view',
                     'chat.moderate',
-
-                    'settings.view',
                 ],
             ],
 

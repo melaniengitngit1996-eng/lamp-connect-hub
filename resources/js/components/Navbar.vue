@@ -21,7 +21,7 @@ onMounted(async () => {
          </div>
          <div>
             <div class="font-display text-lg leading-none">LAMP</div>
-            <div class="text-xs text-muted-foreground">Church Connect</div>
+            <div class="text-xs text-muted-foreground">Church Portal</div>
          </div>
       </div>
       <nav class="flex-1 p-3 space-y-1">
@@ -102,6 +102,23 @@ onMounted(async () => {
             </svg>
             Users
          </RouterLink>
+         <RouterLink
+                v-if="can('lookups.view')"
+               to="/lookups"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
+               :class="
+                  $route.path === '/lookups'
+                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               "
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tags h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:64:17">
+               <path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"></path>
+               <path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"></path>
+               <circle cx="10.5" cy="6.5" r=".5" fill="currentColor"></circle>
+            </svg>
+            Lookups
+         </RouterLink>
       </nav>
       <div class="p-3 border-t flex items-center gap-3">
          <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
@@ -154,6 +171,14 @@ onMounted(async () => {
             <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
          </svg>
          Users
+      </a>
+      <a href="/lookups" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tags h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:64:17">
+            <path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"></path>
+            <path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"></path>
+            <circle cx="10.5" cy="6.5" r=".5" fill="currentColor"></circle>
+         </svg>
+         Lookups
       </a>
    </div>
 </template>

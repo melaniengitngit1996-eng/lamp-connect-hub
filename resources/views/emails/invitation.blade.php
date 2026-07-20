@@ -1,9 +1,9 @@
 @component('mail::message')
-# Welcome to LAMP Church Connect
+# Welcome to LAMP Church Portal
 
 Hello {{ $invitation->full_name }},
 
-You have been invited to create your account for **LAMP Church Connect**.
+You have been invited to create your account for **LAMP Church Portal**.
 
 **Local Church:**  
 {{ $invitation->local_church }}
@@ -21,5 +21,5 @@ This invitation link will expire in **7 days**.
 If you did not expect this invitation, you may safely ignore this email.
 
 Thanks,<br>
-LAMP Church Connect Team
+LAMP Church Portal Team
 @endcomponent

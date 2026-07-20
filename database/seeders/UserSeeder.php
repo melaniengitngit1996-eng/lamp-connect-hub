@@ -13,7 +13,7 @@ class UserSeeder extends Seeder
         $admin = User::updateOrCreate(
             ['email' => 'admin@lamp.test'],
             [
-                'name' => 'LAMP Admin',
+                'name' => 'Some Admin',
                 'password' => Hash::make('password123'),
                 'status' => 'approved',
             ]
@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
         $member = User::updateOrCreate(
             ['email' => 'member@lamp.test'],
             [
-                'name' => 'LAMP Member',
+                'name' => 'Some Member',
                 'password' => Hash::make('password123'),
                 'status' => 'approved',
             ]

@@ -20,7 +20,7 @@ class InvitationMail extends Mailable
     public function build()
     {
         return $this
-            ->subject('You have been invited to LAMP Church Connect')
+            ->subject('You have been invited to LAMP Church Portal')
             ->markdown('emails.invitation');
     }
 }

@@ -13,6 +13,7 @@ import MemberPage from '../pages/members/MemberPage.vue'
 import SignupInvitationPage from '../pages/auth/SignupInvitationPage.vue'
 import UserPage from '../pages/users/UserPage.vue'
 import NotFoundPage from '../pages/auth/403Page.vue'
+import LookupPage from '../pages/lookups/LookupPage.vue'
 
 const routes = [
     {
@@ -55,6 +56,14 @@ const routes = [
                 component: UserPage,
                 meta: {
                     permission: 'users.view',
+                },
+            },
+            {
+                path: 'lookups',
+                name: 'lookups',
+                component: LookupPage,
+                meta: {
+                    permission: 'lookups.view',
                 },
             },
         ],

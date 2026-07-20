@@ -76,5 +76,9 @@ Route::delete('/roles/{role}', [RoleController::class, 'destroy']);
 Route::get('/permissions', [PermissionController::class, 'index']);
 
 Route::get('/local-churches', [LocalChurchController::class, 'index']);
+Route::delete('/local-churches/{localChurch}', [LocalChurchController::class, 'destroy']);
+Route::post('/local-churches', [LocalChurchController::class, 'store']);
+Route::put('/local-churches/{localChurch}', [LocalChurchController::class, 'update']);
+
 Route::get('/local-churches/{localChurch}/ministries', [MinistryController::class, 'index']);
 Route::get('/local-churches/{localChurch}/clusters', [ClusterGroupController::class, 'index']);

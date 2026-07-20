@@ -86,12 +86,18 @@ return [
         ],
     ],
 
-    'settings' => [
+    'lookups' => [
         'view' => [
-            'description' => 'View system settings',
+            'description' => 'View system lookups',
         ],
         'update' => [
-            'description' => 'Update system settings',
+            'description' => 'Update system lookups',
+        ],
+        'create' => [
+            'description' => 'Create lookups',
+        ],
+        'delete' => [
+            'description' => 'Delete lookup',
         ],
     ],
 
