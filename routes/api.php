@@ -80,5 +80,10 @@ Route::delete('/local-churches/{localChurch}', [LocalChurchController::class, 'd
 Route::post('/local-churches', [LocalChurchController::class, 'store']);
 Route::put('/local-churches/{localChurch}', [LocalChurchController::class, 'update']);
 
+Route::get('/ministries', [MinistryController::class, 'all']);
+Route::delete('/ministries/{ministry}', [MinistryController::class, 'destroy']);
+Route::post('/ministries', [MinistryController::class, 'store']);
+Route::put('/ministries/{ministry}', [MinistryController::class, 'update']);
+
 Route::get('/local-churches/{localChurch}/ministries', [MinistryController::class, 'index']);
 Route::get('/local-churches/{localChurch}/clusters', [ClusterGroupController::class, 'index']);

@@ -9,7 +9,7 @@ import MinistriesCard from '../../pages/lookups/MinistriesCard.vue'
 import ClusterGroupsCard from '../../pages/lookups/ClusterGroupsCard.vue'
 import LocalChurchesCard from '../../pages/lookups/LocalChurchesCard.vue';
 
-const activeTab = ref('local_churches')
+const activeTab = ref('ministries')
 </script>
 
 <template>
