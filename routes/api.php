@@ -94,3 +94,7 @@ Route::delete('/clusters/{cluster}', [ClusterGroupController::class, 'destroy'])
 
 Route::get('/local-churches/{localChurch}/ministries', [MinistryController::class, 'index']);
 Route::get('/local-churches/{localChurch}/clusters', [ClusterGroupController::class, 'index']);
+
+Route::post('/drive/files/{file}/activities/view', [FileController::class, 'logView']);
+Route::post('/drive/files/{file}/activities/download', [FileController::class, 'logDownload']);
+Route::get('/drive/files/{file}/activities', [FileController::class, 'activities']);

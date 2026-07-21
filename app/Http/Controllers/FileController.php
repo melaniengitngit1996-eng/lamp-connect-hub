@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\File;
+use App\Models\FileActivity;
 
 class FileController extends Controller
 {
@@ -46,6 +47,42 @@ class FileController extends Controller
 
         return response()->json([
             'message' => 'File deleted successfully.',
+        ]);
+    }
+
+    public function logView(File $file)
+    {
+        $file->logActivity('viewed');
+
+        return $file;
+    }
+
+    public function logDownload(File $file)
+    {
+        $file->logActivity('downloaded');
+
+        return $file;
+    }
+
+    public function activities(File $file)
+    {
+        $views = $file->activities()
+            ->with('user:id,name,created_at')
+            ->where('action', 'viewed')
+            ->latest()
+            ->get();
+
+        $downloads = $file->activities()
+            ->with('user:id,name,created_at')
+            ->where('action', 'downloaded')
+            ->latest()
+            ->get();
+
+        return response()->json([
+            'views' => $views,
+            'downloads' => $downloads,
+            'views_count' => $views->count(),
+            'downloads_count' => $downloads->count(),
         ]);
     }
 }

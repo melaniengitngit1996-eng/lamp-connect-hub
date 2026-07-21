@@ -25,6 +25,7 @@ import UploadFileDialog from '../../pages/drive/UploadFileDialog.vue'
 import PreviewDialog from '../../pages/drive/PreviewDialog.vue'
 import DeleteFileDialog from '../../pages/drive/DeleteFileDialog.vue'
 import ShareDialog from '../../pages/drive/ShareDialog.vue'
+import ActivityDialog from './ActivityDialog.vue';
  
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
@@ -32,6 +33,7 @@ const showUploadDialog = ref(false)
 const showPreviewDialog = ref(false)
 const showDeleteFileDialog = ref(false)
 const showShareDialog = ref(false)
+const showPulseDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -143,6 +145,11 @@ const confirmDeleteFile = (file) => {
 const previewFile = (file) => {
     selectedFile.value = file
     showPreviewDialog.value = true
+}
+
+const pulseFile = (file) => {
+    selectedFile.value = file
+    showPulseDialog.value = true
 }
 
 const openShareDialog = (item, type) => {
@@ -354,6 +361,7 @@ const matchLabel = computed(() => {
             </Button>
 
             <Button
+                @click="pulseFile(file)"
                 type="icon"
             >
                 <PulseIcon />
@@ -408,6 +416,12 @@ const matchLabel = computed(() => {
         :item="selectedItem"
         :type="itemType"
         @close="showShareDialog = false"
+    />
+
+    <ActivityDialog 
+        :open="showPulseDialog"
+        :file="selectedFile"
+        @close="showPulseDialog = false"
     />
 </div>
 </template>

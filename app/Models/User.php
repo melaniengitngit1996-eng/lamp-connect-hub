@@ -132,4 +132,9 @@ class User extends Authenticatable
                 . substr($parts->last(), 0, 1)
         );
     }
+
+    public function fileActivities()
+    {
+        return $this->hasMany(FileActivity::class);
+    }
 }

@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/Button.vue'
@@ -46,6 +46,60 @@ const officeViewerUrl = computed(() => {
 
     return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(props.file.url)}`
 })
+
+watch(
+    () => props.open,
+    async (open) => {
+        if (!open || !props.file) {
+            return
+        }
+
+        await logView()
+    }
+)
+
+const logView = async () => {
+    await fetch(
+        `/api/drive/files/${props.file.id}/activities/view`,
+        {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    ?.content,
+            },
+        }
+    )
+}
+
+const downloadFile = async () => {
+    await fetch(
+        `/api/drive/files/${props.file.id}/activities/download`,
+        {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                Accept: 'application/json',
+                'X-CSRF-TOKEN': document
+                    .querySelector('meta[name="csrf-token"]')
+                    ?.content,
+            },
+        }
+    )
+
+    const link = document.createElement('a')
+
+    link.href = props.file.url
+    link.download = props.file.original_name
+
+    document.body.appendChild(link)
+
+    link.click()
+
+    document.body.removeChild(link)
+}
 </script>
 
 <template>
@@ -57,7 +111,7 @@ const officeViewerUrl = computed(() => {
             v-if="file"
             class="max-w-4xl overflow-hidden"
         >
-            <div class="flex items-center justify-between gap-4 border-b px-6 py-4">
+            <div class="border-b flex gap-4 items-center justify-between pt-0 px-6 py-4">
                 <div class="min-w-0">
                     <h2 class="truncate text-lg font-semibold">
                         {{ file.original_name }}
@@ -81,7 +135,7 @@ const officeViewerUrl = computed(() => {
 
                     <a
                         :href="file.url"
-                        :download="file.original_name"
+                        @click="downloadFile"
                     >
                         <Button type="plain">
                             <DownloadIcon />

@@ -686,6 +686,10 @@
         margin-right: calc(var(--spacing) * 1)
     }
 
+    .mr-1\.5 {
+        margin-right: calc(var(--spacing) * 1.5)
+    }
+
     .mr-2 {
         margin-right: calc(var(--spacing) * 2)
     }
@@ -884,6 +888,10 @@
         max-height: calc(var(--spacing) * 64)
     }
 
+    .max-h-\[50vh\] {
+        max-height: 50vh
+    }
+
     .max-h-\[75vh\] {
         max-height: 75vh
     }
@@ -1002,6 +1010,10 @@
 
     .w-44 {
         width: calc(var(--spacing) * 44)
+    }
+
+    .w-56 {
+        width: calc(var(--spacing) * 56)
     }
 
     .w-64 {
@@ -1846,6 +1858,10 @@
 
     .py-2 {
         padding-block: calc(var(--spacing) * 2)
+    }
+
+    .py-2\.5 {
+        padding-block: calc(var(--spacing) * 2.5)
     }
 
     .py-3 {

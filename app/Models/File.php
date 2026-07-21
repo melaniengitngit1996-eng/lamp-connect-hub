@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Models\FolderPermission;
 use App\Models\FilePermission;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class File extends Model
 {
@@ -32,7 +33,9 @@ class File extends Model
         'created_human',
         'url',
         'path_human',
-        'path_folders'
+        'path_folders',
+        'views_count',
+        'downloads_count',
     ];
 
     public function getSizeHumanAttribute()
@@ -193,5 +196,35 @@ class File extends Model
             FilePermission::class,
             'file_id'
         );
+    }
+
+    public function activities()
+    {
+        return $this->hasMany(FileActivity::class)
+            ->latest();
+    }
+
+    public function getViewsCountAttribute()
+    {
+        return $this->activities()
+            ->where('action', 'viewed')
+            ->count();
+    }
+
+    public function getDownloadsCountAttribute()
+    {
+        return $this->activities()
+            ->where('action', 'downloaded')
+            ->count();
+    }
+
+    public function logActivity(string $action): FileActivity
+    {
+        return $this->activities()->create([
+            'user_id' => Auth::id(),
+            'action' => $action,
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+        ]);
     }
 }
