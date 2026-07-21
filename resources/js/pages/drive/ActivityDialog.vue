@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 import Dialog from '@/components/Dialog.vue'
 
@@ -36,6 +36,18 @@ const loadActivities = async () => {
     downloadsCount.value = data.downloads_count
 }
 
+const truncatedFileName = computed(() => {
+    if (!props.file?.original_name) {
+        return ''
+    }
+
+    const maxLength = 30
+
+    return props.file.original_name.length > maxLength
+        ? props.file.original_name.slice(0, maxLength) + '...'
+        : props.file.original_name
+})
+
 watch(
     () => props.open,
     async (open) => {
@@ -53,7 +65,18 @@ watch(
         @close="emit('close')"
     >
         <div class="flex flex-col space-y-1.5 text-center sm:text-left">
-            <h2 class="text-lg font-semibold leading-none tracking-tight truncate">Activity · {{ file.original_name }}</h2>
+            <h2
+                class="flex items-center gap-1 text-lg font-semibold leading-none tracking-tight min-w-0"
+            >
+                <span class="shrink-0">Activity ·</span>
+
+                <span
+                    class="truncate"
+                    :title="file.original_name"
+                >
+                    {{ truncatedFileName }}
+                </span>
+            </h2>
         </div>
         <div dir="ltr" data-orientation="horizontal">
             <div 
