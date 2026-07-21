@@ -42,6 +42,7 @@ const selectedFolder = ref(null)
 const selectedFile = ref(null)
 const selectedItem = ref(null)
 const itemType = ref(null)
+const loadingFolder = ref(false)
 
 const search = ref('')
 
@@ -87,14 +88,28 @@ const loadFolders = async (parentId = null) => {
 }
 
 const openFolder = async (folder) => {
-    currentFolder.value = folder
+    if (loadingFolder.value) {
+        return
+    }
 
-    breadcrumbs.value.push({
-        id: folder.id,
-        name: folder.name,
-    })
+    if (currentFolder.value?.id === folder.id) {
+        return
+    }
 
-    await loadFolders(folder.id)
+    loadingFolder.value = true
+
+    try {
+        currentFolder.value = folder
+
+        breadcrumbs.value.push({
+            id: folder.id,
+            name: folder.name,
+        })
+
+        await loadFolders(folder.id)
+    } finally {
+        loadingFolder.value = false
+    }
 }
 
 const goHome = async () => {
