@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -115,6 +117,8 @@ class UserController extends Controller
             'role_ids' => ['array'],
             'role_ids.*' => ['exists:roles,id'],
 
+            'password' => ['required', 'confirmed', Password::defaults()],
+
             'status' => ['required', Rule::in([
                 'pending',
                 'approved',
@@ -127,6 +131,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'local_church_id' => $validated['local_church_id'],
             'status' => $validated['status'],
+            'password' => Hash::make($validated['password']),
         ]);
 
         $user->ministries()->sync($validated['ministry_ids'] ?? []);

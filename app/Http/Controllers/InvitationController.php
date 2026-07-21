@@ -15,13 +15,34 @@ use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
 {
+    public function index()
+    {
+        return Invitation::latest()
+            ->get()
+            ->map(function ($invitation) {
+                return [
+                    'id' => $invitation->id,
+                    'full_name' => $invitation->full_name,
+                    'email' => $invitation->email,
+                    'initials' => Str::of($invitation->full_name)
+                        ->explode(' ')
+                        ->map(fn($name) => Str::substr($name, 0, 1))
+                        ->take(2)
+                        ->implode(''),
+                    'local_church' => $invitation->local_church,
+                    'invited_ago' => $invitation->created_at->diffForHumans(),
+                    'status' => $invitation->status,
+                ];
+            });
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'member_id' => ['required'],
             'full_name' => ['required'],
             'email' => ['required', 'email'],
             'local_church' => ['nullable'],
+            'member_id' => ['nullable'],
         ]);
 
         $existing = Invitation::where('member_id', $validated['member_id'])

@@ -52,6 +52,8 @@ Route::get('/shared/folders/{token}', [SharedDriveController::class, 'folder']);
 
 Route::get('/shared/files/{token}', [SharedDriveController::class, 'file']);
 
+Route::get('/invitations', [InvitationController::class, 'index']);
+
 Route::post('/invitations', [InvitationController::class, 'store']);
 
 Route::get('/invitations/{token}', [InvitationController::class, 'show']);

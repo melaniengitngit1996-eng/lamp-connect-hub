@@ -21,4 +21,17 @@ class Invitation extends Model
         'expires_at' => 'datetime',
         'accepted_at' => 'datetime',
     ];
+
+    public function getStatusAttribute(): string
+    {
+        if ($this->accepted_at) {
+            return 'accepted';
+        }
+
+        if ($this->expires_at && $this->expires_at->isPast()) {
+            return 'expired';
+        }
+
+        return 'pending';
+    }
 }

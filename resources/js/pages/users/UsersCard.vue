@@ -29,6 +29,11 @@ const editUser = (user) => {
     dialogOpen.value = true
 }
 
+const createUser = () => {
+    selectedUser.value = null
+    dialogOpen.value = true
+}
+
 const closeDialog = () => {
     dialogOpen.value = false
     selectedUser.value = null
@@ -70,6 +75,13 @@ onMounted(fetchUsers);
     <div class="rounded-xl border bg-card text-card-foreground shadow p-0">
         <div class="flex justify-between items-center p-4 border-b">
             <div class="text-sm text-muted-foreground">{{ users?.length }} user(s)</div>
+            <button v-if="can('users.create')" @click="createUser" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4 mr-1" aria-hidden="true">
+                    <path d="M5 12h14"></path>
+                    <path d="M12 5v14"></path>
+                </svg>
+                New user
+            </button>
         </div>
         <div class="relative w-full overflow-auto">
             <table class="w-full caption-bottom text-sm">

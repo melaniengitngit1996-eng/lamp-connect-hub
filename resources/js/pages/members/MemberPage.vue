@@ -7,6 +7,7 @@ const { can } = useAuth();
 
 const users = ref([])
 const loading = ref(false)
+const invitations = ref([])
 
 import Button from '@/components/Button.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
@@ -24,6 +25,18 @@ const loadUsers = async () => {
         const response = await fetch('/api/users')
 
         users.value = await response.json()
+    } finally {
+        loading.value = false
+    }
+}
+
+const loadInvitations = async () => {
+    loading.value = true
+
+    try {
+        const response = await fetch('/api/invitations')
+
+        invitations.value = await response.json()
     } finally {
         loading.value = false
     }
@@ -147,6 +160,7 @@ const remove = async (user) => {
 }
 
 onMounted(loadUsers)
+onMounted(loadInvitations)
 </script>
 
 <template>
@@ -190,36 +204,53 @@ onMounted(loadUsers)
 		</div>
 	</section>
 	<section class="space-y-3">
-		<h2 class="text-sm font-medium uppercase text-muted-foreground tracking-wide">All users ({{ users.length }})</h2>
+		<h2 class="text-sm font-medium uppercase text-muted-foreground tracking-wide">
+            Invitations ({{ invitations.length }})
+        </h2>
 		<div class="rounded-xl border bg-card text-card-foreground shadow divide-y">
-			<div v-for="user in users" :key="user.id" class="flex items-center gap-3 px-4 py-3">
-				<span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
-					<span class="flex h-full w-full items-center justify-center rounded-full bg-muted">{{ user.initials }}</span>
-				</span>
-				<div class="flex-1 min-w-0">
-					<div class="text-sm font-medium truncate">{{ user.name }}</div>
-					<div class="text-xs text-muted-foreground truncate">{{ user.email }} · joined {{ user.joined_ago }}</div>
-				</div>
-				<div
-					class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors"
-					:class="{
-						'border-transparent bg-primary text-primary-foreground shadow hover:bg-primary/80':
-							user.status === 'approved',
+            <div
+                v-for="invitation in invitations"
+                :key="invitation.id"
+                class="flex items-center gap-3 px-4 py-3"
+            >
+                <span class="relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                    <span class="flex h-full w-full items-center justify-center rounded-full bg-muted">
+                        {{ invitation.initials }}
+                    </span>
+                </span>
 
-						'border-transparent bg-destructive text-destructive-foreground shadow hover:bg-destructive/80':
-							user.status === 'rejected',
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-medium truncate">
+                        {{ invitation.full_name }}
+                    </div>
 
-						'border-input bg-muted text-muted-foreground':
-							user.status === 'pending',
-					}"
-				>
-					{{ user.status }}
-				</div>
-				<!-- <Button type="icon" @click="remove(user)">
-					<TrashIcon />
-				</button> -->
-			</div>
-		</div>
+                    <div class="text-xs text-muted-foreground truncate">
+                        {{ invitation.email }}
+                    </div>
+
+                    <div class="text-xs text-muted-foreground">
+                        {{ invitation.local_church }}
+                        · Invited {{ invitation.invited_ago }}
+                    </div>
+                </div>
+
+                <span
+                    class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold capitalize"
+                    :class="{
+                        'border-input bg-muted text-muted-foreground':
+                            invitation.status === 'pending',
+
+                        'border-transparent bg-primary text-primary-foreground':
+                            invitation.status === 'accepted',
+
+                        'border-transparent bg-destructive text-destructive-foreground':
+                            invitation.status === 'expired',
+                    }"
+                >
+                    {{ invitation.status }}
+                </span>
+            </div>
+        </div>
 	</section>
 </div>
 </template>
