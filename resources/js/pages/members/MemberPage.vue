@@ -235,7 +235,7 @@ onMounted(loadInvitations)
                 </div>
 
                 <span
-                    class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold capitalize"
+                    class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold"
                     :class="{
                         'border-input bg-muted text-muted-foreground':
                             invitation.status === 'pending',
