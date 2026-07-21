@@ -17,6 +17,7 @@ import FileBlueIcon from '../../icons/FileBlueIcon.vue'
 import SearchIcon from '../../icons/SearchIcon.vue'
 import FolderShrink from '../../icons/FolderShrink.vue'
 import ShareIcon from '.././../icons/ShareIcon.vue'
+import PulseIcon from '../../icons/PulseIcon.vue';
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
@@ -192,7 +193,7 @@ const matchLabel = computed(() => {
     <header class="flex items-start justify-between gap-4 flex-wrap">
         <div>
             <h1 class="font-display text-3xl">Drive</h1>
-            <p class="text-sm text-muted-foreground">Shared files for the LAMP community.</p>
+            <p class="text-sm text-muted-foreground">Shared files for the LAMP Church community.</p>
         </div>
         <div class="flex gap-2">
             <Button v-if="can('drive.upload')" type="plain" @click="showNewFolderDialog = true">
@@ -350,6 +351,12 @@ const matchLabel = computed(() => {
                 @click.stop="openShareDialog(file, 'file')"
             >
                 <ShareIcon />
+            </Button>
+
+            <Button
+                type="icon"
+            >
+                <PulseIcon />
             </Button>
 
             <Button 
