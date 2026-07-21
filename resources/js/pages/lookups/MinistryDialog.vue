@@ -121,14 +121,14 @@ watch(
         <div class="space-y-4">
             <div>
                 <label class="text-sm font-medium leading-none">
-                    Local Church
+                    Local Church<br/><small>Leave it blank if national ministry</small>
                 </label>
 
                 <select
                     v-model="form.local_church_id"
                     class="mt-2 flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                    <option :value="null" disabled>
+                    <option :value="null">
                         Select a local church
                     </option>
 

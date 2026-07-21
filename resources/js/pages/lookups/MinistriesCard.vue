@@ -71,10 +71,16 @@ const fetchMinistries = async () => {
     loading.value = true
 
     try {
+        const params = {}
+
+        if (selectedChurchId.value === 'national') {
+            params.national = true
+        } else if (selectedChurchId.value) {
+            params.local_church_id = selectedChurchId.value
+        }
+
         const { data } = await axios.get('/api/ministries', {
-            params: {
-                local_church_id: selectedChurchId.value || undefined,
-            },
+            params,
         })
 
         ministries.value = data
@@ -102,6 +108,7 @@ watch(selectedChurchId, fetchMinistries)
                     class="flex h-8 w-56 rounded-md border border-input bg-transparent px-3 text-sm"
                 >
                     <option value="">All churches</option>
+                    <option value="national">National Ministries</option>
 
                     <option
                         v-for="church in localChurches"
@@ -138,7 +145,7 @@ watch(selectedChurchId, fetchMinistries)
 				<tbody class="[&amp;_tr:last-child]:border-0">
 					<tr v-for="ministry in ministries" :key="ministry.id" class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
 						<td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] font-medium">{{ ministry.name }}</td>
-						<td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-sm">{{ ministry.local_church?.name ?? '—' }}</td>
+						<td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-sm">{{ ministry.local_church?.name ?? 'National' }}</td>
 						<td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-sm text-muted-foreground">{{ ministry.description || '—' }}</td>
 						<td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-right">
 							<Button

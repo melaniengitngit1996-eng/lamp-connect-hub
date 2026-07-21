@@ -11,18 +11,29 @@ class MinistryController extends Controller
 {
     public function all(Request $request)
     {
-        return Ministry::query()
-            ->with('localChurch')
-            ->when($request->local_church_id, function ($query, $churchId) {
-                $query->where('local_church_id', $churchId);
-            })
-            ->latest()
+        return Ministry::with('localChurch')
+            ->when(
+                $request->boolean('national'),
+                fn($query) => $query->whereNull('local_church_id')
+            )
+            ->when(
+                $request->filled('local_church_id'),
+                fn($query) => $query->where(
+                    'local_church_id',
+                    $request->local_church_id
+                )
+            )
+            ->orderBy('name')
             ->get();
     }
 
     public function index(LocalChurch $localChurch)
     {
-        return $localChurch->ministries()
+        return Ministry::with('localChurch')
+            ->where(function ($query) use ($localChurch) {
+                $query->where('local_church_id', $localChurch->id)
+                    ->orWhereNull('local_church_id');
+            })
             ->orderBy('name')
             ->get();
     }
@@ -44,7 +55,7 @@ class MinistryController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'local_church_id' => ['required', 'exists:local_churches,id'],
+            'local_church_id' => ['nullable', 'exists:local_churches,id'],
             'name' => [
                 'required',
                 'string',
@@ -66,7 +77,7 @@ class MinistryController extends Controller
     public function update(Request $request, Ministry $ministry)
     {
         $validated = $request->validate([
-            'local_church_id' => ['required', 'exists:local_churches,id'],
+            'local_church_id' => ['nullable', 'exists:local_churches,id'],
             'name' => [
                 'required',
                 'string',

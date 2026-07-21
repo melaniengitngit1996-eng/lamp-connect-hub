@@ -239,7 +239,7 @@ onMounted(async () => {
                             >
 
                             <span class="text-sm">
-                                {{ ministry.name }}
+                                {{ ministry.name }} <small class="text-[10px] text-muted-foreground">{{ ministry?.local_church?.name ?? 'National' }}</small>
                             </span>
                         </label>
 
