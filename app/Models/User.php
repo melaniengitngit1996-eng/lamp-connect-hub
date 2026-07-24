@@ -137,4 +137,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(FileActivity::class);
     }
+
+    public function announcements()
+    {
+        return $this->hasMany(Announcement::class);
+    }
 }

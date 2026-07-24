@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\CompositionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileFolderController;
 use App\Http\Controllers\FileController;
@@ -13,6 +15,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LocalChurchController;
 use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\ClusterGroupController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\TestimonyController;
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -98,3 +102,8 @@ Route::get('/local-churches/{localChurch}/clusters', [ClusterGroupController::cl
 Route::post('/drive/files/{file}/activities/view', [FileController::class, 'logView']);
 Route::post('/drive/files/{file}/activities/download', [FileController::class, 'logDownload']);
 Route::get('/drive/files/{file}/activities', [FileController::class, 'activities']);
+
+Route::get('/events/highlights', [EventController::class, 'highlights']);
+Route::get('/announcements/latest', [AnnouncementController::class, 'latest']);
+Route::get('/compositions/latest', [CompositionController::class, 'latest']);
+Route::get('/testimonies/latest', [TestimonyController::class, 'latest']);

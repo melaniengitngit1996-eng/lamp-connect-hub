@@ -24,6 +24,10 @@ class DatabaseSeeder extends Seeder
             ClusterSeeder::class,
             MinistrySeeder::class,
             MembershipSeeder::class,
+            EventSeeder::class,
+            AnnouncementSeeder::class,
+            CompositionSeeder::class,
+            TestimonySeeder::class
         ]);
     }
 }
