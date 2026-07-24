@@ -16,7 +16,9 @@ use App\Http\Controllers\LocalChurchController;
 use App\Http\Controllers\MinistryController;
 use App\Http\Controllers\ClusterGroupController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\TestimonyController;
+use App\Http\Controllers\PostCommentController;
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -107,3 +109,13 @@ Route::get('/events/highlights', [EventController::class, 'highlights']);
 Route::get('/announcements/latest', [AnnouncementController::class, 'latest']);
 Route::get('/compositions/latest', [CompositionController::class, 'latest']);
 Route::get('/testimonies/latest', [TestimonyController::class, 'latest']);
+
+Route::get('/posts', [PostController::class, 'index']);
+Route::post('/posts', [PostController::class, 'store']);
+Route::delete('/posts/{post}', [PostController::class, 'destroy']);
+
+Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
+
+Route::get('/posts/{post}/comments', [PostCommentController::class, 'index']);
+Route::post('/posts/{post}/comments', [PostCommentController::class, 'store']);
+Route::delete('/comments/{comment}', [PostCommentController::class, 'destroy']);

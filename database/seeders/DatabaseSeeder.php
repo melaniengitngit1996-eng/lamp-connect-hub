@@ -27,7 +27,8 @@ class DatabaseSeeder extends Seeder
             EventSeeder::class,
             AnnouncementSeeder::class,
             CompositionSeeder::class,
-            TestimonySeeder::class
+            TestimonySeeder::class,
+            PostSeeder::class
         ]);
     }
 }
