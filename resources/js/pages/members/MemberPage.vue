@@ -208,7 +208,11 @@ onMounted(loadInvitations)
             Invitations ({{ invitations.length }})
         </h2>
 		<div class="rounded-xl border bg-card text-card-foreground shadow divide-y">
+            <div v-if="!invitations.length" class="p-6 text-sm text-center text-muted-foreground">
+                No invitations sent.
+            </div>
             <div
+                v-else
                 v-for="invitation in invitations"
                 :key="invitation.id"
                 class="flex items-center gap-3 px-4 py-3"
