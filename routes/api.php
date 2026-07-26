@@ -124,6 +124,10 @@ Route::put('/compositions/{composition}', [CompositionController::class, 'update
 Route::delete('/compositions/{composition}', [CompositionController::class, 'destroy']);
 
 Route::get('/testimonies/latest', [TestimonyController::class, 'latest']);
+Route::get('/testimonies', [TestimonyController::class, 'index']);
+Route::post('/testimonies', [TestimonyController::class, 'store']);
+Route::put('/testimonies/{testimony}', [TestimonyController::class, 'update']);
+Route::delete('/testimonies/{testimony}', [TestimonyController::class, 'destroy']);
 
 Route::get('/posts', [PostController::class, 'index']);
 Route::post('/posts', [PostController::class, 'store']);

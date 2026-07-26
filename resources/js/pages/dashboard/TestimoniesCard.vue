@@ -51,7 +51,7 @@ onMounted(loadTestimonies)
                     </span>
 
                     <span class="text-xs text-muted-foreground truncate">
-                        {{ testimony.author }} · {{ testimony.approved_at }}
+                        {{ testimony.author }} · {{ testimony.created_at }}
                     </span>
                 </footer>
             </blockquote>

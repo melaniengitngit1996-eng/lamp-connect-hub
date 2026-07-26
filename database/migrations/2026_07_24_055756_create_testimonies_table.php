@@ -21,15 +21,6 @@ return new class extends Migration
 
             $table->boolean('is_featured')->default(false);
 
-            $table->enum('status', [
-                'pending',
-                'approved',
-                'rejected',
-                'archived',
-            ])->default('pending');
-
-            $table->timestamp('approved_at')->nullable();
-
             $table->timestamps();
             $table->softDeletes();
         });

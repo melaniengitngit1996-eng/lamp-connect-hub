@@ -14,23 +14,15 @@ class Testimony extends Model
         'title',
         'content',
         'is_featured',
-        'status',
-        'approved_at',
     ];
 
     protected $casts = [
         'is_featured' => 'boolean',
-        'approved_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function scopeApproved($query)
-    {
-        return $query->where('status', 'approved');
     }
 
     public function scopeFeatured($query)
