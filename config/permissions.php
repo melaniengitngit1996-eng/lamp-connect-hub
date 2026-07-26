@@ -85,7 +85,20 @@ return [
             'description' => 'Delete conversations',
         ],
     ],
-
+    'content' => [
+        'view' => [
+            'description' => 'View landing contents',
+        ],
+        'update' => [
+            'description' => 'Update landing contents',
+        ],
+        'create' => [
+            'description' => 'Create content',
+        ],
+        'delete' => [
+            'description' => 'Delete content',
+        ],
+    ],
     'lookups' => [
         'view' => [
             'description' => 'View system lookups',

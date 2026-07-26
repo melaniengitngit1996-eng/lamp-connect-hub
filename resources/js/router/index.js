@@ -14,6 +14,7 @@ import SignupInvitationPage from '../pages/auth/SignupInvitationPage.vue'
 import UserPage from '../pages/users/UserPage.vue'
 import NotFoundPage from '../pages/auth/403Page.vue'
 import LookupPage from '../pages/lookups/LookupPage.vue'
+import ContentPage from '../pages/content/ContentPage.vue'
 
 const routes = [
     {
@@ -56,6 +57,14 @@ const routes = [
                 component: UserPage,
                 meta: {
                     permission: 'users.view',
+                },
+            },
+            {
+                path: 'content',
+                name: 'content',
+                component: ContentPage,
+                meta: {
+                    permission: 'content.view',
                 },
             },
             {

@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Support\Number;
 
 class Composition extends Model
 {
@@ -45,5 +47,19 @@ class Composition extends Model
     public function scopeFeatured($query)
     {
         return $query->where('is_featured', true);
+    }
+
+    protected function fileSizeFormatted(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => Number::fileSize($this->file_size)
+        );
+    }
+
+    protected function publishedAtFormatted(): Attribute
+    {
+        return Attribute::make(
+            get: fn() => $this->published_at?->diffForHumans()
+        );
     }
 }

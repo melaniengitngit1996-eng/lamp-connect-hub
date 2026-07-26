@@ -106,8 +106,20 @@ Route::post('/drive/files/{file}/activities/download', [FileController::class, '
 Route::get('/drive/files/{file}/activities', [FileController::class, 'activities']);
 
 Route::get('/events/highlights', [EventController::class, 'highlights']);
+Route::get('/events', [EventController::class, 'index']);
+Route::post('/events', [EventController::class, 'store']);
+Route::put('/events/{event}', [EventController::class, 'update']);
+Route::delete('/events/{event}', [EventController::class, 'destroy']);
+
 Route::get('/announcements/latest', [AnnouncementController::class, 'latest']);
+Route::get('/announcements', [AnnouncementController::class, 'index']);
+Route::post('/announcements', [AnnouncementController::class, 'store']);
+Route::put('/announcements/{announcement}', [AnnouncementController::class, 'update']);
+Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy']);
+
 Route::get('/compositions/latest', [CompositionController::class, 'latest']);
+Route::get('/compositions', [CompositionController::class, 'index']);
+
 Route::get('/testimonies/latest', [TestimonyController::class, 'latest']);
 
 Route::get('/posts', [PostController::class, 'index']);

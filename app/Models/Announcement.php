@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Announcement extends Model
 {
@@ -20,8 +21,8 @@ class Announcement extends Model
     ];
 
     protected $casts = [
-        'is_pinned' => 'boolean',
         'published_at' => 'datetime',
+        'is_pinned' => 'boolean',
     ];
 
     /**
@@ -46,5 +47,10 @@ class Announcement extends Model
     public function scopePinned($query)
     {
         return $query->where('is_pinned', true);
+    }
+
+    public function getPublishedAtFormattedAttribute()
+    {
+        return $this->published_at?->diffForHumans();
     }
 }

@@ -18,7 +18,6 @@ class EventSeeder extends Seeder
                 'starts_at' => now()->addDays(30),
                 'ends_at' => now()->addDays(33),
                 'venue' => 'LAMP Convention Center',
-                'is_featured' => true,
                 'status' => 'published',
             ],
             [
@@ -28,7 +27,6 @@ class EventSeeder extends Seeder
                 'starts_at' => now()->addDays(60),
                 'ends_at' => now()->addDays(62),
                 'venue' => 'Camp Riverside',
-                'is_featured' => true,
                 'status' => 'published',
             ],
             [
@@ -38,7 +36,6 @@ class EventSeeder extends Seeder
                 'starts_at' => now()->addDays(14),
                 'ends_at' => now()->addDays(14)->addHours(4),
                 'venue' => 'LAMP Main Sanctuary',
-                'is_featured' => false,
                 'status' => 'published',
             ],
         ];

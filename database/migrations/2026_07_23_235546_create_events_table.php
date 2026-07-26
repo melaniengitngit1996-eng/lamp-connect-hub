@@ -26,8 +26,6 @@ return new class extends Migration
 
             $table->string('venue')->nullable();
 
-            $table->boolean('is_featured')->default(false);
-
             $table->enum('status', [
                 'draft',
                 'published',
