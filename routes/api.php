@@ -119,6 +119,9 @@ Route::delete('/announcements/{announcement}', [AnnouncementController::class, '
 
 Route::get('/compositions/latest', [CompositionController::class, 'latest']);
 Route::get('/compositions', [CompositionController::class, 'index']);
+Route::post('/compositions', [CompositionController::class, 'store']);
+Route::put('/compositions/{composition}', [CompositionController::class, 'update']);
+Route::delete('/compositions/{composition}', [CompositionController::class, 'destroy']);
 
 Route::get('/testimonies/latest', [TestimonyController::class, 'latest']);
 

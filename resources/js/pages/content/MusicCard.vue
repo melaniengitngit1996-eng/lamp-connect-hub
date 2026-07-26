@@ -7,8 +7,52 @@ import Button from '@/components/Button.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
 import PencilIcon from '../../icons/PencilIcon.vue'
 
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
+import MusicDialog from '../../pages/content/MusicDialog.vue'
+
 const loading = ref(false)
 const compositions = ref([])
+const selectedMusic = ref(null)
+const deleteDialogOpen = ref(false)
+const deleting = ref(false)
+const dialogOpen = ref(false)
+
+const openDeleteDialog = (event) => {
+    selectedMusic.value = event
+    deleteDialogOpen.value = true
+}
+
+const editMusic = (event) => {
+    selectedMusic.value = event
+    dialogOpen.value = true
+}
+
+const closeDialog = () => {
+    dialogOpen.value = false
+    selectedMusic.value = null
+}
+
+const deleteMusic = async () => {
+    deleting.value = true
+
+    try {
+        await axios.delete(`/api/compositions/${selectedMusic.value.id}`)
+
+        await loadCompositions()
+
+        deleteDialogOpen.value = false
+        selectedMusic.value = null
+    } catch (error) {
+        alert(error.response?.data?.message ?? 'Unable to delete music.')
+    } finally {
+        deleting.value = false
+    }
+}
+
+const newMusic = () => {
+    selectedMusic.value = null
+    dialogOpen.value = true
+}
 
 const loadCompositions = async () => {
     loading.value = true
@@ -35,7 +79,7 @@ onMounted(() => {
             <div class="text-sm font-medium" data-tsd-source="/src/routes/_app.admin.content.tsx:123:11">LAMP Music</div>
             <div class="text-xs text-muted-foreground truncate" data-tsd-source="/src/routes/_app.admin.content.tsx:124:11">Chord charts, setlists, and worship resources. · {{ compositions.length }} {{ compositions.length === 1 ? 'resource' : 'resources' }}</div>
         </div>
-        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs" data-tsd-source="/src/routes/_app.admin.content.tsx:126:9">
+        <button v-if="can('content.create')" @click="newMusic" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-8 rounded-md px-3 text-xs" data-tsd-source="/src/routes/_app.admin.content.tsx:126:9">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus h-4 w-4 mr-1" aria-hidden="true" data-tsd-source="/src/routes/_app.admin.content.tsx:127:11">
                 <path d="M5 12h14"></path>
                 <path d="M12 5v14"></path>
@@ -104,12 +148,12 @@ onMounted(() => {
                     </td>
 
                     <td class="p-2 text-right">
-                       <Button v-if="can('content.update')" type="icon">
-                                <PencilIcon />
-                            </button>
-                            <Button v-if="can('content.delete')" type="icon">
-                                <TrashIcon class="text-destructive" />
-                            </button>
+                        <Button v-if="can('content.update')" @click="editMusic(composition)" type="icon">
+                            <PencilIcon />
+                        </button>
+                        <Button v-if="can('content.delete')" @click="openDeleteDialog(composition)" type="icon">
+                            <TrashIcon class="text-destructive" />
+                        </button>
                     </td>
                 </tr>
 
@@ -125,4 +169,21 @@ onMounted(() => {
         </table>
     </div>
 </div>
+
+    <MusicDialog
+        :open="dialogOpen"
+        :compositions="selectedMusic"
+        @saved="loadCompositions()"
+        @close="closeDialog"
+    />
+
+    <ConfirmDialog
+        :open="deleteDialogOpen"
+        title="Delete Content"
+        :message="`Delete '${selectedMusic?.title}'? This action cannot be undone.`"
+        confirm-text="Delete"
+        :loading="deleting"
+        @close="deleteDialogOpen = false"
+        @confirm="deleteMusic"
+/>
 </template>

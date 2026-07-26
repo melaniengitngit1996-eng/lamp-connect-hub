@@ -9,7 +9,7 @@ import TestimoniesCard from './TestimoniesCard.vue';
 
 const { can } = useAuth();
 
-const activeTab = ref('news')
+const activeTab = ref('music')
 </script>
 
 <template>
