@@ -49,11 +49,23 @@ class Composition extends Model
         return $query->where('is_featured', true);
     }
 
-    protected function fileSizeFormatted(): Attribute
+    public function getFileSizeFormattedAttribute()
     {
-        return Attribute::make(
-            get: fn() => Number::fileSize($this->file_size)
-        );
+        $bytes = $this->file_size;
+
+        if ($bytes >= 1073741824) {
+            return round($bytes / 1073741824, 2) . ' GB';
+        }
+
+        if ($bytes >= 1048576) {
+            return round($bytes / 1048576, 2) . ' MB';
+        }
+
+        if ($bytes >= 1024) {
+            return round($bytes / 1024, 2) . ' KB';
+        }
+
+        return $bytes . ' B';
     }
 
     protected function publishedAtFormatted(): Attribute
