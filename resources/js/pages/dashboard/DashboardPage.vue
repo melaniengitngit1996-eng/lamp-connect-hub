@@ -1,9 +1,13 @@
 <script setup>
+import { ref } from 'vue'
+
 import CompositionsCard from './CompositionsCard.vue';
 import HighlightsCard from './HighlightsCard.vue';
 import NewsCard from './NewsCard.vue';
 import QuickMessageCard from './QuickMessageCard.vue';
 import TestimoniesCard from './TestimoniesCard.vue';
+
+const postCount = ref(0)
 </script>
 
 <template>
@@ -21,14 +25,14 @@ import TestimoniesCard from './TestimoniesCard.vue';
 					<path d="M22 4h-4"></path>
 					<circle cx="4" cy="20" r="2"></circle>
 				</svg>
-				19 posts
+				{{ postCount }} posts
 			</div>
 		</header>
 		<div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-5">
 			<!-- Left Column -->
 			<div class="lg:col-span-8 space-y-4 lg:space-y-5">
 				<HighlightsCard />
-				<QuickMessageCard />
+				<QuickMessageCard @countChanged="postCount = $event" />
 			</div>
 
 			<!-- Right Column -->

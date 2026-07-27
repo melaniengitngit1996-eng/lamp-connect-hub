@@ -15,9 +15,12 @@ const form = ref({
 
 const loading = ref(false)
 
+const emit = defineEmits(['countChanged'])
+
 async function loadPosts() {
     const { data } = await axios.get('/api/posts')
     posts.value = data
+    emit('countChanged', posts.value.length)
 }
 
 async function loadComments(post) {
