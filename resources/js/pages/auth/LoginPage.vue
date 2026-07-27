@@ -70,9 +70,11 @@ input::-ms-clear {
    <div class="hidden lg:flex flex-col justify-between p-12 bg-primary text-primary-foreground">
       <div class="flex items-center gap-2">
          <div class="h-10 w-10 rounded-xl bg-primary-foreground/15 grid place-items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame h-5 w-5" aria-hidden="true">
-               <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"></path>
-            </svg>
+            <img
+               src="../../../../public/images/logo.png"
+               alt="LAMP Logo"
+               class="object-contain"
+            >
          </div>
          <div>
             <div class="font-display text-xl leading-none">LAMP</div>
