@@ -106,7 +106,7 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
-            'local_church_id' => ['nullable', 'exists:local_churches,id'],
+            'local_church_id' => ['required', 'exists:local_churches,id'],
 
             'ministry_ids' => ['array'],
             'ministry_ids.*' => ['exists:ministries,id'],
@@ -114,7 +114,7 @@ class UserController extends Controller
             'cluster_ids' => ['array'],
             'cluster_ids.*' => ['exists:clusters,id'],
 
-            'role_ids' => ['array'],
+            'role_ids' => ['required', 'array'],
             'role_ids.*' => ['exists:roles,id'],
 
             'password' => ['required', 'confirmed', Password::defaults()],

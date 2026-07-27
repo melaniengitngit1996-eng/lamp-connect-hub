@@ -85,6 +85,7 @@ watch(
         }
 
         initializing.value = true
+        errors.value = {}
 
         Object.assign(form.value, defaultForm(), {
             name: props.user.name,
@@ -179,6 +180,12 @@ input::-ms-clear {
                 <input 
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" 
                     v-model="form.name">
+                <p
+                    v-if="errors.name"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.name[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
@@ -186,6 +193,12 @@ input::-ms-clear {
                     :disabled="isEditing"
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" 
                     v-model="form.email">
+                <p
+                    v-if="errors.email"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.email[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -207,6 +220,13 @@ input::-ms-clear {
                         {{ church.name }}
                     </option>
                 </select>
+
+                <p
+                    v-if="errors.local_church_id"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.local_church_id[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -455,6 +475,13 @@ input::-ms-clear {
                         </div>
                     </label>
                 </div>
+
+                <p
+                    v-if="errors.role_ids"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.role_ids[0] }}
+                </p>
             </div>
             <div v-if="!isEditing">
                 <label class="text-sm font-medium">Password</label>
@@ -498,6 +525,12 @@ input::-ms-clear {
                             />
                         </svg>
                     </button>
+                    <p
+                        v-if="errors.password"
+                        class="mt-1 text-sm text-destructive"
+                    >
+                        {{ errors.password[0] }}
+                    </p>
                 </div>
             </div>
 
