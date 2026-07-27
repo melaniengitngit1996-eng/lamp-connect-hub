@@ -60,7 +60,7 @@ class CompositionController extends Controller
             'file' => 'required|file|max:51200', // 50MB
             'status' => 'required|in:draft,published,archived',
             'is_featured' => 'boolean',
-            'published_at' => 'nullable|date',
+            'published_at' => 'required|date',
         ]);
 
         $file = $request->file('file');
@@ -93,7 +93,7 @@ class CompositionController extends Controller
             'file' => 'nullable|file|max:51200',
             'status' => 'required|in:draft,published,archived',
             'is_featured' => 'boolean',
-            'published_at' => 'nullable|date',
+            'published_at' => 'required|date',
         ]);
 
         if ($request->hasFile('file')) {
