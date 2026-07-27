@@ -13,12 +13,12 @@ onMounted(async () => {
 
 <template>
     <aside class="hidden md:flex w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
-      <div class="px-6 py-5 flex items-center gap-2 border-b">
-         <div class="h-9 w-9 rounded-xl bg-primary text-primary-foreground grid place-items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame h-5 w-5" aria-hidden="true">
-               <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4"></path>
-            </svg>
-         </div>
+      <div class="border-b flex items-center px-6 py-5">
+         <img
+            src="../../../public/images/logo.png"
+            alt="LAMP Logo"
+            class="h-14 object-contain w-14"
+         >
          <div>
             <div class="font-display text-lg leading-none">LAMP</div>
             <div class="text-xs text-muted-foreground">Church Portal</div>
