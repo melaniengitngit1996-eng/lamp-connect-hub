@@ -115,7 +115,7 @@ watch(
 <template>
     <Dialog
         :open="open"
-        :title="isEditing ? 'Edit Local Church' : 'New Local Church'"
+        :title="isEditing ? 'Edit Ministry' : 'New Ministry'"
         @close="emit('close')"
     >
         <div class="space-y-4">
@@ -153,6 +153,12 @@ watch(
                 <input 
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" 
                     v-model="form.name">
+                <p
+                    v-if="errors.name"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.name[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Description</label>
