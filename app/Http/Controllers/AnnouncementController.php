@@ -51,7 +51,7 @@ class AnnouncementController extends Controller
             'content' => 'required|string',
             'status' => 'required|in:draft,published,cancelled,archived',
             'is_pinned' => 'boolean',
-            'published_at' => 'nullable|date',
+            'published_at' => 'required|date',
         ]);
 
         $announcement = Announcement::create([
@@ -73,7 +73,7 @@ class AnnouncementController extends Controller
             'content' => 'required|string',
             'status' => 'required|in:draft,published,cancelled,archived',
             'is_pinned' => 'boolean',
-            'published_at' => 'nullable|date',
+            'published_at' => 'required|date',
         ]);
 
         $announcement->update([
