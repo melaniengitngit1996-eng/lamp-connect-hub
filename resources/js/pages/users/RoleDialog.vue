@@ -19,6 +19,7 @@ const form = ref({
 })
 
 const saving = ref(false)
+const errors = ref({})
 
 const permissions = ref([])
 const isEditing = computed(() => !!props.role)
@@ -31,6 +32,8 @@ const fetchPermissions = async () => {
 watch(
     () => props.role,
     (role) => {
+        errors.value = {}
+
         if (role) {
             form.value = {
                 name: role.name,
@@ -55,6 +58,7 @@ const emit = defineEmits([
 
 const save = async () => {
     saving.value = true
+    errors.value = {}
 
     try {
         if (props.role) {
@@ -68,6 +72,12 @@ const save = async () => {
                 form.value
             )
         }
+    } catch (error) {
+        if (error.response?.status === 422) {
+            errors.value = error.response.data.errors
+        }
+
+        throw error
     } finally {
         saving.value = false
     }
@@ -103,6 +113,12 @@ const groupedPermissions = computed(() => {
                 <input 
                     v-model="form.name"
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm">
+                <p
+                    v-if="errors.name"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.name[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Description</label>
@@ -148,6 +164,13 @@ const groupedPermissions = computed(() => {
                         </div>
 
                 </div>
+
+                <p
+                    v-if="errors.permissions"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.permissions[0] }}
+                </p>
             </div>
 
             <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">

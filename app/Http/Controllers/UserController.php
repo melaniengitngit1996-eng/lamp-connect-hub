@@ -162,7 +162,7 @@ class UserController extends Controller
             'cluster_ids' => ['array'],
             'cluster_ids.*' => ['exists:clusters,id'],
 
-            'role_ids' => ['array'],
+            'role_ids' => ['required', 'array'],
             'role_ids.*' => ['exists:roles,id'],
 
             'status' => ['required', Rule::in([

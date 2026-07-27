@@ -27,7 +27,7 @@ class RoleController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'unique:roles,name'],
             'description' => ['nullable'],
-            'permissions' => ['array'],
+            'permissions' => ['required', 'array'],
         ]);
 
         $role = Role::create([
@@ -49,7 +49,7 @@ class RoleController extends Controller
                 Rule::unique('roles')->ignore($role->id),
             ],
             'description' => ['nullable'],
-            'permissions' => ['array'],
+            'permissions' => ['required', 'array'],
         ]);
 
         $role->update([
