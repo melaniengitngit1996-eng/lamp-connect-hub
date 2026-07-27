@@ -52,10 +52,10 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'venue' => 'nullable|string|max:255',
             'status' => 'required|in:draft,published,cancelled,archived',
-            'cover_image' => 'nullable|image|max:5120',
+            'cover_image' => 'required|image|max:5120',
         ]);
 
         if ($request->hasFile('cover_image')) {
@@ -82,10 +82,10 @@ class EventController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
+            'description' => 'required|string',
             'venue' => 'nullable|string|max:255',
             'status' => 'required|in:draft,published,cancelled,archived',
-            'cover_image' => 'nullable|image|max:5120',
+            'cover_image' => 'required|image|max:5120',
         ]);
 
         if ($request->hasFile('cover_image')) {

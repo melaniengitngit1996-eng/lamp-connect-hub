@@ -145,10 +145,22 @@ onBeforeUnmount(() => {
                 <input 
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" 
                     v-model="form.title">
+                <p
+                    v-if="errors.title"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.title[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Description</label>
                 <textarea v-model="form.description" class="flex min-h-[60px] w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" rows="3" placeholder="Optional" spellcheck="false"></textarea>
+                <p
+                    v-if="errors.description"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.description[0] }}
+                </p>
             </div>
             <div>
                 <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Venue</label>
@@ -198,6 +210,13 @@ onBeforeUnmount(() => {
                         @change="onImageSelected"
                     >
                 </label>
+
+                <p
+                    v-if="errors.cover_image"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.cover_image[0] }}
+                </p>
             </div>
 
             <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
