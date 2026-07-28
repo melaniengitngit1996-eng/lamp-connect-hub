@@ -26,7 +26,7 @@ onMounted(loadAnnouncements)
                 <p class="text-xs text-muted-foreground truncate" data-tsd-source="/src/routes/_app.feed.tsx:174:22">What's happening this week</p>
             </div>
         </div>
-        <ul class="space-y-4">
+        <ul v-if="announcements.length" class="space-y-4">
             <li
                 v-for="announcement in announcements"
                 :key="announcement.id"
@@ -47,5 +47,11 @@ onMounted(loadAnnouncements)
                 </div>
             </li>
         </ul>
+        <div
+            v-else
+            class="py-8 text-center text-sm text-muted-foreground"
+        >
+            No news & announcements available.
+        </div>
     </div>
 </template>

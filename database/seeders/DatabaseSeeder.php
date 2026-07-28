@@ -19,16 +19,16 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             RoleSeeder::class,
             UserSeeder::class,
-            FileFolderTableSeeder::class,
+            // FileFolderTableSeeder::class,
             LocalChurchSeeder::class,
             ClusterSeeder::class,
             MinistrySeeder::class,
             MembershipSeeder::class,
-            EventSeeder::class,
-            AnnouncementSeeder::class,
-            CompositionSeeder::class,
-            TestimonySeeder::class,
-            PostSeeder::class
+            // EventSeeder::class,
+            // AnnouncementSeeder::class,
+            // CompositionSeeder::class,
+            // TestimonySeeder::class,
+            // PostSeeder::class
         ]);
     }
 }
