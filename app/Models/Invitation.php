@@ -15,11 +15,15 @@ class Invitation extends Model
         'expires_at',
         'accepted_at',
         'created_by',
+        'ministries',
+        'cluster_groups'
     ];
 
     protected $casts = [
         'expires_at' => 'datetime',
         'accepted_at' => 'datetime',
+        'ministries' => 'array',
+        'cluster_groups' => 'array',
     ];
 
     public function getStatusAttribute(): string

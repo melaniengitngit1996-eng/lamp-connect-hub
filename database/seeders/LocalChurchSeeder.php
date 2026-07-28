@@ -14,14 +14,6 @@ class LocalChurchSeeder extends Seeder
                 'name' => 'Muntinlupa',
                 'code' => 'LPMU',
             ],
-            [
-                'name' => 'Binan',
-                'code' => 'LPBI',
-            ],
-            [
-                'name' => 'Canlubang',
-                'code' => 'LPCA',
-            ],
         ]);
     }
 }

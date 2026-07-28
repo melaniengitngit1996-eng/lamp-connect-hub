@@ -13,8 +13,9 @@ class MembershipSeeder extends Seeder
     {
         $users = User::take(5)->get();
 
-        $cluster = Cluster::first();
-        $ministry = Ministry::first();
+        // no ministry & cluster for seeded users for now
+        // $cluster = Cluster::first();
+        // $ministry = Ministry::first();
 
         foreach ($users as $user) {
 
@@ -22,13 +23,13 @@ class MembershipSeeder extends Seeder
                 'local_church_id' => 1,
             ]);
 
-            $user->clusters()->syncWithoutDetaching([
-                $cluster->id,
-            ]);
+            // $user->clusters()->syncWithoutDetaching([
+            //     $cluster->id,
+            // ]);
 
-            $user->ministries()->syncWithoutDetaching([
-                $ministry->id,
-            ]);
+            // $user->ministries()->syncWithoutDetaching([
+            //     $ministry->id,
+            // ]);
         }
     }
 }

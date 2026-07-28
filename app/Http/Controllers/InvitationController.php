@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use App\Mail\InvitationMail;
+use App\Models\Cluster;
+use App\Models\Ministry;
 use Illuminate\Support\Facades\Mail;
 
 class InvitationController extends Controller
@@ -43,6 +45,14 @@ class InvitationController extends Controller
             'email' => ['required', 'email'],
             'local_church' => ['nullable'],
             'member_id' => ['nullable'],
+
+            'ministries' => ['array'],
+            'ministries.*.name' => ['required', 'string'],
+            'ministries.*.local_church' => ['nullable', 'string'],
+
+            'cluster_groups' => ['array'],
+            'cluster_groups.*.name' => ['required', 'string'],
+            'cluster_groups.*.local_church' => ['nullable', 'string'],
         ]);
 
         $existing = Invitation::where('member_id', $validated['member_id'])
@@ -63,6 +73,8 @@ class InvitationController extends Controller
             'full_name' => $validated['full_name'],
             'email' => $validated['email'],
             'local_church' => $validated['local_church'],
+            'ministries' => $validated['ministries'] ?? [],
+            'cluster_groups' => $validated['cluster_groups'] ?? [],
             'token' => Str::uuid(),
             'expires_at' => now()->addDays(7),
         ]);
@@ -158,31 +170,70 @@ class InvitationController extends Controller
             ], 422);
         }
 
-        $localChurch = LocalChurch::whereRaw(
-            'LOWER(name) = ?',
-            [strtolower(trim($invitation->local_church))]
-        )->first();
-
-        if (! $localChurch) {
-            return response()->json([
-                'message' => 'Local church not found.',
-            ], 422);
-        }
+        $localChurchId = $this->resolveLocalChurchId(
+            $invitation->local_church
+        );
 
         DB::transaction(function () use (
             $validated,
             $invitation,
-            $localChurch
+            $localChurchId
         ) {
             $member = User::create([
                 'member_id' => $invitation->member_id,
-                'local_church_id' => $localChurch->id,
+                'local_church_id' => $localChurchId,
                 'name' => $invitation->full_name,
                 'email' => $invitation->email,
                 'password' => Hash::make($validated['password']),
             ]);
 
             $member->syncRoles(['Member']);
+
+            // Attach ministries
+            foreach ($invitation->ministries ?? [] as $item) {
+                if (empty($item['name'])) {
+                    continue;
+                }
+
+                $churchId = $this->resolveLocalChurchId($item['local_church'] ?? null);
+
+                $ministry = Ministry::whereRaw(
+                    'LOWER(name) = ? AND local_church_id <=> ?',
+                    [strtolower(trim($item['name'])), $churchId]
+                )->first();
+
+                if (! $ministry) {
+                    $ministry = Ministry::create([
+                        'name' => trim($item['name']),
+                        'local_church_id' => $churchId,
+                    ]);
+                }
+
+                $member->ministries()->syncWithoutDetaching($ministry->id);
+            }
+
+            // Attach cluster groups
+            foreach ($invitation->cluster_groups ?? [] as $item) {
+                if (empty($item['name'])) {
+                    continue;
+                }
+
+                $churchId = $this->resolveLocalChurchId($item['local_church']);
+
+                $cluster = Cluster::whereRaw(
+                    'LOWER(name) = ? AND local_church_id <=> ?',
+                    [strtolower(trim($item['name'])), $churchId]
+                )->first();
+
+                if (! $cluster) {
+                    $cluster = Cluster::create([
+                        'name' => trim($item['name']),
+                        'local_church_id' => $churchId,
+                    ]);
+                }
+
+                $member->clusters()->syncWithoutDetaching($cluster->id);
+            }
 
             $invitation->update([
                 'accepted_at' => now(),
@@ -192,5 +243,27 @@ class InvitationController extends Controller
         return response()->json([
             'message' => 'Account created successfully and is awaiting approval.',
         ]);
+    }
+
+    protected function resolveLocalChurchId(?string $name): ?int
+    {
+        if (blank($name)) {
+            return null;
+        }
+
+        $name = trim($name);
+
+        $localChurch = LocalChurch::whereRaw(
+            'LOWER(name) = ?',
+            [strtolower($name)]
+        )->first();
+
+        if (! $localChurch) {
+            $localChurch = LocalChurch::create([
+                'name' => $name,
+            ]);
+        }
+
+        return $localChurch->id;
     }
 }
