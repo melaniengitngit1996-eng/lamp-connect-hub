@@ -51,22 +51,22 @@ Route::get('/me', function () {
 });
 
 Route::post('/login', function (Request $request) {
-    $user = User::where(
-        'email',
-        $request->email
-    )->first();
+    $validated = $request->validate([
+        'login' => ['required'],
+        'password' => ['required'],
+    ]);
 
-    if (! $user) {
-        return response()->json([
-            'code' => 'INVALID_CREDENTIALS',
-            'message' => 'Invalid credentials',
-        ], 401);
-    }
+    $user = User::whereRaw(
+        'LOWER(email) = ?',
+        [strtolower($validated['login'])]
+    )
+        ->orWhereRaw(
+            'LOWER(username) = ?',
+            [strtolower($validated['login'])]
+        )
+        ->first();
 
-    if (! Hash::check(
-        $request->password,
-        $user->password
-    )) {
+    if (! $user || ! Hash::check($validated['password'], $user->password)) {
         return response()->json([
             'code' => 'INVALID_CREDENTIALS',
             'message' => 'Invalid credentials',
@@ -92,7 +92,7 @@ Route::post('/login', function (Request $request) {
     $request->session()->regenerate();
 
     return response()->json([
-        'user' => Auth::user(),
+        'user' => $user,
     ]);
 });
 

@@ -18,12 +18,23 @@ const showPassword = ref(false)
 const showConfirmPassword = ref(false)
 
 const form = ref({
+    username: '',
     password: '',
     password_confirmation: '',
 })
 
 const validate = () => {
     errors.value = {}
+
+    if (!form.value.username) {
+        errors.value.username = 'Username is required.'
+    } else if (form.value.username.length < 3) {
+        errors.value.username =
+            'Username must be at least 3 characters.'
+    } else if (!/^[a-zA-Z0-9_-]+$/.test(form.value.username)) {
+        errors.value.username =
+            'Username may only contain letters, numbers, hyphens and underscores.'
+    }
 
     if (!form.value.password) {
         errors.value.password = 'Password is required.'
@@ -73,6 +84,7 @@ const loadInvitation = async () => {
         }
 
         invitation.value = data
+        form.value.username = data.username
     } catch (e) {
         error.value = e.message
     } finally {
@@ -83,37 +95,44 @@ const loadInvitation = async () => {
 const submit = async () => {
     submitting.value = true
     error.value = ''
+    errors.value = {}
 
     if (!validate()) {
+        submitting.value = false
         return
     }
 
     try {
-        const response = await fetch(`/api/invitations/${route.params.token}/signup`, {
-            method: 'POST',
-            headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                password: form.value.password,
-                password_confirmation:
-                    form.value.password_confirmation,
-            }),
-        })
+        const response = await fetch(
+            `/api/invitations/${route.params.token}/signup`,
+            {
+                method: 'POST',
+                headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: form.value.username,
+                    password: form.value.password,
+                    password_confirmation:
+                        form.value.password_confirmation,
+                }),
+            }
+        )
 
         const data = await response.json()
 
         if (!response.ok) {
+            if (response.status === 422 && data.errors) {
+                errors.value = data.errors
+                return
+            }
+
             throw new Error(data.message)
         }
 
         success.value = true
     } catch (e) {
-        if (e.response?.errors) {
-            errors.value = e.response.errors
-        }
-
         error.value = e.message
     } finally {
         submitting.value = false
@@ -185,6 +204,33 @@ input::-ms-clear {
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="localChurch">Local church</label>
                         <input :value="invitation?.local_church" class="bg-muted border-none file:font-medium file:text-foreground h-9 md:text-sm px-3 py-1 rounded-md shadow-sm text-base w-full" id="localChurch" readonly maxlength="120">
+                    </div>
+                    <div class="space-y-1.5">
+                        <label
+                            class="text-sm font-medium"
+                            for="username"
+                        >
+                            Username
+                        </label>
+                        <p class="text-xs text-muted-foreground">
+                            This will be your unique username for signing in.
+                        </p>
+
+                        <input
+                            id="username"
+                            v-model="form.username"
+                            type="text"
+                            maxlength="30"
+                            autocomplete="username"
+                            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm md:text-sm"
+                        >
+
+                        <p
+                            v-if="errors?.username"
+                            class="text-sm text-destructive"
+                        >
+                            {{ errors.username }}
+                        </p>
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="password">Password</label>

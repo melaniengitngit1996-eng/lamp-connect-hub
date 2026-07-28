@@ -106,6 +106,13 @@ class UserController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
+            'username' => [
+                'required',
+                'min:3',
+                'max:30',
+                'alpha_dash',
+                Rule::unique('users', 'username'),
+            ],
             'local_church_id' => ['required', 'exists:local_churches,id'],
 
             'ministry_ids' => ['array'],
@@ -132,6 +139,7 @@ class UserController extends Controller
             'local_church_id' => $validated['local_church_id'],
             'status' => $validated['status'],
             'password' => Hash::make($validated['password']),
+            'username' => $validated['username'],
         ]);
 
         $user->ministries()->sync($validated['ministry_ids'] ?? []);
@@ -153,6 +161,14 @@ class UserController extends Controller
                 'required',
                 'email',
                 Rule::unique('users', 'email')->ignore($user),
+            ],
+            'username' => [
+                'required',
+                'min:3',
+                'max:30',
+                'alpha_dash',
+                Rule::unique('users', 'username')
+                    ->ignore($user->id),
             ],
             'local_church_id' => ['nullable', 'exists:local_churches,id'],
 
@@ -177,6 +193,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'local_church_id' => $validated['local_church_id'],
             'status' => $validated['status'],
+            'username' => $validated['username'],
         ]);
 
         $user->ministries()->sync($validated['ministry_ids'] ?? []);

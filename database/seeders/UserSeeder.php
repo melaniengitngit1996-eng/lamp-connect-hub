@@ -14,6 +14,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@lamp.test'],
             [
                 'name' => 'Some Admin',
+                'username' => 'admin',
                 'password' => Hash::make('password123'),
                 'status' => 'approved',
             ]
@@ -25,6 +26,7 @@ class UserSeeder extends Seeder
             ['email' => 'member@lamp.test'],
             [
                 'name' => 'Some Member',
+                'username' => 'someuser',
                 'password' => Hash::make('password123'),
                 'status' => 'approved',
             ]

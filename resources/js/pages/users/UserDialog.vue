@@ -16,6 +16,7 @@ const showConfirmPassword = ref(false)
 
 const defaultForm = () => ({
     name: '',
+    username: '',
     email: '',
     password: '',
     password_confirmation: '',
@@ -89,6 +90,7 @@ watch(
 
         Object.assign(form.value, defaultForm(), {
             name: props.user.name,
+            username: props.user.username,
             email: props.user.email,
             local_church_id: props.user.local_church_id,
             ministry_ids: props.user.ministries?.map(m => m.id) ?? [],
@@ -185,6 +187,25 @@ input::-ms-clear {
                     class="mt-1 text-sm text-destructive"
                 >
                     {{ errors.name[0] }}
+                </p>
+            </div>
+            <div>
+                <label class="text-sm font-medium leading-none">
+                    Username
+                </label>
+
+                <input
+                    v-model="form.username"
+                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    autocomplete="username"
+                    maxlength="30"
+                >
+
+                <p
+                    v-if="errors.username"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.username[0] }}
                 </p>
             </div>
             <div>

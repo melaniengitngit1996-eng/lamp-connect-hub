@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const email = ref('')
+const loginInput = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -26,8 +26,8 @@ const login = async () => {
           ?.getAttribute('content'),
       },
       body: JSON.stringify({
-        email: email.value,
-        password: password.value,
+         login: loginInput.value,
+         password: password.value,
       }),
     })
 
@@ -111,10 +111,20 @@ input::-ms-clear {
             </div>
             <form @submit.prevent="login" class="space-y-3 mt-4">
                <div class="space-y-1.5">
-                    <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">
-                        Email
-                    </label>
-                    <input class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" id="email" required="" v-model="email" type="email" value="">
+                  <label
+                     class="text-sm font-medium leading-none"
+                     for="login"
+                  >
+                     Email or Username
+                  </label>
+
+                  <input
+                     id="login"
+                     v-model="loginInput"
+                     type="text"
+                     autocomplete="username"
+                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring md:text-sm"
+                  />
                 </div>
                <div class="space-y-1.5">
                   <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="password">

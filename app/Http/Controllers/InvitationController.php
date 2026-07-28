@@ -14,6 +14,7 @@ use App\Mail\InvitationMail;
 use App\Models\Cluster;
 use App\Models\Ministry;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Validation\Rule;
 
 class InvitationController extends Controller
 {
@@ -127,13 +128,25 @@ class InvitationController extends Controller
             'full_name' => $invitation->full_name,
             'email' => $invitation->email,
             'local_church' => $invitation->local_church,
+            'username' => $this->generateUsername($invitation->full_name),
         ]);
     }
 
     public function signup(Request $request, string $token)
     {
         $validated = $request->validate([
-            'password' => ['required', 'confirmed', 'min:8'],
+            'username' => [
+                'required',
+                'min:3',
+                'max:30',
+                'alpha_dash',
+                Rule::unique('users', 'username'),
+            ],
+            'password' => [
+                'required',
+                'confirmed',
+                'min:8',
+            ],
         ]);
 
         $invitation = Invitation::where('token', $token)->first();
@@ -183,6 +196,7 @@ class InvitationController extends Controller
                 'member_id' => $invitation->member_id,
                 'local_church_id' => $localChurchId,
                 'name' => $invitation->full_name,
+                'username' => $validated['username'],
                 'email' => $invitation->email,
                 'password' => Hash::make($validated['password']),
             ]);
@@ -265,5 +279,24 @@ class InvitationController extends Controller
         }
 
         return $localChurch->id;
+    }
+
+    protected function generateUsername(string $name): string
+    {
+        $base = Str::of($name)
+            ->lower()
+            ->ascii()
+            ->replaceMatches('/[^a-z0-9]+/', '')
+            ->toString();
+
+        $username = $base;
+        $counter = 2;
+
+        while (User::where('username', $username)->exists()) {
+            $username = "{$base}{$counter}";
+            $counter++;
+        }
+
+        return $username;
     }
 }
