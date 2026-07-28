@@ -199,6 +199,10 @@ input::-ms-clear {
                     </div>
                     <div class="space-y-1.5">
                         <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">Email</label>
+                        <p class="mt-1 mb-2 text-xs text-muted-foreground">
+                            Use a valid email address. Account notifications, invitations, password resets,
+                            and other important updates will be sent to this email.
+                        </p>
                         <input :value="invitation?.email" class="bg-muted border-none file:font-medium file:text-foreground h-9 md:text-sm px-3 py-1 rounded-md shadow-sm text-base w-full" id="email" readonly maxlength="255" type="email">
                     </div>
                     <div class="space-y-1.5">
