@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\File;
 use App\Models\FileActivity;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class FileController extends Controller
 {
@@ -18,6 +20,22 @@ class FileController extends Controller
         ]);
 
         $uploadedFile = $request->file('file');
+
+        $filename = $uploadedFile->getClientOriginalName();
+
+        $exists = File::where('folder_id', $request->folder_id)
+            ->where('name', $filename)
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'errors' => [
+                    'file' => [
+                        'A file with this name already exists in this folder.',
+                    ],
+                ],
+            ], 422);
+        }
 
         $path = $uploadedFile->store('drive', 'public');
 
@@ -88,13 +106,23 @@ class FileController extends Controller
 
     public function update(Request $request, File $file)
     {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
+        $validated = $request->validate(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('files', 'name')
+                        ->ignore($file->id)
+                        ->where(fn($query) => $query
+                            ->where('folder_id', $file->folder_id)
+                            ->whereNull('deleted_at')),
+                ],
             ],
-        ]);
+            [
+                'name.unique' => 'A file with this name already exists in this folder.',
+            ]
+        );
 
         $file->update([
             'name' => $validated['name'],

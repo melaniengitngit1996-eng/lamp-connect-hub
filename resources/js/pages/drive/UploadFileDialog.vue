@@ -20,9 +20,11 @@ const emit = defineEmits([
 const file = ref(null)
 const loading = ref(false)
 const fileInput = ref(null)
+const errors = ref({})
 
 const handleFileChange = (event) => {
     file.value = event.target.files?.[0] ?? null
+    errors.value = {}
 }
 
 const uploadFile = async () => {
@@ -38,16 +40,29 @@ const uploadFile = async () => {
         formData.append('file', file.value)
         formData.append('folder_id', props.folderId ?? '')
 
-        await fetch('/api/drive/files', {
+        const response = await fetch('/api/drive/files', {
             method: 'POST',
             credentials: 'include',
             headers: {
+                Accept: 'application/json',
                 'X-CSRF-TOKEN': document
                     .querySelector('meta[name="csrf-token"]')
                     ?.content,
             },
             body: formData,
         })
+
+        if (response.status === 422) {
+            const data = await response.json()
+
+            errors.value = data.errors
+
+            return
+        }
+
+        if (!response.ok) {
+            return
+        }
 
         file.value = null
 
@@ -81,17 +96,30 @@ const close = () => {
     >
         <div class="space-y-4">
             <input
-                type="file"
                 ref="fileInput"
+                type="file"
                 @change="handleFileChange"
-            >
+                class="block w-full rounded-md border border-input bg-background p-2 text-sm text-muted-foreground
+                    file:mr-3
+                    file:rounded-md
+                    file:border-0
+                    file:bg-primary
+                    file:px-3
+                    file:py-2
+                    file:text-sm
+                    file:font-medium
+                    file:text-primary-foreground
+                    file:cursor-pointer
+                    hover:file:opacity-90
+                    cursor-pointer"
+            />
 
-            <div
-                v-if="file"
-                class="text-sm text-muted-foreground"
+            <p
+                v-if="errors.file"
+                class="text-sm text-destructive"
             >
-                {{ file.name }}
-            </div>
+                {{ errors.file[0] }}
+            </p>
 
             <div class="flex justify-end gap-2">
                 <Button

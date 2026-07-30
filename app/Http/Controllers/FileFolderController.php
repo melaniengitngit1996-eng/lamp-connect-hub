@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\FileFolder;
 use App\Models\FolderPermission;
 use App\Models\File;
+use Illuminate\Validation\Rule;
 
 class FileFolderController extends Controller
 {
@@ -83,10 +84,23 @@ class FileFolderController extends Controller
             403
         );
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'parent_id' => ['nullable', 'integer', 'exists:file_folders,id'],
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('file_folders', 'name')
+                        ->where(fn($query) => $query
+                            ->where('parent_id', $request->parent_id)
+                            ->whereNull('deleted_at')),
+                ],
+            ],
+            [
+                'name.required' => 'Please enter a folder name.',
+                'name.unique' => 'A folder with this name already exists in this location.',
+            ]
+        );
 
         $folder = FileFolder::create([
             'name' => $validated['name'],
@@ -182,13 +196,23 @@ class FileFolderController extends Controller
 
     public function update(Request $request, FileFolder $folder)
     {
-        $validated = $request->validate([
-            'name' => [
-                'required',
-                'string',
-                'max:255',
+        $validated = $request->validate(
+            [
+                'name' => [
+                    'required',
+                    'string',
+                    'max:255',
+                    Rule::unique('file_folders', 'name')
+                        ->ignore($folder->id)
+                        ->where(fn($query) => $query
+                            ->where('parent_id', $folder->parent_id)
+                            ->whereNull('deleted_at')),
+                ],
             ],
-        ]);
+            [
+                'name.unique' => 'A folder with this name already exists in this location.',
+            ]
+        );
 
         $folder->update([
             'name' => $validated['name'],

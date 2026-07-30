@@ -18,6 +18,7 @@ const emit = defineEmits([
 
 const loading = ref(false)
 const name = ref('')
+const errors = ref({})
 
 watch(
     () => props.open,
@@ -26,12 +27,18 @@ watch(
             return
         }
 
+        errors.value = {}
+
         name.value =
             props.type === 'file'
                 ? props.item.name
                 : props.item.name
     }
 )
+
+watch(name, () => {
+    delete errors.value.name
+})
 
 const save = async () => {
     if (loading.value) {
@@ -61,6 +68,14 @@ const save = async () => {
             }),
         })
 
+        if (response.status === 422) {
+            const data = await response.json()
+
+            errors.value = data.errors
+
+            return
+        }
+
         if (!response.ok) {
             return
         }
@@ -78,14 +93,22 @@ const save = async () => {
         :open="open"
         :title="type === 'folder' ? 'Rename folder' : 'Rename file'"
         @close="emit('close')"
-    >
-            <input
-                v-model="name"
-                :placeholder="type === 'folder' ? 'Folder name' : 'File name'"
-                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                @keyup.enter="save"
-            >
+    > 
+            <div>
+                <input
+                    v-model="name"
+                    :placeholder="type === 'folder' ? 'Folder name' : 'File name'"
+                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    @keyup.enter="save"
+                >
 
+                <p
+                    v-if="errors.name"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.name[0] }}
+                </p>
+            </div>
             <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                 <Button
                     type="plain"

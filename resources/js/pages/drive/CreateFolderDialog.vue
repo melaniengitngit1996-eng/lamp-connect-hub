@@ -16,11 +16,17 @@ const emit = defineEmits([
 
 const folderName = ref('')
 const loading = ref(false)
+const errors = ref({})
 
 watch(() => props.open, (open) => {
     if (open) {
         folderName.value = ''
+        errors.value = {}
     }
+})
+
+watch(folderName, () => {
+    delete errors.value.name
 })
 
 const createFolder = async () => {
@@ -35,7 +41,7 @@ const createFolder = async () => {
             .querySelector('meta[name="csrf-token"]')
             ?.getAttribute('content')
             
-        await fetch('/api/drive/folders', {
+        const response = await fetch('/api/drive/folders', {
             method: 'POST',
             credentials: 'include',
             headers: {
@@ -48,6 +54,14 @@ const createFolder = async () => {
                 parent_id: props.parentId,
             }),
         })
+
+        if (response.status === 422) {
+            const data = await response.json()
+
+            errors.value = data.errors
+
+            return
+        }
 
         emit('created')
         emit('close')
@@ -63,12 +77,21 @@ const createFolder = async () => {
         title="New folder"
         @close="emit('close')"
     >
-            <input
-                v-model="folderName"
-                placeholder="Folder name"
-                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                @keyup.enter="createFolder"
-            >
+            <div>
+                <input
+                    v-model="folderName"
+                    placeholder="Folder name"
+                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    @keyup.enter="createFolder"
+                >
+
+                <p
+                    v-if="errors.name"
+                    class="mt-1 text-sm text-destructive"
+                >
+                    {{ errors.name[0] }}
+                </p>
+            </div>
 
             <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2">
                 <Button
