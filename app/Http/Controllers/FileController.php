@@ -23,7 +23,7 @@ class FileController extends Controller
 
         $file = File::create([
             'folder_id' => $validated['folder_id'] ?? null,
-            'name' => pathinfo($uploadedFile->hashName(), PATHINFO_FILENAME),
+            'name' => $uploadedFile->getClientOriginalName(),
             'original_name' => $uploadedFile->getClientOriginalName(),
             'mime_type' => $uploadedFile->getMimeType(),
             'extension' => $uploadedFile->getClientOriginalExtension(),
@@ -83,6 +83,26 @@ class FileController extends Controller
             'downloads' => $downloads,
             'views_count' => $views->count(),
             'downloads_count' => $downloads->count(),
+        ]);
+    }
+
+    public function update(Request $request, File $file)
+    {
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        ]);
+
+        $file->update([
+            'name' => $validated['name'],
+        ]);
+
+        return response()->json([
+            'message' => 'File renamed successfully.',
+            'file' => $file,
         ]);
     }
 }

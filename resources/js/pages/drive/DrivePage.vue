@@ -18,6 +18,7 @@ import SearchIcon from '../../icons/SearchIcon.vue'
 import FolderShrink from '../../icons/FolderShrink.vue'
 import ShareIcon from '.././../icons/ShareIcon.vue'
 import PulseIcon from '../../icons/PulseIcon.vue';
+import PencilIconGray from '../../icons/PencilIconGray.vue';
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
@@ -26,6 +27,7 @@ import PreviewDialog from '../../pages/drive/PreviewDialog.vue'
 import DeleteFileDialog from '../../pages/drive/DeleteFileDialog.vue'
 import ShareDialog from '../../pages/drive/ShareDialog.vue'
 import ActivityDialog from './ActivityDialog.vue';
+import RenameDialog from './RenameDialog.vue';
  
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
@@ -34,6 +36,7 @@ const showPreviewDialog = ref(false)
 const showDeleteFileDialog = ref(false)
 const showShareDialog = ref(false)
 const showPulseDialog = ref(false)
+const showRenameDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -156,6 +159,12 @@ const openShareDialog = (item, type) => {
     selectedItem.value = item
     itemType.value = type
     showShareDialog.value = true
+}
+
+const openRenameDialog = (item, type) => {
+    selectedItem.value = item
+    itemType.value = type
+    showRenameDialog.value = true
 }
 
 const openFileLocation = async (file) => {
@@ -301,6 +310,14 @@ const matchLabel = computed(() => {
             </div>
 
             <Button
+                v-if="folder.can_manage && can('drive.update')"
+                type="icon"
+                @click.stop="openRenameDialog(folder, 'folder')"
+            >
+                <PencilIconGray />
+            </Button>
+
+            <Button
                 v-if="folder.can_manage && can('drive.share')"
                 type="icon"
                 @click.stop="openShareDialog(folder, 'folder')"
@@ -327,7 +344,7 @@ const matchLabel = computed(() => {
 
                 <div class="flex-1 min-w-0" @click="previewFile(file)">
                     <div class="text-sm font-medium truncate">
-                        {{ file.original_name }}
+                        {{ file.name }}
                     </div>
 
                     <div class="text-xs text-muted-foreground">
@@ -351,6 +368,14 @@ const matchLabel = computed(() => {
                     {{ file.uploader?.name }}
                 </span>
             </div>
+
+            <Button
+                v-if="file.can_manage && can('drive.update')"
+                type="icon"
+                @click.stop="openRenameDialog(file, 'file')"
+            >
+                <PencilIconGray />
+            </Button>
 
             <Button
                 v-if="file.can_manage  && can('drive.share')"
@@ -422,6 +447,14 @@ const matchLabel = computed(() => {
         :open="showPulseDialog"
         :file="selectedFile"
         @close="showPulseDialog = false"
+    />
+
+    <RenameDialog
+        :open="showRenameDialog"
+        :item="selectedItem"
+        :type="itemType"
+        @close="showRenameDialog = false"
+        @renamed="refreshFolders"
     />
 </div>
 </template>

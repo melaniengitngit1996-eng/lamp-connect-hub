@@ -179,4 +179,24 @@ class FileFolderController extends Controller
             'message' => 'Folder shared.',
         ]);
     }
+
+    public function update(Request $request, FileFolder $folder)
+    {
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+            ],
+        ]);
+
+        $folder->update([
+            'name' => $validated['name'],
+        ]);
+
+        return response()->json([
+            'message' => 'Folder renamed successfully.',
+            'folder' => $folder,
+        ]);
+    }
 }

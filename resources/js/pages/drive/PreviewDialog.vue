@@ -168,7 +168,7 @@ const downloadFile = async () => {
 
                 <div
                     v-else
-                    class="flex items-center justify-center h-[400px] text-sm text-muted-foreground"
+                    class="flex min-h-[300px] items-center justify-center text-sm text-muted-foreground"
                 >
                     Preview not available for this file type.
                 </div>

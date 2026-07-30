@@ -142,7 +142,7 @@ onMounted(loadAnnouncements)
                 <tr v-if="!loading && !announcements.length">
                     <td
                         colspan="6"
-                        class="py-10 text-center text-muted-foreground"
+                        class="text-center py-8 text-muted-foreground"
                     >
                         No announcements found.
                     </td>

@@ -147,7 +147,7 @@ onMounted(loadEvents)
                     <tr v-if="!loading && !events.length">
                         <td
                             colspan="5"
-                            class="py-10 text-center text-muted-foreground"
+                            class="text-center py-8 text-muted-foreground"
                         >
                             No events found.
                         </td>

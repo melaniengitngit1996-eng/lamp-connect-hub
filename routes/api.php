@@ -38,6 +38,8 @@ Route::post('/drive/folders/{folder}/permissions', [FolderPermissionController::
 
 Route::patch('/drive/folders/{folder}/visibility', [FolderPermissionController::class, 'updateVisibility']);
 
+Route::patch('/drive/folders/{folder}', [FileFolderController::class, 'update']);
+
 Route::patch('/drive/folder-permissions/{permission}', [FolderPermissionController::class, 'update']);
 
 Route::delete('/drive/folder-permissions/{permission}', [FolderPermissionController::class, 'destroy']);
@@ -104,6 +106,7 @@ Route::get('/local-churches/{localChurch}/clusters', [ClusterGroupController::cl
 Route::post('/drive/files/{file}/activities/view', [FileController::class, 'logView']);
 Route::post('/drive/files/{file}/activities/download', [FileController::class, 'logDownload']);
 Route::get('/drive/files/{file}/activities', [FileController::class, 'activities']);
+Route::patch('/drive/files/{file}', [FileController::class, 'update']);
 
 Route::get('/events/highlights', [EventController::class, 'highlights']);
 Route::get('/events', [EventController::class, 'index']);

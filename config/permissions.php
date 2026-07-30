@@ -45,6 +45,9 @@ return [
         'view' => [
             'description' => 'View files and folders',
         ],
+        'update' => [
+            'description' => 'Update file and folder names',
+        ],
         'upload' => [
             'description' => 'Upload files',
         ],
