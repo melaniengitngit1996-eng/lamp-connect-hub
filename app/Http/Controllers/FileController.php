@@ -133,4 +133,22 @@ class FileController extends Controller
             'file' => $file,
         ]);
     }
+
+    public function move(Request $request, File $file)
+    {
+        $validated = $request->validate([
+            'folder_id' => [
+                'nullable',
+                'exists:file_folders,id',
+            ],
+        ]);
+
+        $file->update([
+            'folder_id' => $validated['folder_id'],
+        ]);
+
+        return response()->json([
+            'message' => 'File moved successfully.',
+        ]);
+    }
 }

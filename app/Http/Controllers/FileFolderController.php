@@ -22,6 +22,24 @@ class FileFolderController extends Controller
 
         $search = trim($request->search ?? '');
 
+        if ($request->boolean('folders_only')) {
+            $parentId = $request->input('parent_id');
+
+            return response()->json([
+                'folders' => FileFolder::with('owner')
+                    ->visibleTo(Auth::user())
+                    ->where('parent_id', $parentId)
+                    ->where('name', 'like', "%{$search}%")
+                    ->latest()
+                    ->get()
+                    ->map(function ($folder) {
+                        $folder->can_manage = $folder->canManage(Auth::user());
+
+                        return $folder;
+                    }),
+            ]);
+        }
+
         if ($search) {
             return response()->json([
                 'folders' => FileFolder::with('owner')
@@ -221,6 +239,44 @@ class FileFolderController extends Controller
         return response()->json([
             'message' => 'Folder renamed successfully.',
             'folder' => $folder,
+        ]);
+    }
+
+    public function move(Request $request, FileFolder $folder)
+    {
+        $validated = $request->validate([
+            'parent_id' => [
+                'nullable',
+                'exists:file_folders,id',
+            ],
+        ]);
+
+        if (($validated['parent_id'] ?? null) == $folder->id) {
+            return response()->json([
+                'folder' => [
+                    'A folder cannot be moved into itself.',
+                ],
+            ], 422);
+        }
+
+        $destination = isset($validated['parent_id'])
+            ? FileFolder::find($validated['parent_id'])
+            : null;
+
+        if ($destination && $folder->isAncestorOf($destination)) {
+            return response()->json([
+                'folder' => [
+                    'A folder cannot be moved into one of its subfolders.',
+                ],
+            ]);
+        }
+
+        $folder->update([
+            'parent_id' => $validated['parent_id'],
+        ]);
+
+        return response()->json([
+            'message' => 'Folder moved successfully.',
         ]);
     }
 }

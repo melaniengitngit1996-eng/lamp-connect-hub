@@ -28,9 +28,13 @@ Route::delete('/drive/folders/{folder}', [FileFolderController::class, 'destroy'
 
 Route::post('/drive/folders/{folder}/share', [FileFolderController::class, 'share']);
 
+Route::patch('/drive/folders/{folder}/move', [FileFolderController::class, 'move']);
+
 Route::post('/drive/files', [FileController::class, 'store']);
 
 Route::delete('/drive/files/{file}', [FileController::class, 'destroy']);
+
+Route::patch('/drive/files/{file}/move', [FileController::class, 'move']);
 
 Route::get('/drive/folders/{folder}/permissions', [FolderPermissionController::class, 'index']);
 

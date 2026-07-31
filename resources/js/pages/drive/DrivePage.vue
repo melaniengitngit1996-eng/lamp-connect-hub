@@ -19,6 +19,7 @@ import FolderShrink from '../../icons/FolderShrink.vue'
 import ShareIcon from '.././../icons/ShareIcon.vue'
 import PulseIcon from '../../icons/PulseIcon.vue';
 import PencilIconGray from '../../icons/PencilIconGray.vue';
+import FolderArrowIcon from '../../icons/FolderArrowIcon.vue';
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
@@ -28,6 +29,7 @@ import DeleteFileDialog from '../../pages/drive/DeleteFileDialog.vue'
 import ShareDialog from '../../pages/drive/ShareDialog.vue'
 import ActivityDialog from './ActivityDialog.vue';
 import RenameDialog from './RenameDialog.vue';
+import MoveDialog from './MoveDialog.vue';
  
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
@@ -37,6 +39,7 @@ const showDeleteFileDialog = ref(false)
 const showShareDialog = ref(false)
 const showPulseDialog = ref(false)
 const showRenameDialog = ref(false)
+const showMoveDialog = ref(false)
 
 const folders = ref([])
 const files = ref([])
@@ -165,6 +168,12 @@ const openRenameDialog = (item, type) => {
     selectedItem.value = item
     itemType.value = type
     showRenameDialog.value = true
+}
+
+const openMoveDialog = (item, type) => {
+    selectedItem.value = item
+    itemType.value = type
+    showMoveDialog.value = true
 }
 
 const openFileLocation = async (file) => {
@@ -325,6 +334,13 @@ const matchLabel = computed(() => {
                 <ShareIcon />
             </Button>
 
+            <Button
+                type="icon"
+                @click.stop="openMoveDialog(folder, 'folder')"
+            >
+                <FolderArrowIcon />
+            </Button>
+
             <Button 
                 v-if="folder.can_manage && can('drive.delete')"
                 type="icon" 
@@ -388,8 +404,16 @@ const matchLabel = computed(() => {
             <Button
                 @click="pulseFile(file)"
                 type="icon"
+                @click.stop="openMoveDialog(file, 'file')"
             >
                 <PulseIcon />
+            </Button>
+
+            <Button
+                type="icon"
+                @click.stop="openMoveDialog(file, 'file')"
+            >
+                <FolderArrowIcon />
             </Button>
 
             <Button 
@@ -455,6 +479,14 @@ const matchLabel = computed(() => {
         :type="itemType"
         @close="showRenameDialog = false"
         @renamed="refreshFolders"
+    />
+
+    <MoveDialog 
+        :open="showMoveDialog"
+        :item="selectedItem"
+        :type="itemType"
+        @close="showMoveDialog = false"
+        @moved="refreshFolders"
     />
 </div>
 </template>
