@@ -37,16 +37,27 @@ const breadcrumbs = ref([
     },
 ])
 
+const navigating = ref(false)
+
 const openFolder = async (folder) => {
-    console.log(folder);
-    destinationFolder.value = folder
+    if (navigating.value) {
+        return
+    }
 
-    breadcrumbs.value.push({
-        id: folder.id,
-        name: folder.name,
-    })
+    navigating.value = true
 
-    await loadFolders(folder.id)
+    try {
+        destinationFolder.value = folder
+
+        breadcrumbs.value.push({
+            id: folder.id,
+            name: folder.name,
+        })
+
+        await loadFolders(folder.id)
+    } finally {
+        navigating.value = false
+    }
 }
 
 const goToBreadcrumb = async (index) => {
