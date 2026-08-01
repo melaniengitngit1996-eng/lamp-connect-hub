@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\FolderPermission;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class FileFolder extends Model
 {
@@ -179,5 +180,13 @@ class FileFolder extends Model
     public function canManage(User $user): bool
     {
         return $this->roleFor($user) === FolderPermission::MANAGER;
+    }
+
+    public function favorites()
+    {
+        return $this->morphMany(
+            DriveFavorite::class,
+            'favoritable'
+        );
     }
 }

@@ -44,6 +44,8 @@ Route::patch('/drive/folders/{folder}/visibility', [FolderPermissionController::
 
 Route::patch('/drive/folders/{folder}', [FileFolderController::class, 'update']);
 
+Route::post('/drive/folders/{folder}/favorite', [FileFolderController::class, 'toggleFavorite']);
+
 Route::patch('/drive/folder-permissions/{permission}', [FolderPermissionController::class, 'update']);
 
 Route::delete('/drive/folder-permissions/{permission}', [FolderPermissionController::class, 'destroy']);
@@ -111,6 +113,7 @@ Route::post('/drive/files/{file}/activities/view', [FileController::class, 'logV
 Route::post('/drive/files/{file}/activities/download', [FileController::class, 'logDownload']);
 Route::get('/drive/files/{file}/activities', [FileController::class, 'activities']);
 Route::patch('/drive/files/{file}', [FileController::class, 'update']);
+Route::post('/drive/files/{file}/favorite', [FileController::class, 'toggleFavorite']);
 
 Route::get('/events/highlights', [EventController::class, 'highlights']);
 Route::get('/events', [EventController::class, 'index']);

@@ -20,6 +20,8 @@ import ShareIcon from '.././../icons/ShareIcon.vue'
 import PulseIcon from '../../icons/PulseIcon.vue';
 import PencilIconGray from '../../icons/PencilIconGray.vue';
 import FolderArrowIcon from '../../icons/FolderArrowIcon.vue';
+import StarredIcon from '../../icons/StarredIcon.vue';
+import UnstarredIcon from '../../icons/UnstarredIcon.vue';
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
@@ -52,6 +54,7 @@ const selectedFile = ref(null)
 const selectedItem = ref(null)
 const itemType = ref(null)
 const loadingFolder = ref(false)
+const view = ref('drive')
 
 const search = ref('')
 
@@ -72,12 +75,16 @@ const refreshFolders = async () => {
 const loadFolders = async (parentId = null) => {
     const params = new URLSearchParams()
 
-    if (parentId) {
+    if (parentId !== null) {
         params.append('parent_id', parentId)
     }
 
     if (search.value) {
         params.append('search', search.value)
+    }
+
+    if (view.value === 'starred') {
+        params.append('starred', 1)
     }
 
     const response = await fetch(
@@ -198,6 +205,32 @@ const openFolderLocation = async (folder) => {
     await loadFolders(folder.id)
 }
 
+const toggleFavorite = async (item, type) => {
+    const endpoint =
+        type === 'folder'
+            ? `/api/drive/folders/${item.id}/favorite`
+            : `/api/drive/files/${item.id}/favorite`
+
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': document.querySelector(
+                'meta[name="csrf-token"]'
+            )?.content,
+        },
+    })
+
+    if (!response.ok) {
+        return
+    }
+
+    const data = await response.json()
+
+    item.is_favorited = data.favorited
+}
+
 onMounted(async () => {
     await loadFolders()
 })
@@ -211,6 +244,24 @@ const matchLabel = computed(() => {
         ? 'match'
         : 'matches'
 })
+
+const toggleStarred = async () => {
+    if (view.value === 'starred') {
+        view.value = 'drive'
+    } else {
+        view.value = 'starred'
+    }
+
+    await loadFolders(currentFolder.value?.id)
+}
+
+const handleFolderClick = async (folder) => {
+    if (search.value) {
+        return openFolderLocation(folder)
+    }
+
+    return openFolder(folder)
+}
 </script>
 
 <template>
@@ -221,6 +272,14 @@ const matchLabel = computed(() => {
             <p class="text-sm text-muted-foreground">Shared files for the LAMP Church community.</p>
         </div>
         <div class="flex gap-2">
+            <Button
+                :type="view === 'starred' ? 'primary' : 'plain'"
+                @click="toggleStarred"
+            >
+                <UnstarredIcon />
+                Starred
+            </Button>
+
             <Button v-if="can('drive.upload')" type="plain" @click="showNewFolderDialog = true">
                 <FolderPlusIcon />
                 New folder
@@ -252,7 +311,7 @@ const matchLabel = computed(() => {
         </span>
         · {{ totalMatches }} {{ matchLabel }}
     </div>
-    <div class="flex items-center gap-1 text-sm flex-wrap">
+    <div v-if="!search" class="flex items-center gap-1 text-sm flex-wrap">
         <button
             @click="goHome"
             class="px-2 py-1 rounded hover:bg-accent font-medium"
@@ -288,7 +347,7 @@ const matchLabel = computed(() => {
             :key="folder.id"
             class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition"
         >
-            <button @click="openFolder(folder)" class="flex items-center gap-3 flex-1 min-w-0 text-left">
+            <button @click="handleFolderClick(folder)" class="flex items-center gap-3 flex-1 min-w-0 text-left">
                 <FolderOrangeIcon />
 
                 <div class="flex-1 min-w-0">
@@ -317,6 +376,14 @@ const matchLabel = computed(() => {
                     {{ folder.owner?.name }}
                 </span>
             </div>
+
+            <Button
+                type="icon"
+                @click.stop="toggleFavorite(folder, 'folder')"
+            >
+                <StarredIcon v-if="folder.is_favorited" />
+                <UnstarredIcon v-else />
+            </Button>
 
             <Button
                 v-if="folder.can_manage && can('drive.update')"
@@ -384,6 +451,14 @@ const matchLabel = computed(() => {
                     {{ file.uploader?.name }}
                 </span>
             </div>
+
+            <Button
+                type="icon"
+                @click.stop="toggleFavorite(file, 'file')"
+            >
+                <StarredIcon v-if="file.is_favorited" />
+                <UnstarredIcon v-else />
+            </Button>
 
             <Button
                 v-if="file.can_manage && can('drive.update')"

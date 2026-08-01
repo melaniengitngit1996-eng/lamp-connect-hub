@@ -26,7 +26,11 @@ class FileFolderController extends Controller
             $parentId = $request->input('parent_id');
 
             return response()->json([
-                'folders' => FileFolder::with('owner')
+                'folders' => FileFolder::with([
+                    'owner',
+                    'favorites' => fn($query) =>
+                    $query->where('user_id', Auth::id()),
+                ])
                     ->visibleTo(Auth::user())
                     ->where('parent_id', $parentId)
                     ->where('name', 'like', "%{$search}%")
@@ -40,6 +44,55 @@ class FileFolderController extends Controller
             ]);
         }
 
+        if ($request->boolean('starred')) {
+            $parentId = $request->input('parent_id');
+
+            return response()->json([
+                'folders' => FileFolder::with([
+                    'owner',
+                    'favorites' => fn($query) =>
+                    $query->where('user_id', Auth::id()),
+                ])
+                    ->visibleTo(Auth::user())
+                    ->whereHas('favorites', function ($query) {
+                        $query->where('user_id', Auth::id());
+                    })
+                    ->when(
+                        $request->has('parent_id'),
+                        fn($query) => $query->where('parent_id', $parentId)
+                    )
+                    ->latest()
+                    ->get()
+                    ->map(function ($folder) {
+                        $folder->can_manage = $folder->canManage(Auth::user());
+                        $folder->is_favorited = true;
+
+                        return $folder;
+                    }),
+
+                'files' => File::with([
+                    'uploader',
+                    'favorites' => fn($query) =>
+                    $query->where('user_id', Auth::id()),
+                ])
+                    ->visibleTo(Auth::user())
+                    ->whereHas('favorites', function ($query) {
+                        $query->where('user_id', Auth::id());
+                    })
+                    ->when(
+                        $request->has('parent_id'),
+                        fn($query) => $query->where('folder_id', $parentId)
+                    )
+                    ->latest()
+                    ->get()
+                    ->map(function ($file) {
+                        $file->can_manage = $file->canManage(Auth::user());
+                        $file->is_favorited = true;
+
+                        return $file;
+                    }),
+            ]);
+        }
         if ($search) {
             return response()->json([
                 'folders' => FileFolder::with('owner')
@@ -49,11 +102,16 @@ class FileFolderController extends Controller
                     ->get()
                     ->map(function ($folder) {
                         $folder->can_manage = $folder->canManage(Auth::user());
+                        $folder->is_favorited = $folder->favorites->isNotEmpty();
 
                         return $folder;
                     }),
 
-                'files' => File::with('uploader')
+                'files' => File::with([
+                    'uploader',
+                    'favorites' => fn($query) =>
+                    $query->where('user_id', Auth::id()),
+                ])
                     ->visibleTo(Auth::user())
                     ->where(function ($query) use ($search) {
                         $query->where('name', 'like', "%{$search}%")
@@ -63,6 +121,7 @@ class FileFolderController extends Controller
                     ->get()
                     ->map(function ($file) {
                         $file->can_manage = $file->canManage(Auth::user());
+                        $file->is_favorited = $file->favorites->isNotEmpty();
 
                         return $file;
                     }),
@@ -70,24 +129,34 @@ class FileFolderController extends Controller
         }
 
         return response()->json([
-            'folders' => FileFolder::with('owner')
+            'folders' => FileFolder::with([
+                'owner',
+                'favorites' => fn($query) =>
+                $query->where('user_id', Auth::id()),
+            ])
                 ->visibleTo(Auth::user())
                 ->where('parent_id', $request->parent_id)
                 ->latest()
                 ->get()
                 ->map(function ($folder) {
                     $folder->can_manage = $folder->canManage(Auth::user());
+                    $folder->is_favorited = $folder->favorites->isNotEmpty();
 
                     return $folder;
                 }),
 
-            'files' => File::with('uploader')
+            'files' => File::with([
+                'uploader',
+                'favorites' => fn($query) =>
+                $query->where('user_id', Auth::id()),
+            ])
                 ->visibleTo(Auth::user())
                 ->where('folder_id', $request->parent_id)
                 ->latest()
                 ->get()
                 ->map(function ($file) {
                     $file->can_manage = $file->canManage(Auth::user());
+                    $file->is_favorited = $file->favorites->isNotEmpty();
 
                     return $file;
                 }),
@@ -277,6 +346,29 @@ class FileFolderController extends Controller
 
         return response()->json([
             'message' => 'Folder moved successfully.',
+        ]);
+    }
+
+    public function toggleFavorite(FileFolder $folder)
+    {
+        $favorite = $folder->favorites()
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($favorite) {
+            $favorite->delete();
+
+            return response()->json([
+                'favorited' => false,
+            ]);
+        }
+
+        $folder->favorites()->create([
+            'user_id' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'favorited' => true,
         ]);
     }
 }

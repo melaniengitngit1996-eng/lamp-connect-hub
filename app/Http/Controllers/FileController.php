@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\File;
 use App\Models\FileActivity;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
+use App\Models\DriveFavorite;
 
 class FileController extends Controller
 {
@@ -149,6 +149,29 @@ class FileController extends Controller
 
         return response()->json([
             'message' => 'File moved successfully.',
+        ]);
+    }
+
+    public function toggleFavorite(File $file)
+    {
+        $favorite = $file->favorites()
+            ->where('user_id', Auth::id())
+            ->first();
+
+        if ($favorite) {
+            $favorite->delete();
+
+            return response()->json([
+                'favorited' => false,
+            ]);
+        }
+
+        $file->favorites()->create([
+            'user_id' => Auth::id(),
+        ]);
+
+        return response()->json([
+            'favorited' => true,
         ]);
     }
 }

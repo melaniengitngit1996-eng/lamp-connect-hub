@@ -8,6 +8,7 @@ use App\Models\FolderPermission;
 use App\Models\FilePermission;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class File extends Model
 {
@@ -25,7 +26,7 @@ class File extends Model
         'mime_type',
         'size',
         'visibility',
-        'share_token'
+        'share_token',
     ];
 
     protected $appends = [
@@ -35,7 +36,7 @@ class File extends Model
         'path_human',
         'path_folders',
         'views_count',
-        'downloads_count',
+        'downloads_count'
     ];
 
     public function getSizeHumanAttribute()
@@ -226,5 +227,13 @@ class File extends Model
             'ip_address' => request()->ip(),
             'user_agent' => request()->userAgent(),
         ]);
+    }
+
+    public function favorites()
+    {
+        return $this->morphMany(
+            DriveFavorite::class,
+            'favoritable'
+        );
     }
 }
