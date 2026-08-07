@@ -105,7 +105,7 @@ onMounted(fetchUsers);
                                 </div>
                             </div>
                         </td>
-                        <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-sm">{{ user.local_church.name ?? '—' }}</td>
+                        <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px] text-sm">{{ user.local_church?.name ?? '—' }}</td>
                         <td class="p-2 align-middle [&amp;:has([role=checkbox])]:pr-0 [&amp;&gt;[role=checkbox]]:translate-y-[2px]">
                             <div
                                 class="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors"
