@@ -22,6 +22,12 @@ class UserResource extends JsonResource
             // Change this if your app stores avatars differently
             'avatar' => $this->avatar,
             'initials' => $this->initials,
+            'pivot' => $this->whenPivotLoaded('conversation_members', function () {
+                return [
+                    'role' => $this->pivot->role,
+                    'joined_at' => $this->pivot->joined_at,
+                ];
+            }),
             // Optional later
             // 'is_online' => false,
         ];

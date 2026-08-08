@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
+use App\Http\Resources\UserResource;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
@@ -67,6 +68,7 @@ class ChatController extends Controller
 
         return response()->json([
             'conversation' => new ConversationResource($conversation),
+            'members' => UserResource::collection($conversation->members),
             'messages' => MessageResource::collection(
                 $conversation->messages()
                     ->with([
@@ -204,6 +206,35 @@ class ChatController extends Controller
             ->get();
     }
 
+    public function availableUsers(Request $request, Conversation $conversation)
+    {
+        abort_unless(
+            $conversation->members()
+                ->where('users.id', auth()->id())
+                ->exists(),
+            403
+        );
+
+        $memberIds = $conversation->members()
+            ->pluck('users.id');
+
+        return UserResource::collection(
+            User::query()
+                ->where('status', 'approved')
+                ->whereKeyNot(auth()->id())
+                ->whereNotIn('id', $memberIds)
+                ->when($request->filled('search'), function ($query) use ($request) {
+                    $query->where(function ($query) use ($request) {
+                        $query->where('name', 'like', "%{$request->search}%")
+                            ->orWhere('email', 'like', "%{$request->search}%");
+                    });
+                })
+                ->orderBy('name')
+                ->limit(10)
+                ->get()
+        );
+    }
+
     public function destroyMessage(Message $message)
     {
         //
@@ -211,11 +242,56 @@ class ChatController extends Controller
 
     public function addMember(Request $request, Conversation $conversation)
     {
-        //
+        abort_unless(
+            $conversation->members()
+                ->where('users.id', auth()->id())
+                ->wherePivot('role', 'owner')
+                ->exists(),
+            403
+        );
+
+        $request->validate([
+            'user_ids' => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['exists:users,id'],
+        ]);
+
+        foreach ($request->user_ids as $userId) {
+            $conversation->members()->syncWithoutDetaching([
+                $userId => [
+                    'role' => 'member',
+                    'joined_at' => now(),
+                ],
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Members added successfully.',
+        ]);
     }
 
     public function removeMember(Conversation $conversation, User $user)
     {
-        //
+        abort_unless(
+            $conversation->members()
+                ->where('users.id', auth()->id())
+                ->wherePivot('role', 'owner')
+                ->exists(),
+            403
+        );
+
+        if (
+            $conversation->members()
+            ->where('users.id', $user->id)
+            ->wherePivot('role', 'owner')
+            ->exists()
+        ) {
+            return response()->json([
+                'message' => 'Owner cannot be removed.',
+            ], 422);
+        }
+
+        $conversation->members()->detach($user->id);
+
+        return response()->noContent();
     }
 }

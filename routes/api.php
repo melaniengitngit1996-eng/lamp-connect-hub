@@ -166,3 +166,4 @@ Route::delete('/chat/messages/{message}', [ChatController::class, 'destroyMessag
 Route::post('/chat/conversations/{conversation}/members', [ChatController::class, 'addMember']);
 Route::delete('/chat/conversations/{conversation}/members/{user}', [ChatController::class, 'removeMember']);
 Route::get('/chat/users', [ChatController::class, 'getUsers']);
+Route::get('/chat/conversations/{conversation}/available-users', [ChatController::class, 'availableUsers']);

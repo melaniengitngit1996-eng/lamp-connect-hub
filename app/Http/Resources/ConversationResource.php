@@ -42,6 +42,10 @@ class ConversationResource extends JsonResource
             ),
 
             'members_count' => $this->members_count,
+            'is_owner' => $this->members()
+                ->where('users.id', auth()->id())
+                ->wherePivot('role', 'owner')
+                ->exists(),
         ];
     }
 }

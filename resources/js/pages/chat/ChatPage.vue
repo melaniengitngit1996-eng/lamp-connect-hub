@@ -1,19 +1,21 @@
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
+import { useAuth } from '../../stores/auth'
+const { logout, user, fetchUser, can } = useAuth()
 
 import GroupChatDialog from '../../pages/chat/GroupChatDialog.vue'
 import DirectChatDialog from '../../pages/chat/DirectChatDialog.vue'
-import { useAuth } from '../../stores/auth'
+import ChatMembersDialog from '../../pages/chat/ChatMembersDialog.vue'
+
 import ChannelIcon from '../../icons/ChannelIcon.vue'
 import PlusIcon from '../../icons/PlusIcon.vue'
 import PaperClipIcon from '../../icons/PaperClipIcon.vue'
 import PlaneIcon from '../../icons/PlaneIcon.vue'
 import GroupIcon from '../../icons/GroupIcon.vue'
 
-const { logout, user, fetchUser, can } = useAuth()
-
 const showNewGroupChatDialog = ref(false)
 const showNewDirectChatDialog = ref(false)
+const showChatMembersDialog = ref(false)
 
 const openNewGroupChatDialog = (item, type) => {
     showNewGroupChatDialog.value = true
@@ -23,10 +25,15 @@ const openNewDirectChatDialog = (item, type) => {
     showNewDirectChatDialog.value = true
 }
 
+const openChatMembersDialog = (item, type) => {
+    showChatMembersDialog.value = true
+}
+
 const channels = ref([])
 const groups = ref([])
 const selectedConversation = ref(null)
 const messages = ref([])
+const members = ref([])
 const directMessages = ref([])
 const newMessage = ref('')
 const messagesContainer = ref(null)
@@ -60,7 +67,7 @@ const loadConversation = async (conversation) => {
         )
 
         selectedConversation.value = data.conversation
-		console.log(selectedConversation.value);
+		members.value = data.members
         messages.value = data.messages.data ?? data.messages
     } catch (error) {
         console.error(error)
@@ -151,7 +158,7 @@ onMounted(() => {
 			<div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Group chats</span>
-					<button @click="openNewGroupChatDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
+					<button v-if="can('chat.manager')" @click="openNewGroupChatDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
 						<PlusIcon />
 					</button>
 				</div>
@@ -223,7 +230,11 @@ onMounted(() => {
 				<div class="font-display text-lg truncate">{{ selectedConversation?.name }}</div>
 				<div class="text-xs text-muted-foreground" v-if="selectedConversation?.type !== 'direct'">{{ selectedConversation?.members_count }} members</div>
 			</div>
-			<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto">
+			<button v-if="
+				selectedConversation?.type === 'group' &&
+				selectedConversation?.is_owner
+			"
+			@click="openChatMembersDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto">
 				<GroupIcon /> Members
 			</button>
 		</header>
@@ -311,6 +322,15 @@ onMounted(() => {
         :open="showNewDirectChatDialog"
 		@created="handleConversationCreated"
         @close="showNewDirectChatDialog = false"
+    />
+
+	<ChatMembersDialog
+        :open="showChatMembersDialog"
+		:conversation="selectedConversation"
+		:members="members"
+        @close="showChatMembersDialog = false"
+		@member-removed="loadConversation(selectedConversation)"
+		@member-added="loadConversation(selectedConversation)"
     />
 </div>
 </template>

@@ -84,6 +84,9 @@ return [
         'moderate' => [
             'description' => 'Moderate conversations',
         ],
+        'manager' => [
+            'description' => 'Can create group chats and channels',
+        ],
         'delete' => [
             'description' => 'Delete conversations',
         ],
