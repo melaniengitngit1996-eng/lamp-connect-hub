@@ -82,7 +82,34 @@ class ChatController extends Controller
 
     public function storeGroup(Request $request)
     {
-        //
+        $conversation = Conversation::create([
+            'type' => 'group',
+            'name' => $request->name ?: 'New Group',
+            'created_by' => auth()->id(),
+            'is_private' => true,
+        ]);
+
+        // creator
+        $conversation->members()->attach(auth()->id(), [
+            'role' => 'owner',
+            'joined_at' => now(),
+        ]);
+
+        // selected users
+        foreach ($request->members as $userId) {
+
+            $conversation->members()->attach($userId, [
+                'role' => 'member',
+                'joined_at' => now(),
+            ]);
+        }
+
+        return new ConversationResource(
+            $conversation->load([
+                'members',
+                'latestMessage.sender',
+            ])->loadCount('members')
+        );
     }
 
     public function storeDirect(Request $request)

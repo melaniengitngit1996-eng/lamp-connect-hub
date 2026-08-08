@@ -103,6 +103,13 @@ const handleConversationCreated = async (conversation) => {
     await loadConversation(conversation)
 }
 
+const handleGroupCreated = async (conversation) => {
+    showNewGroupChatDialog.value = false
+
+    await loadChats()
+    await loadConversation(conversation)
+}
+
 onMounted(() => {
     loadChats()
 })
@@ -144,7 +151,7 @@ onMounted(() => {
 			<div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Group chats</span>
-					<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
+					<button @click="openNewGroupChatDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
 						<PlusIcon />
 					</button>
 				</div>
@@ -296,6 +303,7 @@ onMounted(() => {
 
     <GroupChatDialog
         :open="showNewGroupChatDialog"
+		@created="handleGroupCreated"
         @close="showNewGroupChatDialog = false"
     />
 
