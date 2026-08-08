@@ -87,7 +87,58 @@ class ChatController extends Controller
 
     public function storeDirect(Request $request)
     {
-        //
+        $request->validate([
+            'user_id' => ['required', 'exists:users,id'],
+        ]);
+
+        $authUser = auth()->user();
+        $otherUserId = (int) $request->user_id;
+
+        if ($authUser->id === $otherUserId) {
+            return response()->json([
+                'message' => 'You cannot start a conversation with yourself.',
+            ], 422);
+        }
+
+        // Look for an existing direct conversation between the two users
+        $conversation = Conversation::query()
+            ->direct()
+            ->whereHas('members', function ($query) use ($authUser) {
+                $query->where('users.id', $authUser->id);
+            })
+            ->whereHas('members', function ($query) use ($otherUserId) {
+                $query->where('users.id', $otherUserId);
+            })
+            ->withCount('members')
+            ->having('members_count', 2)
+            ->first();
+
+        if (! $conversation) {
+            $conversation = Conversation::create([
+                'type' => 'direct',
+                'created_by' => $authUser->id,
+                'is_private' => true,
+            ]);
+
+            $conversation->members()->attach($authUser->id, [
+                'role' => 'owner',
+                'joined_at' => now(),
+            ]);
+
+            $conversation->members()->attach($otherUserId, [
+                'role' => 'member',
+                'joined_at' => now(),
+            ]);
+
+            $conversation->loadCount('members');
+        }
+
+        $conversation->load([
+            'members',
+            'latestMessage.sender',
+        ]);
+
+        return new ConversationResource($conversation);
     }
 
     public function sendMessage(Request $request, Conversation $conversation)
@@ -115,6 +166,15 @@ class ChatController extends Controller
         $message->load('sender');
 
         return new MessageResource($message);
+    }
+
+    public function getUsers()
+    {
+        return User::query()
+            ->whereKeyNot(auth()->id())
+            ->where('status', 'approved')
+            ->orderBy('name')
+            ->get();
     }
 
     public function destroyMessage(Message $message)
