@@ -148,4 +148,24 @@ class User extends Authenticatable
     {
         return $this->hasMany(DriveFavorite::class);
     }
+
+    public function conversations()
+    {
+        return $this->belongsToMany(
+            Conversation::class,
+            'conversation_members'
+        )
+            ->using(ConversationMember::class)
+            ->withPivot([
+                'role',
+                'last_read_message_id',
+                'joined_at',
+            ])
+            ->withTimestamps();
+    }
+
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
 }

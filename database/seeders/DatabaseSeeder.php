@@ -28,7 +28,10 @@ class DatabaseSeeder extends Seeder
             // AnnouncementSeeder::class,
             // CompositionSeeder::class,
             // TestimonySeeder::class,
-            // PostSeeder::class
+            // PostSeeder::class,
+            ConversationSeeder::class,
+            DirectConversationSeeder::class,
+            MessageSeeder::class
         ]);
     }
 }

@@ -19,6 +19,8 @@ use App\Http\Controllers\EventController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TestimonyController;
 use App\Http\Controllers\PostCommentController;
+use App\Http\Controllers\ChatController;
+
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
 
@@ -148,3 +150,18 @@ Route::post('/posts/{post}/like', [PostController::class, 'toggleLike']);
 Route::get('/posts/{post}/comments', [PostCommentController::class, 'index']);
 Route::post('/posts/{post}/comments', [PostCommentController::class, 'store']);
 Route::delete('/comments/{comment}', [PostCommentController::class, 'destroy']);
+
+// Sidebar
+Route::get('/chat', [ChatController::class, 'index']);
+// Load conversation
+Route::get('/chat/conversations/{conversation}', [ChatController::class, 'show']);
+// Create
+Route::post('/chat/groups', [ChatController::class, 'storeGroup']);
+Route::post('/chat/direct', [ChatController::class, 'storeDirect']);
+// Messages
+Route::post('/chat/conversations/{conversation}/messages', [ChatController::class, 'sendMessage']);
+// Delete message
+Route::delete('/chat/messages/{message}', [ChatController::class, 'destroyMessage']);
+// Members
+Route::post('/chat/conversations/{conversation}/members', [ChatController::class, 'addMember']);
+Route::delete('/chat/conversations/{conversation}/members/{user}', [ChatController::class, 'removeMember']);
