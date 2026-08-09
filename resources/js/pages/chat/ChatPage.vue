@@ -130,7 +130,7 @@ onMounted(() => {
 			<p class="text-xs text-muted-foreground">Group chats</p>
 		</div>
 		<div class="flex-1 overflow-y-auto px-2 py-3 space-y-5">
-			<div>
+			<!-- <div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Channels</span>
 				</div>
@@ -154,7 +154,7 @@ onMounted(() => {
 				<div v-else class="italic px-2 py-3 text-center text-muted-foreground text-xs">
 					No channels available
 				</div>
-			</div>
+			</div> -->
 			<div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Group chats</span>
