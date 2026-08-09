@@ -12,6 +12,7 @@ import UploadIcon from '../../icons/UploadIcon.vue'
 import HomeIcon from '../../icons/HomeIcon.vue'
 import FolderOrangeIcon from '../../icons/FolderOrangeIcon.vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
+import RedTrashIcon from '../../icons/RedTrashIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
 import FileBlueIcon from '../../icons/FileBlueIcon.vue'
 import SearchIcon from '../../icons/SearchIcon.vue'
@@ -22,6 +23,7 @@ import PencilIconGray from '../../icons/PencilIconGray.vue';
 import FolderArrowIcon from '../../icons/FolderArrowIcon.vue';
 import StarredIcon from '../../icons/StarredIcon.vue';
 import UnstarredIcon from '../../icons/UnstarredIcon.vue';
+import EllipsisVerticalIcon from '../../icons/EllipsisVerticalIcon.vue';
 
 import CreateFolderDialog from '../../pages/drive/CreateFolderDialog.vue'
 import DeleteFolderDialog from '../../pages/drive/DeleteFolderDialog.vue'
@@ -32,6 +34,8 @@ import ShareDialog from '../../pages/drive/ShareDialog.vue'
 import ActivityDialog from './ActivityDialog.vue';
 import RenameDialog from './RenameDialog.vue';
 import MoveDialog from './MoveDialog.vue';
+
+import Popover from '@/components/Popover.vue'
  
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
@@ -262,6 +266,36 @@ const handleFolderClick = async (folder) => {
 
     return openFolder(folder)
 }
+
+const handleShare = (item, type, close) => {
+    close()
+    openShareDialog(item, type)
+}
+
+const handleRename = (item, type, close) => {
+    close()
+    openRenameDialog(item, type)
+}
+
+const handleMove = (item, type, close) => {
+    close()
+    openMoveDialog(item, type)
+}
+
+const handleDeleteFolder = (folder, close) => {
+    close()
+    confirmDeleteFolder(folder)
+}
+
+const handleDeleteFile = (file, close) => {
+    close()
+    confirmDeleteFile(file)
+}
+
+const handleActivity = (file, close) => {
+    close()
+    pulseFile(file)
+}
 </script>
 
 <template>
@@ -385,36 +419,54 @@ const handleFolderClick = async (folder) => {
                 <UnstarredIcon v-else />
             </Button>
 
-            <Button
-                v-if="folder.can_manage && can('drive.update')"
-                type="icon"
-                @click.stop="openRenameDialog(folder, 'folder')"
-            >
-                <PencilIconGray />
-            </Button>
+            <Popover>
+                <template #trigger>
+                    <Button type="icon">
+                        <EllipsisVerticalIcon />
+                    </Button>
+                </template>
 
-            <Button
-                v-if="folder.can_manage && can('drive.share')"
-                type="icon"
-                @click.stop="openShareDialog(folder, 'folder')"
-            >
-                <ShareIcon />
-            </Button>
+                <template #content="{ close }">
 
-            <Button
-                type="icon"
-                @click.stop="openMoveDialog(folder, 'folder')"
-            >
-                <FolderArrowIcon />
-            </Button>
+                    <button
+                        v-if="folder.can_manage && can('drive.share')"
+                        @click.stop="handleShare(folder, 'folder', close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <ShareIcon />
+                        Share
+                    </button>
 
-            <Button 
-                v-if="folder.can_manage && can('drive.delete')"
-                type="icon" 
-                @click.stop="confirmDeleteFolder(folder)"
-            >
-                <TrashIcon />
-            </Button>
+                    <button
+                        v-if="folder.can_manage && can('drive.update')"
+                        @click.stop="handleRename(folder, 'folder', close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <PencilIconGray />
+                        Rename
+                    </button>
+
+                    <button
+                        @click.stop="handleMove(folder, 'folder', close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <FolderArrowIcon />
+                        Move
+                    </button>
+
+                    <div class="my-1 h-px bg-border" />
+
+                    <button
+                        v-if="folder.can_manage && can('drive.delete')"
+                        @click.stop="handleDeleteFolder(folder, close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-destructive hover:bg-accent"
+                    >
+                        <RedTrashIcon />
+                        Delete
+                    </button>
+
+                </template>
+            </Popover>
         </div>
 
         <div
@@ -460,44 +512,62 @@ const handleFolderClick = async (folder) => {
                 <UnstarredIcon v-else />
             </Button>
 
-            <Button
-                v-if="file.can_manage && can('drive.update')"
-                type="icon"
-                @click.stop="openRenameDialog(file, 'file')"
-            >
-                <PencilIconGray />
-            </Button>
+            <Popover>
+                <template #trigger>
+                    <Button type="icon">
+                        <EllipsisVerticalIcon />
+                    </Button>
+                </template>
 
-            <Button
-                v-if="file.can_manage  && can('drive.share')"
-                type="icon"
-                @click.stop="openShareDialog(file, 'file')"
-            >
-                <ShareIcon />
-            </Button>
+                <template #content="{ close }">
 
-            <Button
-                @click="pulseFile(file)"
-                type="icon"
-                @click.stop="openMoveDialog(file, 'file')"
-            >
-                <PulseIcon />
-            </Button>
+                    <button
+                        v-if="file.can_manage && can('drive.share')"
+                        @click.stop="handleShare(file, 'file', close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <ShareIcon />
+                        Share
+                    </button>
 
-            <Button
-                type="icon"
-                @click.stop="openMoveDialog(file, 'file')"
-            >
-                <FolderArrowIcon />
-            </Button>
+                    <button
+                        v-if="file.can_manage && can('drive.update')"
+                        @click.stop="handleRename(file, 'file', close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <PencilIconGray />
+                        Rename
+                    </button>
 
-            <Button 
-                v-if="file.can_manage && can('drive.delete')" 
-                type="icon" 
-                @click.stop="confirmDeleteFile(file)"
-            >
-                <TrashIcon />
-            </Button>
+                    <button
+                        @click.stop="handleActivity(file, close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <PulseIcon />
+                        Activity
+                    </button>
+
+                    <button
+                        @click.stop="handleMove(file, 'file', close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
+                    >
+                        <FolderArrowIcon />
+                        Move
+                    </button>
+
+                    <div class="my-1 h-px bg-border" />
+
+                    <button
+                        v-if="file.can_manage && can('drive.delete')"
+                        @click.stop="handleDeleteFile(file, close)"
+                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-destructive hover:bg-accent"
+                    >
+                        <RedTrashIcon />
+                        Delete
+                    </button>
+
+                </template>
+            </Popover>
         </div>
     </div>
 
