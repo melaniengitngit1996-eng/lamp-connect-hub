@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
 import { useAuth } from '../../stores/auth'
 const { logout, user, fetchUser, can } = useAuth()
 
@@ -39,14 +39,14 @@ const newMessage = ref('')
 const messagesContainer = ref(null)
 
 const loadChats = async () => {
-    try {
-        const { data } = await axios.get('/api/chat')
+    const { data } = await axios.get('/api/chat')
 
-        channels.value = data.channels
-        groups.value = data.groups
-        directMessages.value = data.direct_messages
+    channels.value = data.channels
+    groups.value = data.groups
+    directMessages.value = data.direct_messages
 
-        // Select the first conversation
+    // Desktop only
+    if (window.innerWidth >= 768) {
         const firstConversation =
             channels.value[0] ??
             groups.value[0] ??
@@ -55,8 +55,6 @@ const loadChats = async () => {
         if (firstConversation) {
             await loadConversation(firstConversation)
         }
-    } catch (error) {
-        console.error(error)
     }
 }
 
@@ -67,7 +65,7 @@ const loadConversation = async (conversation) => {
         )
 
         selectedConversation.value = data.conversation
-		members.value = data.members
+        members.value = data.members
         messages.value = data.messages.data ?? data.messages
     } catch (error) {
         console.error(error)
@@ -117,6 +115,9 @@ const handleGroupCreated = async (conversation) => {
     await loadConversation(conversation)
 }
 
+const isMobile = computed(() => window.innerWidth < 768)
+
+
 onMounted(() => {
     loadChats()
 })
@@ -124,7 +125,15 @@ onMounted(() => {
 
 <template>
 <div class="h-screen flex">
-	<aside class="w-72 border-r flex flex-col bg-card/30">
+
+	<aside
+    :class="[
+        'border-r bg-card/30',
+        selectedConversation
+            ? 'hidden md:block md:w-72 md:flex-col'
+            : 'flex w-full flex-col md:w-72'
+    ]"
+>
 		<div class="px-4 py-4 border-b">
 			<h1 class="font-display text-xl">Messages</h1>
 			<p class="text-xs text-muted-foreground">Group chats</p>
@@ -216,8 +225,16 @@ onMounted(() => {
 		</div>
 	</aside>
 
-	<div class="flex-1 flex flex-col min-w-0">
+	<div
+    :class="[
+        'flex-1 min-w-0 flex-col',
+        selectedConversation
+            ? 'flex'
+            : 'hidden md:flex'
+    ]"
+>
 		<header class="px-6 py-4 border-b flex items-center gap-3">
+			<button @click="selectedConversation = null" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left h-5 w-5" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
 			<div v-if="selectedConversation?.type != 'direct'" class="h-9 w-9 rounded-full bg-muted grid place-items-center text-muted-foreground">
 				<GroupIcon />
 			</div>
