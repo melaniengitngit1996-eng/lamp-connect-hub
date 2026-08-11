@@ -15,6 +15,7 @@ import UserPage from '../pages/users/UserPage.vue'
 import NotFoundPage from '../pages/auth/403Page.vue'
 import LookupPage from '../pages/lookups/LookupPage.vue'
 import ContentPage from '../pages/content/ContentPage.vue'
+import SettingsPage from '../pages/settings/SettingsPage.vue'
 
 const routes = [
     {
@@ -73,6 +74,14 @@ const routes = [
                 component: LookupPage,
                 meta: {
                     permission: 'lookups.view',
+                },
+            },
+            {
+                path: 'settings',
+                name: 'settings',
+                component: SettingsPage,
+                meta: {
+                    permission: 'settings.update',
                 },
             },
         ],

@@ -133,6 +133,19 @@ onMounted(async () => {
             </svg>
             Lookups
          </RouterLink>
+         <RouterLink
+                v-if="can('settings.update')"
+               to="/settings"
+               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
+               :class="
+                  $route.path === '/settings'
+                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               "
+            >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings h-4 w-4" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            Settings
+         </RouterLink>
       </nav>
       <div class="p-3 border-t flex items-center gap-3">
          <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
@@ -159,19 +172,19 @@ onMounted(async () => {
          </svg>
          Feed
       </a>
-      <a href="/chat" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
+      <a v-if="can('chat.view')" href="/chat" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square h-5 w-5" aria-hidden="true">
             <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
          </svg>
          Chat
       </a>
-      <a href="/drive" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
+      <a v-if="can('drive.view')" href="/drive" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open h-5 w-5" aria-hidden="true">
             <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path>
          </svg>
          Drive
       </a>
-      <a href="/members" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
+      <a v-if="can('members.view')" href="/members" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users h-5 w-5" aria-hidden="true">
             <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
             <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
@@ -180,23 +193,27 @@ onMounted(async () => {
          </svg>
          Sign Ups
       </a>
-      <a href="/users" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
+      <a v-if="can('users.view')" href="/users" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-5 w-5" aria-hidden="true">
             <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
          </svg>
          Users
       </a>
-      <a href="/content" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
+      <a v-if="can('content.view')" href="/content" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:65:17"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
          Content   
       </a>
-      <a href="/lookups" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
+      <a v-if="can('lookups.view')" href="/lookups" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tags h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:64:17">
             <path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"></path>
             <path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"></path>
             <circle cx="10.5" cy="6.5" r=".5" fill="currentColor"></circle>
          </svg>
          Lookups
+      </a>
+      <a v-if="can('settings.update')" href="/settings" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings h-4 w-4" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+         Settings
       </a>
    </div>
 </template>

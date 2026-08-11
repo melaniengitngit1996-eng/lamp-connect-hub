@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\Api\SettingController;
 use App\Http\Controllers\CompositionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FileFolderController;
@@ -167,3 +168,6 @@ Route::post('/chat/conversations/{conversation}/members', [ChatController::class
 Route::delete('/chat/conversations/{conversation}/members/{user}', [ChatController::class, 'removeMember']);
 Route::get('/chat/users', [ChatController::class, 'getUsers']);
 Route::get('/chat/conversations/{conversation}/available-users', [ChatController::class, 'availableUsers']);
+
+Route::get('/settings', [SettingController::class, 'index']);
+Route::patch('/settings', [SettingController::class, 'update']);

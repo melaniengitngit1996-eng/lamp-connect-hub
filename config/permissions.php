@@ -119,5 +119,10 @@ return [
             'description' => 'Delete lookup',
         ],
     ],
+    'settings' => [
+        'update' => [
+            'description' => 'Update system settings',
+        ],
+    ]
 
 ];
