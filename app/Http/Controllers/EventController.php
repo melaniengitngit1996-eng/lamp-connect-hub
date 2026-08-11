@@ -21,6 +21,7 @@ class EventController extends Controller
                 'title' => $event->title,
                 'description' => $event->description,
                 'image' => $event->cover_image,
+                'cover_image_url' => $event->cover_image_url,
                 'published_at' => $event->starts_at->diffForHumans(),
             ]);
     }

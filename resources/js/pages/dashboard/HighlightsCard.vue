@@ -87,7 +87,7 @@ onMounted(loadEvents)
                         class="relative aspect-[16/9] w-full rounded-xl overflow-hidden"
                     >
                         <img
-                            :src="currentEvent.image"
+                            :src="currentEvent.cover_image_url"
                             :alt="currentEvent.title"
                             class="absolute inset-0 h-full w-full object-cover"
                         >
