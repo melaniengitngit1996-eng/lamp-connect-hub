@@ -67,7 +67,7 @@ watch(
             cover_image: null,
         })
 
-        imagePreview.value = props.event.cover_image
+        imagePreview.value = props.event.cover_image_url
     },
     { immediate: true }
 )
