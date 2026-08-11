@@ -104,7 +104,7 @@ onMounted(loadEvents)
                             <div class="flex items-start gap-3">
                                 <img
                                     v-if="event.cover_image"
-                                    :src="event.cover_image"
+                                    :src="event.cover_image_url"
                                     class="h-14 w-20 rounded-md object-cover border"
                                 >
 

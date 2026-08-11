@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 class Event extends Model
 {
@@ -26,6 +27,8 @@ class Event extends Model
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
     ];
+
+    protected $appends = ['cover_image_url'];
 
     protected function startsAtFormatted(): Attribute
     {
@@ -58,5 +61,12 @@ class Event extends Model
                     . $this->ends_at->format('M j, Y g:i A');
             },
         );
+    }
+
+    public function getCoverImageUrlAttribute()
+    {
+        return $this->cover_image
+            ? Storage::url($this->cover_image)
+            : null;
     }
 }

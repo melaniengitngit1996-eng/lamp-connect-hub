@@ -36,6 +36,7 @@ class EventController extends Controller
                 'slug' => $event->slug,
                 'description' => $event->description,
                 'cover_image' => $event->cover_image,
+                'cover_image_url' => $event->cover_image_url,
                 'starts_at' => $event->starts_at,
                 'ends_at' => $event->ends_at,
 
