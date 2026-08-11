@@ -41,12 +41,6 @@ return [
             'rules' => ['boolean'],
         ],
 
-        'chat_attachments_enabled' => [
-            'type' => 'boolean',
-            'default' => true,
-            'rules' => ['boolean'],
-        ],
-
     ],
 
     'feed' => [
@@ -66,12 +60,6 @@ return [
     ],
 
     'drive' => [
-
-        'member_uploads_enabled' => [
-            'type' => 'boolean',
-            'default' => true,
-            'rules' => ['boolean'],
-        ],
 
         'max_upload_size' => [
             'type' => 'number',

@@ -305,19 +305,6 @@ onMounted(loadSettings)
                                 class="flex flex-col gap-3 py-4 first:pt-0 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
                                 <div class="space-y-1"><label
                                         class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-medium"
-                                        for="drive_uploads_enabled">Member uploads</label>
-                                    <p class="text-xs text-muted-foreground max-w-md">When off, only administrators can
-                                        upload files to the Drive.</p>
-                                </div>
-                                <div class="shrink-0 sm:w-64 sm:text-right">
-                                    <Switch id="member_uploads_enabled" v-model="settings.drive.member_uploads_enabled"
-                                        @change="saveSetting('drive.member_uploads_enabled', $event)" />
-                                </div>
-                            </div>
-                            <div
-                                class="flex flex-col gap-3 py-4 first:pt-0 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
-                                <div class="space-y-1"><label
-                                        class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-medium"
                                         for="drive_max_upload_mb">Maximum upload size (MB)</label>
                                     <p class="text-xs text-muted-foreground max-w-md">Largest single file a member is
                                         allowed to upload.</p>
