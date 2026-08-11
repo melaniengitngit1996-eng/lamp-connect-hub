@@ -1,7 +1,10 @@
 <script setup>
 import { ref, onMounted, nextTick, computed } from 'vue'
 import { useAuth } from '../../stores/auth'
+import { useSettings } from '../../stores/settings'
 const { logout, user, fetchUser, can } = useAuth()
+const settings = useSettings()
+
 
 import GroupChatDialog from '../../pages/chat/GroupChatDialog.vue'
 import DirectChatDialog from '../../pages/chat/DirectChatDialog.vue'
@@ -18,15 +21,15 @@ const showNewDirectChatDialog = ref(false)
 const showChatMembersDialog = ref(false)
 
 const openNewGroupChatDialog = (item, type) => {
-    showNewGroupChatDialog.value = true
+	showNewGroupChatDialog.value = true
 }
 
 const openNewDirectChatDialog = (item, type) => {
-    showNewDirectChatDialog.value = true
+	showNewDirectChatDialog.value = true
 }
 
 const openChatMembersDialog = (item, type) => {
-    showChatMembersDialog.value = true
+	showChatMembersDialog.value = true
 }
 
 const channels = ref([])
@@ -39,107 +42,106 @@ const newMessage = ref('')
 const messagesContainer = ref(null)
 
 const loadChats = async () => {
-    const { data } = await axios.get('/api/chat')
+	const { data } = await axios.get('/api/chat')
 
-    channels.value = data.channels
-    groups.value = data.groups
-    directMessages.value = data.direct_messages
+	channels.value = data.channels
+	groups.value = data.groups
+	directMessages.value = data.direct_messages
 
-    // Desktop only
-    if (window.innerWidth >= 768) {
-        const firstConversation =
-            channels.value[0] ??
-            groups.value[0] ??
-            directMessages.value[0]
+	// Desktop only
+	if (window.innerWidth >= 768) {
+		const firstConversation =
+			channels.value[0] ??
+			groups.value[0] ??
+			directMessages.value[0]
 
-        if (firstConversation) {
-            await loadConversation(firstConversation)
-        }
-    }
+		if (firstConversation) {
+			await loadConversation(firstConversation)
+		}
+	}
 }
 
 const loadConversation = async (conversation) => {
-    try {
-        const { data } = await axios.get(
-            `/api/chat/conversations/${conversation.id}`
-        )
+	try {
+		const { data } = await axios.get(
+			`/api/chat/conversations/${conversation.id}`
+		)
 
-        selectedConversation.value = data.conversation
-        members.value = data.members
-        messages.value = data.messages.data ?? data.messages
-    } catch (error) {
-        console.error(error)
-    }
+		selectedConversation.value = data.conversation
+		members.value = data.members
+		messages.value = data.messages.data ?? data.messages
+	} catch (error) {
+		console.error(error)
+	}
 }
 
 const sendMessage = async () => {
 
-    if (!newMessage.value.trim()) {
-        return
-    }
+	if (!newMessage.value.trim()) {
+		return
+	}
 
-    const { data } = await axios.post(
-        `/api/chat/conversations/${selectedConversation.value.id}/messages`,
-        {
-            message: newMessage.value
-        }
-    )
+	const { data } = await axios.post(
+		`/api/chat/conversations/${selectedConversation.value.id}/messages`,
+		{
+			message: newMessage.value
+		}
+	)
 
-    messages.value.push(data.data)
+	messages.value.push(data.data)
 
-    newMessage.value = ''
+	newMessage.value = ''
 
 	await scrollToBottom()
 }
 
 const scrollToBottom = async () => {
-    await nextTick()
+	await nextTick()
 
-    if (messagesContainer.value) {
-        messagesContainer.value.scrollTop =
-            messagesContainer.value.scrollHeight
-    }
+	if (messagesContainer.value) {
+		messagesContainer.value.scrollTop =
+			messagesContainer.value.scrollHeight
+	}
 }
 
 const handleConversationCreated = async (conversation) => {
-    showNewDirectChatDialog.value = false
+	showNewDirectChatDialog.value = false
 
-    await loadChats()
-    await loadConversation(conversation)
+	await loadChats()
+	await loadConversation(conversation)
 }
 
 const handleGroupCreated = async (conversation) => {
-    showNewGroupChatDialog.value = false
+	showNewGroupChatDialog.value = false
 
-    await loadChats()
-    await loadConversation(conversation)
+	await loadChats()
+	await loadConversation(conversation)
 }
 
 const isMobile = computed(() => window.innerWidth < 768)
 
 
 onMounted(() => {
-    loadChats()
+	loadChats()
+	settings.load()
 })
 </script>
 
 <template>
-<div class="h-screen flex">
+	<div class="h-screen flex">
 
-	<aside
-    :class="[
-        'border-r bg-card/30',
-        selectedConversation
-            ? 'hidden md:block md:w-72 md:flex-col'
-            : 'flex w-full flex-col md:w-72'
-    ]"
->
-		<div class="px-4 py-4 border-b">
-			<h1 class="font-display text-xl">Messages</h1>
-			<p class="text-xs text-muted-foreground">Group chats</p>
-		</div>
-		<div class="flex-1 overflow-y-auto px-2 py-3 space-y-5">
-			<!-- <div>
+		<aside :class="[
+			'border-r bg-card/30',
+			selectedConversation
+				? 'hidden md:block md:w-72 md:flex-col'
+				: 'flex w-full flex-col md:w-72'
+		]">
+			<div class="px-4 py-4 border-b">
+				<h1 class="font-display text-xl">Messages</h1>
+				<p class="text-xs text-muted-foreground">Group chats</p>
+			</div>
+			<div class="flex-1 overflow-y-auto px-2 py-3 space-y-5">
+				<!-- <div>
 				<div class="flex items-center justify-between px-2 mb-1">
 					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Channels</span>
 				</div>
@@ -164,190 +166,165 @@ onMounted(() => {
 					No channels available
 				</div>
 			</div> -->
-			<div>
-				<div class="flex items-center justify-between px-2 mb-1">
-					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Group chats</span>
-					<button v-if="can('chat.manager')" @click="openNewGroupChatDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
-						<PlusIcon />
-					</button>
-				</div>
-				<ul v-if="groups.length" class="space-y-0.5">
-					<li v-for="group in groups"
-						:key="group.id">
-						<button
-							@click="loadConversation(group)"
-							:class="[
+				<div v-if="settings.chat.group_chat_enabled">
+					<div class="flex items-center justify-between px-2 mb-1">
+						<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Group
+							chats</span>
+						<button v-if="can('chat.manager')" @click="openNewGroupChatDialog"
+							class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
+							<PlusIcon />
+						</button>
+					</div>
+					<ul v-if="groups.length" class="space-y-0.5">
+						<li v-for="group in groups" :key="group.id">
+							<button @click="loadConversation(group)" :class="[
 								'w-full flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left hover:bg-accent transition',
 								selectedConversation?.id === group.id && 'bg-accent'
-							]"
-						>
-							<div class="h-9 w-9 rounded-full bg-muted grid place-items-center text-muted-foreground">
-								<GroupIcon />
-							</div>
-							<span class="text-sm truncate flex-1">{{ group.name }}</span>
+							]">
+								<div
+									class="h-9 w-9 rounded-full bg-muted grid place-items-center text-muted-foreground">
+									<GroupIcon />
+								</div>
+								<span class="text-sm truncate flex-1">{{ group.name }}</span>
+							</button>
+						</li>
+					</ul>
+					<div v-else class="italic px-2 py-3 text-center text-muted-foreground text-xs">
+						No group chats yet
+					</div>
+				</div>
+				<div v-if="settings.chat.personal_chat_enabled">
+					<div class="flex items-center justify-between px-2 mb-1">
+						<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Direct
+							messages</span>
+						<button @click="openNewDirectChatDialog"
+							class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
+							<PlusIcon />
 						</button>
-					</li>
-				</ul>
-				<div v-else class="italic px-2 py-3 text-center text-muted-foreground text-xs">
-					No group chats yet
-				</div>
-			</div>
-			<div>
-				<div class="flex items-center justify-between px-2 mb-1">
-					<span class="text-[11px] uppercase tracking-wide text-muted-foreground font-medium">Direct messages</span>
-					<button @click="openNewDirectChatDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-6 w-6">
-						<PlusIcon />
-					</button>
-				</div>
-				<ul v-if="directMessages.length" class="space-y-0.5">
-					<li v-for="directMessage in directMessages"
-						:key="directMessage.id">
-						<button
-							@click="loadConversation(directMessage)"
-							:class="[
+					</div>
+					<ul v-if="directMessages.length" class="space-y-0.5">
+						<li v-for="directMessage in directMessages" :key="directMessage.id">
+							<button @click="loadConversation(directMessage)" :class="[
 								'w-full flex items-center gap-2.5 rounded-md px-2 py-1.5 text-left hover:bg-accent transition',
 								selectedConversation?.id === directMessage.id && 'bg-accent'
-							]"
-						>
-							<span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
-								<span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
-									{{ directMessage.initials }}
+							]">
+								<span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
+									<span
+										class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
+										{{ directMessage.initials }}
+									</span>
 								</span>
-							</span>
-							<span class="text-sm truncate flex-1">{{ directMessage.name }}</span>
-						</button>
-					</li>
-				</ul>
-				<div v-else class="italic px-2 py-3 text-center text-muted-foreground text-xs">
-					No conversations yet.
+								<span class="text-sm truncate flex-1">{{ directMessage.name }}</span>
+							</button>
+						</li>
+					</ul>
+					<div v-else class="italic px-2 py-3 text-center text-muted-foreground text-xs">
+						No conversations yet.
+					</div>
 				</div>
 			</div>
-		</div>
-	</aside>
+		</aside>
 
-	<div
-    :class="[
-        'flex-1 min-w-0 flex-col',
-        selectedConversation
-            ? 'flex'
-            : 'hidden md:flex'
-    ]"
->
-		<header class="px-6 py-4 border-b flex items-center gap-3">
-			<button @click="selectedConversation = null" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left h-5 w-5" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg></button>
-			<div v-if="selectedConversation?.type != 'direct'" class="h-9 w-9 rounded-full bg-muted grid place-items-center text-muted-foreground">
-				<GroupIcon />
-			</div>
-			<span v-else class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
-				<span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
-					{{ selectedConversation?.initials }}
+		<div :class="[
+			'flex-1 min-w-0 flex-col',
+			selectedConversation
+				? 'flex'
+				: 'hidden md:flex'
+		]">
+			<header class="px-6 py-4 border-b flex items-center gap-3">
+				<button @click="selectedConversation = null"
+					class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9 md:hidden shrink-0"><svg
+						xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+						stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+						class="lucide lucide-chevron-left h-5 w-5" aria-hidden="true">
+						<path d="m15 18-6-6 6-6"></path>
+					</svg></button>
+				<div v-if="selectedConversation?.type != 'direct'"
+					class="h-9 w-9 rounded-full bg-muted grid place-items-center text-muted-foreground">
+					<GroupIcon />
+				</div>
+				<span v-else class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
+					<span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
+						{{ selectedConversation?.initials }}
+					</span>
 				</span>
-			</span>
-			<div class="min-w-0">
-				<div class="font-display text-lg truncate">{{ selectedConversation?.name }}</div>
-				<div class="text-xs text-muted-foreground" v-if="selectedConversation?.type !== 'direct'">{{ selectedConversation?.members_count }} members</div>
-			</div>
-			<button v-if="
-				selectedConversation?.type === 'group' &&
-				selectedConversation?.is_owner
-			"
-			@click="openChatMembersDialog" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto">
-				<GroupIcon /> Members
-			</button>
-		</header>
-		<div ref="messagesContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-4">
-			<div
-				v-if="!messages.length"
-				class="h-full flex items-center justify-center text-muted-foreground"
-			>
-				No messages yet.
-				Start the conversation.
-			</div>
-			<div
-				v-else
-				v-for="message in messages"
-				:key="message.id"
-				:class="[
+				<div class="min-w-0">
+					<div class="font-display text-lg truncate">{{ selectedConversation?.name }}</div>
+					<div class="text-xs text-muted-foreground" v-if="selectedConversation?.type !== 'direct'">{{
+						selectedConversation?.members_count }} members</div>
+				</div>
+				<button v-if="
+					selectedConversation?.type === 'group' &&
+					selectedConversation?.is_owner
+				" @click="openChatMembersDialog"
+					class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-8 rounded-md px-3 text-xs ml-auto">
+					<GroupIcon /> Members
+				</button>
+			</header>
+			<div ref="messagesContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+				<div v-if="!messages.length" class="h-full flex items-center justify-center text-muted-foreground">
+					No messages yet.
+					Start the conversation.
+				</div>
+				<div v-else v-for="message in messages" :key="message.id" :class="[
 					'flex gap-2',
 					message.sender.id === user.id
 						? 'flex-row-reverse'
 						: ''
-				]"
-			>
-				<span class="relative flex overflow-hidden rounded-full h-8 w-8 shrink-0">
-					<span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
-						{{ message.sender.initials }}
+				]">
+					<span class="relative flex overflow-hidden rounded-full h-8 w-8 shrink-0">
+						<span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
+							{{ message.sender.initials }}
+						</span>
 					</span>
-				</span>
 
-				<div
-					:class="[
+					<div :class="[
 						'max-w-[75%] flex flex-col gap-1',
 						message.sender.id === user.id
 							? 'items-end'
 							: 'items-start'
-					]"
-				>
-					<div class="text-xs text-muted-foreground">
-						{{ message.sender.name }}
-					</div>
+					]">
+						<div class="text-xs text-muted-foreground">
+							{{ message.sender.name }}
+						</div>
 
-					<div
-						:class="[
+						<div :class="[
 							'rounded-2xl px-3.5 py-2 text-sm break-words',
 							message.sender.id === user.id
 								? 'bg-primary text-primary-foreground'
 								: 'bg-muted'
-						]"
-					>
-						{{ message.message }}
+						]">
+							{{ message.message }}
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
-		<div class="border-t p-3 space-y-2">
-			<div class="flex gap-2">
-				<!-- <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9">
+			<div class="border-t p-3 space-y-2">
+				<div class="flex gap-2">
+					<!-- <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9">
 					<PaperClipIcon />
 				</button> -->
-				<input class="hidden" type="file" /><input
-					v-model="newMessage"
-					@keydown.enter.prevent="sendMessage"
-					class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-					:placeholder="selectedConversation
-					? `Message ${selectedConversation.name}`
-					: 'Type a message...'"
-					value=""
-				/>
-				<button
-					@click="sendMessage"
-					class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2"
-				>
-					<PlaneIcon />
-				</button>
+					<input class="hidden" type="file" /><input v-model="newMessage" @keydown.enter.prevent="sendMessage"
+						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+						:placeholder="selectedConversation
+							? `Message ${selectedConversation.name}`
+							: 'Type a message...'" value="" />
+					<button @click="sendMessage"
+						class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+						<PlaneIcon />
+					</button>
+				</div>
 			</div>
 		</div>
+
+		<GroupChatDialog :open="showNewGroupChatDialog" @created="handleGroupCreated"
+			@close="showNewGroupChatDialog = false" />
+
+		<DirectChatDialog :open="showNewDirectChatDialog" @created="handleConversationCreated"
+			@close="showNewDirectChatDialog = false" />
+
+		<ChatMembersDialog :open="showChatMembersDialog" :conversation="selectedConversation" :members="members"
+			@close="showChatMembersDialog = false" @member-removed="loadConversation(selectedConversation)"
+			@member-added="loadConversation(selectedConversation)" />
 	</div>
-
-    <GroupChatDialog
-        :open="showNewGroupChatDialog"
-		@created="handleGroupCreated"
-        @close="showNewGroupChatDialog = false"
-    />
-
-    <DirectChatDialog
-        :open="showNewDirectChatDialog"
-		@created="handleConversationCreated"
-        @close="showNewDirectChatDialog = false"
-    />
-
-	<ChatMembersDialog
-        :open="showChatMembersDialog"
-		:conversation="selectedConversation"
-		:members="members"
-        @close="showChatMembersDialog = false"
-		@member-removed="loadConversation(selectedConversation)"
-		@member-added="loadConversation(selectedConversation)"
-    />
-</div>
 </template>
