@@ -89,17 +89,9 @@ const close = () => {
 </script>
 
 <template>
-    <Dialog
-        :open="open"
-        title="Upload file"
-        @close="close"
-    >
+    <Dialog :open="open" title="Upload file" @close="close">
         <div class="space-y-4">
-            <input
-                ref="fileInput"
-                type="file"
-                @change="handleFileChange"
-                class="block w-full rounded-md border border-input bg-background p-2 text-sm text-muted-foreground
+            <input ref="fileInput" type="file" @change="handleFileChange" class="block w-full rounded-md border border-input bg-background p-2 text-sm text-muted-foreground
                     file:mr-3
                     file:rounded-md
                     file:border-0
@@ -111,30 +103,19 @@ const close = () => {
                     file:text-primary-foreground
                     file:cursor-pointer
                     hover:file:opacity-90
-                    cursor-pointer"
-            />
+                    cursor-pointer" />
 
-            <p
-                v-if="errors.file"
-                class="text-sm text-destructive"
-            >
+            <p v-if="errors.file" class="text-sm text-destructive">
                 {{ errors.file[0] }}
             </p>
 
             <div class="flex justify-end gap-2">
-                <Button
-                    type="plain"
-                    @click="close"
-                >
+                <Button type="plain" @click="close">
                     Cancel
                 </Button>
 
-                <Button
-                    type="primary"
-                    :disabled="!file || loading"
-                    @click="uploadFile"
-                >
-                    Upload
+                <Button type="primary" :disabled="!file || loading" @click="uploadFile">
+                    {{ loading ? 'Uploading...' : 'Upload' }}
                 </Button>
             </div>
         </div>
