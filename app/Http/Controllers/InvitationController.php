@@ -151,6 +151,18 @@ class InvitationController extends Controller
 
         $invitation = Invitation::where('token', $token)->first();
 
+        if (
+            User::where('email', $invitation->email)->exists()
+        ) {
+            return response()->json([
+                'errors' => [
+                    'email' => [
+                        'The email has already been taken.',
+                    ],
+                ]
+            ], 422);
+        }
+
         if (! $invitation) {
             return response()->json([
                 'message' => 'Invitation not found.',
@@ -192,6 +204,11 @@ class InvitationController extends Controller
             $invitation,
             $localChurchId
         ) {
+            $autoApprove = setting(
+                'general.auto_approve_members',
+                false
+            );
+
             $member = User::create([
                 'member_id' => $invitation->member_id,
                 'local_church_id' => $localChurchId,
@@ -199,6 +216,7 @@ class InvitationController extends Controller
                 'username' => $validated['username'],
                 'email' => $invitation->email,
                 'password' => Hash::make($validated['password']),
+                'status' => $autoApprove ? 'approved' : 'pending',
             ]);
 
             $member->syncRoles(['Member']);
