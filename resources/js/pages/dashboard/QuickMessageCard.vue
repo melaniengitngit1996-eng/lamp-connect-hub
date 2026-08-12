@@ -3,6 +3,8 @@ import axios from 'axios'
 import { onMounted, ref, reactive } from 'vue'
 import TrashIcon from '../../icons/TrashIcon.vue'
 import { useSettings } from '../../stores/settings'
+import { useAuth } from '../../stores/auth'
+const { user } = useAuth()
 const settings = useSettings()
 
 const posts = ref([])
@@ -102,8 +104,11 @@ async function deleteComment(post, comment) {
     post.comments--
 }
 
-onMounted(loadPosts)
+const isAdministrator =
+    user.value?.roles?.includes('Administrator') ?? false
+
 onMounted(() => {
+    loadPosts();
     settings.load()
 })
 </script>
@@ -130,7 +135,8 @@ onMounted(() => {
                     Share with the LAMP family</p>
             </div>
         </div>
-        <div v-if="settings.feed.feed_posting_enabled" class="rounded-xl border bg-card/50 p-3 space-y-3">
+        <div v-if="settings.feed.feed_posting_enabled || isAdministrator"
+            class="rounded-xl border bg-card/50 p-3 space-y-3">
             <textarea v-model="form.content"
                 class="bg-transparent border border-input border-none disabled:cursor-not-allowed disabled:opacity-50 flex focus-visible:outline-none focus-visible:ring-0 md:text-sm min-h-[70px] placeholder:text-muted-foreground px-3 py-2 resize-none rounded-md shadow-sm text-base w-full"
                 placeholder="Share an update, a verse, a prayer request..."></textarea>

@@ -14,10 +14,24 @@ class FileController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'file' => ['required', 'file', 'max:10240'], // 10MB
-            'folder_id' => ['nullable', 'exists:file_folders,id'],
-        ]);
+        $maxUploadSize = (int) setting('drive.max_upload_size', 50);
+
+        $validated = $request->validate(
+            [
+                'file' => [
+                    'required',
+                    'file',
+                    'max:' . ($maxUploadSize * 1024),
+                ],
+                'folder_id' => [
+                    'nullable',
+                    'exists:file_folders,id',
+                ],
+            ],
+            [
+                'file.max' => "The file must not be greater than {$maxUploadSize} MB.",
+            ]
+        );
 
         $uploadedFile = $request->file('file');
 

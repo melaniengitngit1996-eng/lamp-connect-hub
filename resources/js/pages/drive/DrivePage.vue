@@ -36,7 +36,7 @@ import RenameDialog from './RenameDialog.vue';
 import MoveDialog from './MoveDialog.vue';
 
 import Popover from '@/components/Popover.vue'
- 
+
 const showNewFolderDialog = ref(false)
 const showDeleteFolderDialog = ref(false)
 const showUploadDialog = ref(false)
@@ -299,339 +299,245 @@ const handleActivity = (file, close) => {
 </script>
 
 <template>
-<div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
-    <header class="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-            <h1 class="font-display text-3xl">Drive</h1>
-            <p class="text-sm text-muted-foreground">Shared files for the LAMP Church community.</p>
+    <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+        <header class="flex items-start justify-between gap-4 flex-wrap">
+            <div>
+                <h1 class="font-display text-3xl">Drive</h1>
+                <p class="text-sm text-muted-foreground">Shared files for the LAMP Church community.</p>
+            </div>
+            <div class="flex gap-2">
+                <Button :type="view === 'starred' ? 'primary' : 'plain'" @click="toggleStarred">
+                    <UnstarredIcon />
+                    Starred
+                </Button>
+
+                <Button v-if="can('drive.upload')" type="plain" @click="showNewFolderDialog = true">
+                    <FolderPlusIcon />
+                    New folder
+                </Button>
+
+                <Button v-if="can('drive.upload')" type="primary" @click="showUploadDialog = true">
+                    <UploadIcon />
+                    Upload
+                </Button>
+                <input multiple="" class="hidden" type="file">
+            </div>
+        </header>
+        <div class="relative">
+            <SearchIcon />
+
+            <input v-model="search"
+                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-9 pr-9"
+                placeholder="Search all files and folders…">
         </div>
-        <div class="flex gap-2">
-            <Button
-                :type="view === 'starred' ? 'primary' : 'plain'"
-                @click="toggleStarred"
-            >
-                <UnstarredIcon />
-                Starred
-            </Button>
-
-            <Button v-if="can('drive.upload')" type="plain" @click="showNewFolderDialog = true">
-                <FolderPlusIcon />
-                New folder
-            </Button>
-
-            <Button v-if="can('drive.upload')" type="primary" @click="showUploadDialog = true">
-                <UploadIcon />
-                Upload
-            </Button>
-            <input multiple="" class="hidden" type="file">
+        <div v-if="search" class="text-sm text-muted-foreground">
+            Search results for
+            <span class="font-medium text-foreground">
+                "{{ search }}"
+            </span>
+            · {{ totalMatches }} {{ matchLabel }}
         </div>
-    </header>
-    <div class="relative">
-        <SearchIcon />
-
-        <input 
-            v-model="search"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-9 pr-9" 
-            placeholder="Search all files and folders…" 
-        >
-    </div>
-    <div
-        v-if="search"
-        class="text-sm text-muted-foreground"
-    >
-        Search results for
-        <span class="font-medium text-foreground">
-            "{{ search }}"
-        </span>
-        · {{ totalMatches }} {{ matchLabel }}
-    </div>
-    <div v-if="!search" class="flex items-center gap-1 text-sm flex-wrap">
-        <button
-            @click="goHome"
-            class="px-2 py-1 rounded hover:bg-accent font-medium"
-        >
-            <HomeIcon />
-            Drive
-        </button>
-
-        <template
-            v-for="(crumb, index) in breadcrumbs"
-            :key="crumb.id"
-        >
-            <CaretIcon />
-
-            <button
-                @click="navigateBreadcrumb(index)"
-                class="px-2 py-1 rounded hover:bg-accent"
-            >
-                {{ crumb.name }}
+        <div v-if="!search" class="flex items-center gap-1 text-sm flex-wrap">
+            <button @click="goHome" class="px-2 py-1 rounded hover:bg-accent font-medium">
+                <HomeIcon />
+                Drive
             </button>
-        </template>
 
-    </div>
-    <div class="rounded-xl border bg-card text-card-foreground shadow divide-y">
-        <div
-            v-if="folders.length === 0 && files.length === 0"
-            class="text-center py-16 text-sm text-muted-foreground"
-        >
-            This folder is empty.
+            <template v-for="(crumb, index) in breadcrumbs" :key="crumb.id">
+                <CaretIcon />
+
+                <button @click="navigateBreadcrumb(index)" class="px-2 py-1 rounded hover:bg-accent">
+                    {{ crumb.name }}
+                </button>
+            </template>
+
         </div>
-        <div
-            v-for="folder in folders"
-            :key="folder.id"
-            class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition"
-        >
-            <button @click="handleFolderClick(folder)" class="flex items-center gap-3 flex-1 min-w-0 text-left">
-                <FolderOrangeIcon />
+        <div class="rounded-xl border bg-card text-card-foreground shadow divide-y">
+            <div v-if="folders.length === 0 && files.length === 0"
+                class="text-center py-16 text-sm text-muted-foreground">
+                This folder is empty.
+            </div>
+            <div v-for="folder in folders" :key="folder.id"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition">
+                <button @click="handleFolderClick(folder)" class="flex items-center gap-3 flex-1 min-w-0 text-left">
+                    <FolderOrangeIcon />
 
-                <div class="flex-1 min-w-0">
-                    <div class="text-sm font-medium truncate">
-                        {{ folder.name }}
-                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium truncate">
+                            {{ folder.name }}
+                        </div>
 
-                    <div class="text-xs text-muted-foreground">
-                        Folder · {{ folder.created_human }}
+                        <div class="text-xs text-muted-foreground">
+                            Folder · {{ folder.created_human }}
+                        </div>
                     </div>
+                </button>
+
+                <button v-if="search" @click.stop="openFolderLocation(folder)"
+                    class="hidden md:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent max-w-[40%] truncate"
+                    title="Open location">
+                    <FolderShrink />
+                    <span class="truncate">{{ folder.path_human }}</span>
+                </button>
+
+                <div class="hidden sm:flex items-center gap-2">
+                    <span class="text-xs text-muted-foreground">
+                        {{ folder.owner?.name }}
+                    </span>
                 </div>
-            </button>
 
-            <button 
-                v-if="search" 
-                @click.stop="openFolderLocation(folder)" 
-                class="hidden md:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent max-w-[40%] truncate" 
-                title="Open location"
-            >
-                <FolderShrink />
-                <span class="truncate">{{ folder.path_human }}</span>
-            </button>
+                <Button type="icon" @click.stop="toggleFavorite(folder, 'folder')">
+                    <StarredIcon v-if="folder.is_favorited" />
+                    <UnstarredIcon v-else />
+                </Button>
 
-            <div class="hidden sm:flex items-center gap-2">
-                <span class="text-xs text-muted-foreground">
-                    {{ folder.owner?.name }}
-                </span>
+                <Popover>
+                    <template #trigger>
+                        <Button type="icon">
+                            <EllipsisVerticalIcon />
+                        </Button>
+                    </template>
+
+                    <template #content="{ close }">
+
+                        <button v-if="folder.can_manage && can('drive.share')"
+                            @click.stop="handleShare(folder, 'folder', close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <ShareIcon />
+                            Share
+                        </button>
+
+                        <button v-if="folder.can_manage && can('drive.update')"
+                            @click.stop="handleRename(folder, 'folder', close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <PencilIconGray />
+                            Rename
+                        </button>
+
+                        <button @click.stop="handleMove(folder, 'folder', close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <FolderArrowIcon />
+                            Move
+                        </button>
+
+                        <div class="my-1 h-px bg-border" />
+
+                        <button v-if="folder.can_manage && can('drive.delete')"
+                            @click.stop="handleDeleteFolder(folder, close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-destructive hover:bg-accent">
+                            <RedTrashIcon />
+                            Delete
+                        </button>
+
+                    </template>
+                </Popover>
             </div>
 
-            <Button
-                type="icon"
-                @click.stop="toggleFavorite(folder, 'folder')"
-            >
-                <StarredIcon v-if="folder.is_favorited" />
-                <UnstarredIcon v-else />
-            </Button>
+            <div v-for="file in files" :key="file.id"
+                class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition">
+                <button class="flex items-center gap-3 flex-1 min-w-0 text-left">
+                    <FileBlueIcon />
 
-            <Popover>
-                <template #trigger>
-                    <Button type="icon">
-                        <EllipsisVerticalIcon />
-                    </Button>
-                </template>
+                    <div class="flex-1 min-w-0" @click="previewFile(file)">
+                        <div class="text-sm font-medium truncate">
+                            {{ file.name }}
+                        </div>
 
-                <template #content="{ close }">
-
-                    <button
-                        v-if="folder.can_manage && can('drive.share')"
-                        @click.stop="handleShare(folder, 'folder', close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <ShareIcon />
-                        Share
-                    </button>
-
-                    <button
-                        v-if="folder.can_manage && can('drive.update')"
-                        @click.stop="handleRename(folder, 'folder', close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <PencilIconGray />
-                        Rename
-                    </button>
-
-                    <button
-                        @click.stop="handleMove(folder, 'folder', close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <FolderArrowIcon />
-                        Move
-                    </button>
-
-                    <div class="my-1 h-px bg-border" />
-
-                    <button
-                        v-if="folder.can_manage && can('drive.delete')"
-                        @click.stop="handleDeleteFolder(folder, close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-destructive hover:bg-accent"
-                    >
-                        <RedTrashIcon />
-                        Delete
-                    </button>
-
-                </template>
-            </Popover>
-        </div>
-
-        <div
-            v-for="file in files"
-            :key="file.id"
-            class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition"
-        >
-            <button class="flex items-center gap-3 flex-1 min-w-0 text-left">
-                <FileBlueIcon />
-
-                <div class="flex-1 min-w-0" @click="previewFile(file)">
-                    <div class="text-sm font-medium truncate">
-                        {{ file.name }}
+                        <div class="text-xs text-muted-foreground">
+                            {{ file.size_human }} · {{ file.created_human }}
+                        </div>
                     </div>
+                </button>
 
-                    <div class="text-xs text-muted-foreground">
-                        {{ file.size_human }} · {{ file.created_human }}
-                    </div>
+                <button v-if="search" @click.stop="openFileLocation(file)"
+                    class="hidden md:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent max-w-[40%] truncate"
+                    title="Open location">
+                    <FolderShrink />
+                    <span class="truncate">{{ file.path_human }}</span>
+                </button>
+
+                <div class="hidden sm:flex items-center gap-2">
+                    <span class="text-xs text-muted-foreground">
+                        {{ file.uploader?.name }}
+                    </span>
                 </div>
-            </button>
 
-            <button 
-                v-if="search" 
-                @click.stop="openFileLocation(file)" 
-                class="hidden md:flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-2 py-1 rounded hover:bg-accent max-w-[40%] truncate" 
-                title="Open location"
-            >
-                <FolderShrink />
-                <span class="truncate">{{ file.path_human }}</span>
-            </button>
+                <Button type="icon" @click.stop="toggleFavorite(file, 'file')">
+                    <StarredIcon v-if="file.is_favorited" />
+                    <UnstarredIcon v-else />
+                </Button>
 
-            <div class="hidden sm:flex items-center gap-2">
-                <span class="text-xs text-muted-foreground">
-                    {{ file.uploader?.name }}
-                </span>
+                <Popover>
+                    <template #trigger>
+                        <Button type="icon">
+                            <EllipsisVerticalIcon />
+                        </Button>
+                    </template>
+
+                    <template #content="{ close }">
+
+                        <button v-if="file.can_manage && can('drive.share')"
+                            @click.stop="handleShare(file, 'file', close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <ShareIcon />
+                            Share
+                        </button>
+
+                        <button v-if="file.can_manage && can('drive.update')"
+                            @click.stop="handleRename(file, 'file', close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <PencilIconGray />
+                            Rename
+                        </button>
+
+                        <button @click.stop="handleActivity(file, close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <PulseIcon />
+                            Activity
+                        </button>
+
+                        <button @click.stop="handleMove(file, 'file', close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent">
+                            <FolderArrowIcon />
+                            Move
+                        </button>
+
+                        <div class="my-1 h-px bg-border" />
+
+                        <button v-if="file.can_manage && can('drive.delete')"
+                            @click.stop="handleDeleteFile(file, close)"
+                            class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-destructive hover:bg-accent">
+                            <RedTrashIcon />
+                            Delete
+                        </button>
+
+                    </template>
+                </Popover>
             </div>
-
-            <Button
-                type="icon"
-                @click.stop="toggleFavorite(file, 'file')"
-            >
-                <StarredIcon v-if="file.is_favorited" />
-                <UnstarredIcon v-else />
-            </Button>
-
-            <Popover>
-                <template #trigger>
-                    <Button type="icon">
-                        <EllipsisVerticalIcon />
-                    </Button>
-                </template>
-
-                <template #content="{ close }">
-
-                    <button
-                        v-if="file.can_manage && can('drive.share')"
-                        @click.stop="handleShare(file, 'file', close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <ShareIcon />
-                        Share
-                    </button>
-
-                    <button
-                        v-if="file.can_manage && can('drive.update')"
-                        @click.stop="handleRename(file, 'file', close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <PencilIconGray />
-                        Rename
-                    </button>
-
-                    <button
-                        @click.stop="handleActivity(file, close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <PulseIcon />
-                        Activity
-                    </button>
-
-                    <button
-                        @click.stop="handleMove(file, 'file', close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-accent"
-                    >
-                        <FolderArrowIcon />
-                        Move
-                    </button>
-
-                    <div class="my-1 h-px bg-border" />
-
-                    <button
-                        v-if="file.can_manage && can('drive.delete')"
-                        @click.stop="handleDeleteFile(file, close)"
-                        class="flex w-full items-center gap-2 rounded px-2 py-1.5 text-sm text-destructive hover:bg-accent"
-                    >
-                        <RedTrashIcon />
-                        Delete
-                    </button>
-
-                </template>
-            </Popover>
         </div>
+
+        <CreateFolderDialog :open="showNewFolderDialog" :parent-id="currentFolder?.id"
+            @close="showNewFolderDialog = false" @created="refreshFolders" />
+
+        <DeleteFolderDialog :open="showDeleteFolderDialog" :folder="selectedFolder"
+            @close="showDeleteFolderDialog = false" @deleted="refreshFolders" />
+
+        <DeleteFileDialog :open="showDeleteFileDialog" :file="selectedFile" @close="showDeleteFileDialog = false"
+            @deleted="refreshFolders" />
+
+        <UploadFileDialog :open="showUploadDialog" :folder-id="currentFolder?.id" @close="showUploadDialog = false"
+            @uploaded="refreshFolders" />
+
+        <PreviewDialog :open="showPreviewDialog" :file="selectedFile" @close="showPreviewDialog = false" />
+
+        <ShareDialog :open="showShareDialog" :item="selectedItem" :type="itemType" @close="showShareDialog = false" />
+
+        <ActivityDialog :open="showPulseDialog" :file="selectedFile" @close="showPulseDialog = false" />
+
+        <RenameDialog :open="showRenameDialog" :item="selectedItem" :type="itemType" @close="showRenameDialog = false"
+            @renamed="refreshFolders" />
+
+        <MoveDialog :open="showMoveDialog" :item="selectedItem" :type="itemType" @close="showMoveDialog = false"
+            @moved="refreshFolders" />
     </div>
-
-    <CreateFolderDialog
-        :open="showNewFolderDialog"
-        :parent-id="currentFolder?.id"
-        @close="showNewFolderDialog = false"
-        @created="refreshFolders"
-    />
-
-    <DeleteFolderDialog
-        :open="showDeleteFolderDialog"
-        :folder="selectedFolder"
-        @close="showDeleteFolderDialog = false"
-        @deleted="refreshFolders"
-    />
-
-    <DeleteFileDialog
-        :open="showDeleteFileDialog"
-        :file="selectedFile"
-        @close="showDeleteFileDialog = false"
-        @deleted="refreshFolders"
-    />
-
-    <UploadFileDialog
-        :open="showUploadDialog"
-        :folder-id="currentFolder?.id"
-        @close="showUploadDialog = false"
-        @uploaded="refreshFolders"
-    />
-
-    <PreviewDialog
-        :open="showPreviewDialog"
-        :file="selectedFile"
-        @close="showPreviewDialog = false"
-    />
-
-    <ShareDialog
-        :open="showShareDialog"
-        :item="selectedItem"
-        :type="itemType"
-        @close="showShareDialog = false"
-    />
-
-    <ActivityDialog 
-        :open="showPulseDialog"
-        :file="selectedFile"
-        @close="showPulseDialog = false"
-    />
-
-    <RenameDialog
-        :open="showRenameDialog"
-        :item="selectedItem"
-        :type="itemType"
-        @close="showRenameDialog = false"
-        @renamed="refreshFolders"
-    />
-
-    <MoveDialog 
-        :open="showMoveDialog"
-        :item="selectedItem"
-        :type="itemType"
-        @close="showMoveDialog = false"
-        @moved="refreshFolders"
-    />
-</div>
 </template>
