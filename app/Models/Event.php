@@ -69,4 +69,9 @@ class Event extends Model
             ? Storage::url($this->cover_image)
             : null;
     }
+
+    public function images()
+    {
+        return $this->hasMany(EventImage::class);
+    }
 }
