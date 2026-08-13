@@ -82,7 +82,7 @@ const subtitle = computed(() => {
 function getEventDuration() {
     const photoCount = currentImages.value.length || 1
 
-    return 3000 + ((photoCount - 1) * 2000)
+    return 3000 + ((photoCount - 1) * 3000)
 }
 
 /**
@@ -276,8 +276,8 @@ onBeforeUnmount(() => {
                             class="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                             <span v-for="(_, index) in currentImages" :key="index"
                                 class="h-1.5 rounded-full transition-all duration-300" :class="currentImage === index
-                                        ? 'w-6 bg-white'
-                                        : 'w-1.5 bg-white/50'
+                                    ? 'w-6 bg-white'
+                                    : 'w-1.5 bg-white/50'
                                     " />
                         </div>
                     </div>
@@ -299,8 +299,8 @@ onBeforeUnmount(() => {
                 <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                     <button v-for="(event, index) in events" :key="event.id" @click="selectEvent(index)"
                         class="h-2 w-2 rounded-full transition-all" :class="current === index
-                                ? 'bg-white w-6'
-                                : 'bg-white/50'
+                            ? 'bg-white w-6'
+                            : 'bg-white/50'
                             " />
                 </div>
             </template>
