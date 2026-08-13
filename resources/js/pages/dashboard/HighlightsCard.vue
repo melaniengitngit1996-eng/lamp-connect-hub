@@ -1,5 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import {
+    ref,
+    computed,
+    onMounted,
+    onBeforeUnmount,
+    watch,
+} from 'vue'
 
 const events = ref([])
 
@@ -24,7 +30,7 @@ const currentImages = computed(() => {
         return []
     }
 
-    // If the API already returns images
+    // Use event images if available
     if (currentEvent.value.images?.length) {
         return currentEvent.value.images
     }
@@ -46,18 +52,42 @@ const currentImageUrl = computed(() => {
         return currentEvent.value?.cover_image_url
     }
 
-    return currentImages.value[currentImage.value]?.url
-        ?? currentEvent.value?.cover_image_url
+    return (
+        currentImages.value[currentImage.value]?.url ??
+        currentEvent.value?.cover_image_url
+    )
 })
 
 const subtitle = computed(() => {
-    return events.value
-        .slice(0, 2)
-        .map(event => event.title)
-        .join(', ') +
+    return (
+        events.value
+            .slice(0, 2)
+            .map(event => event.title)
+            .join(', ') +
         (events.value.length > 2 ? ', and more' : '')
+    )
 })
 
+/**
+ * Event duration:
+ *
+ * 1 photo  = 3 seconds
+ * 2 photos = 5 seconds
+ * 3 photos = 7 seconds
+ * 4 photos = 9 seconds
+ *
+ * Formula:
+ * 3 seconds + 2 seconds for every additional photo
+ */
+function getEventDuration() {
+    const photoCount = currentImages.value.length || 1
+
+    return 3000 + ((photoCount - 1) * 2000)
+}
+
+/**
+ * Move to the next event.
+ */
 function next() {
     if (!events.value.length) return
 
@@ -65,8 +95,13 @@ function next() {
         (current.value + 1) % events.value.length
 
     currentImage.value = 0
+
+    startEventTimer()
 }
 
+/**
+ * Move to the previous event.
+ */
 function previous() {
     if (!events.value.length) return
 
@@ -75,8 +110,13 @@ function previous() {
         events.value.length
 
     currentImage.value = 0
+
+    startEventTimer()
 }
 
+/**
+ * Move to the next photo.
+ */
 function nextImage() {
     if (currentImages.value.length <= 1) {
         return
@@ -87,42 +127,94 @@ function nextImage() {
         currentImages.value.length
 }
 
+/**
+ * Select a specific event.
+ */
 function selectEvent(index) {
     current.value = index
     currentImage.value = 0
+
+    startEventTimer()
+}
+
+let eventTimeout
+let imageInterval
+
+/**
+ * Start/restart the timer for the current event.
+ *
+ * Example:
+ * 3 photos = 7 seconds total
+ *
+ * Each photo gets an equal portion of the event duration.
+ */
+function startEventTimer() {
+    clearTimeout(eventTimeout)
+    clearInterval(imageInterval)
+
+    const photoCount = currentImages.value.length || 1
+    const eventDuration = getEventDuration()
+
+    // If there are multiple photos,
+    // divide the event duration equally between them.
+    if (photoCount > 1) {
+        const photoDuration = eventDuration / photoCount
+
+        imageInterval = setInterval(() => {
+            nextImage()
+        }, photoDuration)
+    }
+
+    // Move to the next event after the full duration.
+    eventTimeout = setTimeout(() => {
+        current.value =
+            (current.value + 1) % events.value.length
+
+        currentImage.value = 0
+
+        startEventTimer()
+    }, eventDuration)
 }
 
 watch(events, (list) => {
+    if (!list.length) {
+        current.value = 0
+        currentImage.value = 0
+        return
+    }
+
     if (current.value >= list.length) {
         current.value = 0
     }
 
     currentImage.value = 0
+
+    startEventTimer()
 })
+
+let initialized = false
 
 watch(current, () => {
-    currentImage.value = 0
-})
+    if (!initialized) return
 
-let eventInterval
-let imageInterval
+    currentImage.value = 0
+    startEventTimer()
+})
 
 onMounted(async () => {
     await loadEvents()
 
-    // Change event every 5 seconds
-    eventInterval = setInterval(next, 5000)
-
-    // Change image every 3 seconds
-    imageInterval = setInterval(nextImage, 3000)
+    if (events.value.length) {
+        initialized = true
+        startEventTimer()
+    }
 })
 
 onBeforeUnmount(() => {
-    clearInterval(eventInterval)
+    clearTimeout(eventTimeout)
     clearInterval(imageInterval)
 })
 </script>
-
 
 <template>
     <div
@@ -151,19 +243,15 @@ onBeforeUnmount(() => {
             </div>
         </div>
 
-
         <!-- Event -->
         <div class="relative rounded-xl overflow-hidden">
-
             <template v-if="currentEvent">
-
                 <Transition name="fade" mode="out-in">
                     <div :key="`${currentEvent.id}-${currentImage}`"
                         class="relative aspect-[16/9] w-full rounded-xl overflow-hidden">
-
                         <!-- Image -->
                         <img :src="currentImageUrl" :alt="currentEvent.title"
-                            class="absolute inset-0 h-full w-full object-cover">
+                            class="absolute inset-0 h-full w-full object-cover" />
 
                         <!-- Overlay -->
                         <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
@@ -181,27 +269,19 @@ onBeforeUnmount(() => {
                             <p class="mt-2 text-base leading-snug line-clamp-3">
                                 {{ currentEvent.description }}
                             </p>
-
-                            <!-- <RouterLink :to="currentEvent.url"
-                                class="inline-flex items-center gap-1 mt-3 text-sm font-medium hover:underline">
-                                Learn more →
-                            </RouterLink> -->
                         </div>
-
 
                         <!-- Photo indicators -->
                         <div v-if="currentImages.length > 1"
                             class="absolute top-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                             <span v-for="(_, index) in currentImages" :key="index"
                                 class="h-1.5 rounded-full transition-all duration-300" :class="currentImage === index
-                                    ? 'w-6 bg-white'
-                                    : 'w-1.5 bg-white/50'
+                                        ? 'w-6 bg-white'
+                                        : 'w-1.5 bg-white/50'
                                     " />
                         </div>
-
                     </div>
                 </Transition>
-
 
                 <!-- Previous Event -->
                 <button v-if="events.length > 1" @click="previous"
@@ -209,32 +289,39 @@ onBeforeUnmount(() => {
                     ←
                 </button>
 
-
                 <!-- Next Event -->
                 <button v-if="events.length > 1" @click="next"
                     class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white hover:bg-black/60 transition">
                     →
                 </button>
 
-
                 <!-- Event Dots -->
                 <div class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                     <button v-for="(event, index) in events" :key="event.id" @click="selectEvent(index)"
                         class="h-2 w-2 rounded-full transition-all" :class="current === index
-                            ? 'bg-white w-6'
-                            : 'bg-white/50'
+                                ? 'bg-white w-6'
+                                : 'bg-white/50'
                             " />
                 </div>
-
             </template>
-
 
             <!-- Empty -->
             <div v-else
                 class="aspect-[16/9] rounded-xl bg-muted flex items-center justify-center text-muted-foreground">
                 No featured events.
             </div>
-
         </div>
     </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
