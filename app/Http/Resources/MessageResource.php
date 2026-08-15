@@ -14,6 +14,8 @@ class MessageResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $createdAt = $this->created_at?->timezone('Asia/Manila');
+
         return [
             'id' => $this->id,
             'conversation_id' => $this->conversation_id,
@@ -31,6 +33,19 @@ class MessageResource extends JsonResource
             'edited_at' => $this->edited_at,
 
             'created_at' => $this->created_at,
+            'date_key' => $createdAt?->format('Y-m-d'),
+            'created_at_formatted' => $createdAt?->format('g:i A'),
+
+            'date_label' => $createdAt?->isToday()
+                ? 'Today'
+                : ($createdAt?->isYesterday()
+                    ? 'Yesterday'
+                    : $createdAt?->format(
+                        $createdAt->year === now('Asia/Manila')->year
+                            ? 'M d'
+                            : 'M d, Y'
+                    )),
+
             'updated_at' => $this->updated_at,
         ];
     }
