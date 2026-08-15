@@ -40,6 +40,7 @@ const members = ref([])
 const directMessages = ref([])
 const newMessage = ref('')
 const messagesContainer = ref(null)
+const isSending = ref(false)
 
 const loadChats = async () => {
 	const { data } = await axios.get('/api/chat')
@@ -76,23 +77,30 @@ const loadConversation = async (conversation) => {
 }
 
 const sendMessage = async () => {
-
-	if (!newMessage.value.trim()) {
+	if (!newMessage.value.trim() || isSending.value) {
 		return
 	}
 
-	const { data } = await axios.post(
-		`/api/chat/conversations/${selectedConversation.value.id}/messages`,
-		{
-			message: newMessage.value
-		}
-	)
+	isSending.value = true
 
-	messages.value.push(data.data)
+	try {
+		const { data } = await axios.post(
+			`/api/chat/conversations/${selectedConversation.value.id}/messages`,
+			{
+				message: newMessage.value
+			}
+		)
 
-	newMessage.value = ''
+		messages.value.push(data.data)
 
-	await scrollToBottom()
+		newMessage.value = ''
+
+		await scrollToBottom()
+	} catch (error) {
+		console.error(error)
+	} finally {
+		isSending.value = false
+	}
 }
 
 const scrollToBottom = async () => {
@@ -304,14 +312,27 @@ onMounted(() => {
 					<!-- <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9">
 					<PaperClipIcon />
 				</button> -->
-					<input class="hidden" type="file" /><input v-model="newMessage" @keydown.enter.prevent="sendMessage"
+					<input v-model="newMessage" @keydown.enter.prevent="sendMessage" :disabled="isSending"
 						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
 						:placeholder="selectedConversation
 							? `Message ${selectedConversation.name}`
-							: 'Type a message...'" value="" />
-					<button @click="sendMessage"
+							: 'Type a message...'
+							" />
+					<button @click="sendMessage" :disabled="isSending || !newMessage.trim()"
 						class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-						<PlaneIcon />
+						<svg v-if="isSending" class="animate-spin" fill="#ffffff" viewBox="0 0 32 32" version="1.1"
+							xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
+							<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+							<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+							<g id="SVGRepo_iconCarrier">
+								<title>spinner-one-third</title>
+								<path
+									d="M16 1.25c-0.414 0-0.75 0.336-0.75 0.75s0.336 0.75 0.75 0.75v0c7.318 0.001 13.25 5.933 13.25 13.251 0 3.659-1.483 6.972-3.881 9.37v0c-0.14 0.136-0.227 0.327-0.227 0.537 0 0.414 0.336 0.75 0.75 0.75 0.212 0 0.403-0.088 0.539-0.228l0-0c2.668-2.669 4.318-6.356 4.318-10.428 0-8.146-6.604-14.751-14.75-14.751h-0z">
+								</path>
+							</g>
+						</svg>
+
+						<PlaneIcon v-else />
 					</button>
 				</div>
 			</div>
