@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 
 /*
 |--------------------------------------------------------------------------
@@ -106,6 +107,27 @@ Route::post('/logout', function (Request $request) {
         'message' => 'Logged out successfully'
     ]);
 });
+
+Route::post('/forgot-password', function (Request $request) {
+    $validated = $request->validate([
+        'email' => ['required', 'email'],
+    ]);
+
+    $status = Password::sendResetLink([
+        'email' => $validated['email'],
+    ]);
+
+    if ($status !== Password::RESET_LINK_SENT) {
+        return response()->json([
+            'code' => 'RESET_LINK_FAILED',
+            'message' => __($status),
+        ], 422);
+    }
+
+    return response()->json([
+        'message' => 'Password reset link sent successfully.',
+    ]);
+})->name('password.reset');
 
 /*
 |--------------------------------------------------------------------------
