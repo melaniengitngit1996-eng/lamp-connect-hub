@@ -18,7 +18,7 @@ const submit = async () => {
     errors.value = {}
 
     try {
-        const response = await fetch('/api/reset-password', {
+        const response = await fetch('/reset-password', {
             method: 'POST',
             credentials: 'include',
             headers: {
