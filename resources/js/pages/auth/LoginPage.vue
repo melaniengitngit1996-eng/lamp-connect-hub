@@ -152,7 +152,7 @@ input::-ms-clear {
                      </div>
                   </div>
                   <div class="flex justify-end">
-                     <router-link to="/forgot-password" class="text-sm text-primary hover:underline">
+                     <router-link to="/reset" class="text-sm text-primary hover:underline">
                         Forgot password?
                      </router-link>
                   </div>

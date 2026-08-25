@@ -5,6 +5,7 @@ import { useAuth } from '../stores/auth'
 import AppLayout from '../layouts/AppLayout.vue'
 import LoginPage from '../pages/auth/LoginPage.vue'
 import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage.vue'
+import ResetPasswordPage from '../pages/auth/ResetPasswordPage.vue'
 import DashboardPage from '../pages/dashboard/DashboardPage.vue'
 import DrivePage from '../pages/drive/DrivePage.vue'
 import ChatPage from '../pages/chat/ChatPage.vue'
@@ -125,6 +126,13 @@ const routes = [
     {
         path: '/forgot-password',
         component: ForgotPasswordPage,
+        meta: {
+            requiresAuth: false,
+        },
+    },
+    {
+        path: '/reset-password/:token',
+        component: ResetPasswordPage,
         meta: {
             requiresAuth: false,
         },
