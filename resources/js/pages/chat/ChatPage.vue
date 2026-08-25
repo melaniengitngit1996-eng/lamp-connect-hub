@@ -9,16 +9,19 @@ const settings = useSettings()
 import GroupChatDialog from '../../pages/chat/GroupChatDialog.vue'
 import DirectChatDialog from '../../pages/chat/DirectChatDialog.vue'
 import ChatMembersDialog from '../../pages/chat/ChatMembersDialog.vue'
+import GroupChatRenameDialog from '../../pages/chat/GroupChatRenameDialog.vue'
 
 import ChannelIcon from '../../icons/ChannelIcon.vue'
 import PlusIcon from '../../icons/PlusIcon.vue'
 import PaperClipIcon from '../../icons/PaperClipIcon.vue'
 import PlaneIcon from '../../icons/PlaneIcon.vue'
 import GroupIcon from '../../icons/GroupIcon.vue'
+import PencilIconGray from '../../icons/PencilIconGray.vue'
 
 const showNewGroupChatDialog = ref(false)
 const showNewDirectChatDialog = ref(false)
 const showChatMembersDialog = ref(false)
+const showGroupRenameDialog = ref(false)
 
 const openNewGroupChatDialog = (item, type) => {
 	showNewGroupChatDialog.value = true
@@ -30,6 +33,10 @@ const openNewDirectChatDialog = (item, type) => {
 
 const openChatMembersDialog = (item, type) => {
 	showChatMembersDialog.value = true
+}
+
+const openGroupRenameDialog = () => {
+	showGroupRenameDialog.value = true
 }
 
 const channels = ref([])
@@ -128,6 +135,12 @@ const handleGroupCreated = async (conversation) => {
 
 const isMobile = computed(() => window.innerWidth < 768)
 
+const handleGroupRenamed = async (conversation) => {
+	showGroupRenameDialog.value = false
+
+	await loadChats()
+	await loadConversation(conversation)
+}
 
 onMounted(() => {
 	loadChats()
@@ -257,9 +270,24 @@ onMounted(() => {
 					</span>
 				</span>
 				<div class="min-w-0">
-					<div class="font-display text-lg truncate">{{ selectedConversation?.name }}</div>
-					<div class="text-xs text-muted-foreground" v-if="selectedConversation?.type !== 'direct'">{{
-						selectedConversation?.members_count }} members</div>
+					<div class="flex items-center gap-1.5">
+						<div class="font-display text-lg truncate">
+							{{ selectedConversation?.name }}
+						</div>
+
+						<button v-if="
+							selectedConversation?.type === 'group' &&
+							selectedConversation?.is_owner
+						" type="button" @click="openGroupRenameDialog"
+							class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+							title="Rename group">
+							<PencilIconGray class="h-3.5 w-3.5" />
+						</button>
+					</div>
+
+					<div v-if="selectedConversation?.type !== 'direct'" class="text-xs text-muted-foreground">
+						{{ selectedConversation?.members_count }} members
+					</div>
 				</div>
 				<button v-if="
 					selectedConversation?.type === 'group' &&
@@ -366,5 +394,8 @@ onMounted(() => {
 		<ChatMembersDialog :open="showChatMembersDialog" :conversation="selectedConversation" :members="members"
 			@close="showChatMembersDialog = false" @member-removed="loadConversation(selectedConversation)"
 			@member-added="loadConversation(selectedConversation)" />
+
+		<GroupChatRenameDialog :open="showGroupRenameDialog" :conversation="selectedConversation"
+			@updated="handleGroupRenamed" @close="showGroupRenameDialog = false" />
 	</div>
 </template>

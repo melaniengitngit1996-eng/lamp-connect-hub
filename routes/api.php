@@ -168,6 +168,7 @@ Route::post('/chat/conversations/{conversation}/members', [ChatController::class
 Route::delete('/chat/conversations/{conversation}/members/{user}', [ChatController::class, 'removeMember']);
 Route::get('/chat/users', [ChatController::class, 'getUsers']);
 Route::get('/chat/conversations/{conversation}/available-users', [ChatController::class, 'availableUsers']);
+Route::patch('/chat/conversations/{conversation}/name', [ChatController::class, 'updateName']);
 
 Route::get('/settings', [SettingController::class, 'index']);
 Route::patch('/settings', [SettingController::class, 'update']);

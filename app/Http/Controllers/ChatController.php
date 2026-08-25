@@ -294,4 +294,35 @@ class ChatController extends Controller
 
         return response()->noContent();
     }
+
+    public function updateName(
+        Request $request,
+        Conversation $conversation
+    ) {
+        abort_unless(
+            $conversation->type === 'group',
+            404
+        );
+
+        abort_unless(
+            $conversation->created_by === auth()->id(),
+            403
+        );
+
+        $validated = $request->validate([
+            'name' => [
+                'required',
+                'string',
+                'max:100',
+            ],
+        ]);
+
+        $conversation->update([
+            'name' => $validated['name'],
+        ]);
+
+        return new ConversationResource(
+            $conversation->fresh()
+        );
+    }
 }
