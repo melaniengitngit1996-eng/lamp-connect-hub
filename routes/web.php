@@ -127,7 +127,7 @@ Route::post('/forgot-password', function (Request $request) {
     return response()->json([
         'message' => 'Password reset link sent successfully.',
     ]);
-})->name('password.reset');
+});
 
 /*
 |--------------------------------------------------------------------------
