@@ -129,6 +129,34 @@ Route::post('/forgot-password', function (Request $request) {
     ]);
 });
 
+Route::post('/reset-password', function (Request $request) {
+    $validated = $request->validate([
+        'token' => ['required'],
+        'email' => ['required', 'email'],
+        'password' => ['required', 'confirmed', 'min:8'],
+    ]);
+
+    $status = Password::reset(
+        $validated,
+        function ($user, $password) {
+            $user->forceFill([
+                'password' => Hash::make($password),
+            ])->save();
+        }
+    );
+
+    if ($status !== Password::PASSWORD_RESET) {
+        return response()->json([
+            'code' => 'PASSWORD_RESET_FAILED',
+            'message' => __($status),
+        ], 422);
+    }
+
+    return response()->json([
+        'message' => 'Your password has been reset successfully.',
+    ]);
+});
+
 /*
 |--------------------------------------------------------------------------
 | FRONTEND CATCH-ALL (LAST!)
