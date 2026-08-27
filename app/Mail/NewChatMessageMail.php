@@ -8,7 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
-class NewChatMessageMail extends Mailable implements ShouldQueue
+class NewChatMessageMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -25,6 +25,6 @@ class NewChatMessageMail extends Mailable implements ShouldQueue
 
         return $this
             ->subject('You have a new message on LAMP Church Connect')
-            ->markdown('emails.chat.new-message');
+            ->markdown('emails.new-message');
     }
 }

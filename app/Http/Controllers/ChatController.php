@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Http\Resources\UserResource;
+use App\Mail\NewChatMessageMail;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Notifications\NewChatMessage;
+use Illuminate\Support\Facades\Mail;
 
 class ChatController extends Controller
 {
@@ -247,16 +249,15 @@ class ChatController extends Controller
             'conversation',
         ]);
 
-        // Notify other members
+        // Notify other members via email
         $recipients = $conversation->members()
             ->where('users.id', '!=', auth()->id())
             ->where('email_chat_notifications', true)
             ->get();
 
         foreach ($recipients as $recipient) {
-            $recipient->notify(
-                new NewChatMessage($message)
-            );
+            Mail::to($recipient->email)
+                ->send(new NewChatMessageMail($message));
         }
 
         return new MessageResource($message);
