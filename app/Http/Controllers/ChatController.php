@@ -13,6 +13,45 @@ use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
+    private function addUnreadCounts($conversations, $user)
+    {
+        foreach ($conversations as $conversation) {
+            $member = $conversation->members
+                ->firstWhere('id', $user->id);
+
+            $lastReadMessageId = $member?->pivot?->last_read_message_id;
+
+            $conversation->unread_count = $conversation->messages()
+                ->where('id', '>', $lastReadMessageId ?? 0)
+                ->where('sender_id', '!=', $user->id)
+                ->count();
+        }
+
+        return $conversations;
+    }
+
+    public function markAsRead(Conversation $conversation)
+    {
+        $member = $conversation->members()
+            ->where('users.id', auth()->id())
+            ->firstOrFail();
+
+        $lastMessage = $conversation->messages()
+            ->latest('id')
+            ->first();
+
+        $conversation->members()->updateExistingPivot(
+            auth()->id(),
+            [
+                'last_read_message_id' => $lastMessage?->id,
+            ]
+        );
+
+        return response()->json([
+            'message' => 'Conversation marked as read.',
+        ]);
+    }
+
     public function index()
     {
         $user = auth()->user();
@@ -20,14 +59,20 @@ class ChatController extends Controller
         $channels = Conversation::query()
             ->channels()
             ->visibleTo($user)
-            ->with('latestMessage.sender')
+            ->with([
+                'latestMessage.sender',
+                'members',
+            ])
             ->ordered()
             ->get();
 
         $groups = Conversation::query()
             ->groups()
             ->visibleTo($user)
-            ->with('latestMessage.sender')
+            ->with([
+                'latestMessage.sender',
+                'members',
+            ])
             ->ordered()
             ->get();
 
@@ -40,6 +85,10 @@ class ChatController extends Controller
             ])
             ->ordered()
             ->get();
+
+        $this->addUnreadCounts($channels, $user);
+        $this->addUnreadCounts($groups, $user);
+        $this->addUnreadCounts($directMessages, $user);
 
         return response()->json([
             'channels' => ConversationResource::collection($channels),

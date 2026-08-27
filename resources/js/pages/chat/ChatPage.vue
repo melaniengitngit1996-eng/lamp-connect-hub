@@ -78,8 +78,30 @@ const loadConversation = async (conversation) => {
 		selectedConversation.value = data.conversation
 		members.value = data.members
 		messages.value = data.messages.data ?? data.messages
+
+		await axios.post(
+			`/api/chat/conversations/${conversation.id}/read`
+		)
+
+		// Remove the badge immediately
+		updateConversationUnreadCount(conversation.id)
+
+		await scrollToBottom()
+
 	} catch (error) {
 		console.error(error)
+	}
+}
+
+const updateConversationUnreadCount = (conversationId) => {
+	const conversation = [
+		...channels.value,
+		...groups.value,
+		...directMessages.value,
+	].find(item => item.id === conversationId)
+
+	if (conversation) {
+		conversation.unread_count = 0
 	}
 }
 
@@ -206,7 +228,14 @@ onMounted(() => {
 									class="h-9 w-9 rounded-full bg-muted grid place-items-center text-muted-foreground">
 									<GroupIcon />
 								</div>
-								<span class="text-sm truncate flex-1">{{ group.name }}</span>
+								<span class="text-sm truncate flex-1">
+									{{ group.name }}
+								</span>
+
+								<span v-if="group.unread_count > 0"
+									class="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+									{{ group.unread_count > 99 ? '99+' : group.unread_count }}
+								</span>
 							</button>
 						</li>
 					</ul>
@@ -235,7 +264,14 @@ onMounted(() => {
 										{{ directMessage.initials }}
 									</span>
 								</span>
-								<span class="text-sm truncate flex-1">{{ directMessage.name }}</span>
+								<span class="text-sm truncate flex-1">
+									{{ directMessage.name }}
+								</span>
+
+								<span v-if="directMessage.unread_count > 0"
+									class="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-medium text-primary-foreground">
+									{{ directMessage.unread_count > 99 ? '99+' : directMessage.unread_count }}
+								</span>
 							</button>
 						</li>
 					</ul>

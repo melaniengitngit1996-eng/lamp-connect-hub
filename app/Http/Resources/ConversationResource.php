@@ -46,6 +46,7 @@ class ConversationResource extends JsonResource
                 ->where('users.id', auth()->id())
                 ->wherePivot('role', 'owner')
                 ->exists(),
+            'unread_count' => $this->unread_count ?? 0,
         ];
     }
 }
