@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Storage;
 
 class MessageResource extends JsonResource
 {
@@ -47,6 +48,19 @@ class MessageResource extends JsonResource
                     )),
 
             'updated_at' => $this->updated_at,
+            'file' => $this->whenLoaded('file', function () {
+                if (!$this->file) {
+                    return null;
+                }
+
+                return [
+                    'id' => $this->file->id,
+                    'name' => $this->file->original_name,
+                    'mime_type' => $this->file->mime_type,
+                    'size' => $this->file->size,
+                    'url' => Storage::disk($this->file->disk)->url($this->file->path),
+                ];
+            }),
         ];
     }
 }

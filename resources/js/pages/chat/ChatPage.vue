@@ -48,6 +48,22 @@ const directMessages = ref([])
 const newMessage = ref('')
 const messagesContainer = ref(null)
 const isSending = ref(false)
+const selectedFile = ref(null)
+const fileInput = ref(null)
+
+const openFilePicker = () => {
+	fileInput.value?.click()
+}
+
+const handleFileSelected = (event) => {
+	const file = event.target.files?.[0]
+
+	if (!file) {
+		return
+	}
+
+	selectedFile.value = file
+}
 
 const loadChats = async () => {
 	const { data } = await axios.get('/api/chat')
@@ -106,23 +122,44 @@ const updateConversationUnreadCount = (conversationId) => {
 }
 
 const sendMessage = async () => {
-	if (!newMessage.value.trim() || isSending.value) {
+	if (
+		(!newMessage.value.trim() && !selectedFile.value) ||
+		isSending.value
+	) {
 		return
 	}
 
 	isSending.value = true
 
 	try {
+		const formData = new FormData()
+
+		if (newMessage.value.trim()) {
+			formData.append('message', newMessage.value)
+		}
+
+		if (selectedFile.value) {
+			formData.append('file', selectedFile.value)
+		}
+
 		const { data } = await axios.post(
 			`/api/chat/conversations/${selectedConversation.value.id}/messages`,
+			formData,
 			{
-				message: newMessage.value
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
 			}
 		)
 
 		messages.value.push(data.data)
 
 		newMessage.value = ''
+		selectedFile.value = null
+
+		if (fileInput.value) {
+			fileInput.value.value = ''
+		}
 
 		await scrollToBottom()
 	} catch (error) {
@@ -162,6 +199,26 @@ const handleGroupRenamed = async (conversation) => {
 
 	await loadChats()
 	await loadConversation(conversation)
+}
+
+const formatFileSize = (bytes) => {
+	if (!bytes) {
+		return ''
+	}
+
+	if (bytes < 1024) {
+		return `${bytes} B`
+	}
+
+	if (bytes < 1024 * 1024) {
+		return `${(bytes / 1024).toFixed(1)} KB`
+	}
+
+	if (bytes < 1024 * 1024 * 1024) {
+		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+	}
+
+	return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
 }
 
 onMounted(() => {
@@ -396,12 +453,43 @@ onMounted(() => {
 								</div>
 
 								<div :class="[
-									'rounded-2xl px-3.5 py-2 text-sm break-words',
+									'rounded-2xl text-sm break-words overflow-hidden',
 									message.sender.id === user.id
 										? 'bg-primary text-primary-foreground'
 										: 'bg-muted'
 								]">
-									{{ message.message }}
+									<!-- Image attachment -->
+									<a v-if="message.file && message.file.mime_type?.startsWith('image/')"
+										:href="message.file.url" target="_blank" rel="noopener noreferrer"
+										class="block">
+										<img :src="message.file.url" :alt="message.file.name"
+											class="w-48 h-40 object-cover rounded-lg" />
+									</a>
+
+									<!-- Other file types -->
+									<a v-else-if="message.file" :href="message.file.url" target="_blank"
+										rel="noopener noreferrer"
+										class="flex items-center gap-3 px-3.5 py-3 min-w-[220px]">
+										<div
+											class="h-9 w-9 shrink-0 rounded-md bg-background/20 flex items-center justify-center">
+											<PaperClipIcon class="h-4 w-4" />
+										</div>
+
+										<div class="min-w-0">
+											<div class="truncate font-medium">
+												{{ message.file.name }}
+											</div>
+
+											<div class="text-xs opacity-70">
+												{{ formatFileSize(message.file.size) }}
+											</div>
+										</div>
+									</a>
+
+									<!-- Text -->
+									<div v-if="message.message" class="px-3.5 py-2">
+										{{ message.message }}
+									</div>
 								</div>
 							</div>
 						</div>
@@ -409,28 +497,41 @@ onMounted(() => {
 				</div>
 			</div>
 			<div v-if="selectedConversation" class="border-t p-3 space-y-2">
+				<div v-if="selectedFile" class="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm">
+					<PaperClipIcon class="h-4 w-4 shrink-0" />
+
+					<span class="min-w-0 flex-1 truncate">
+						{{ selectedFile.name }}
+					</span>
+
+					<button type="button" @click="selectedFile = null; fileInput.value = ''"
+						class="text-muted-foreground hover:text-foreground">
+						×
+					</button>
+				</div>
+
 				<div class="flex gap-2">
-					<!-- <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9">
-					<PaperClipIcon />
-				</button> -->
+					<button type="button" @click="openFilePicker" :disabled="isSending"
+						class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9">
+						<PaperClipIcon />
+					</button>
+
+					<input ref="fileInput" type="file" class="hidden" @change="handleFileSelected" />
+
 					<input v-model="newMessage" @keydown.enter.prevent="sendMessage" :disabled="isSending"
-						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-						:placeholder="selectedConversation
-							? `Message ${selectedConversation.name}`
-							: 'Type a message...'
-							" />
-					<button @click="sendMessage" :disabled="isSending || !newMessage.trim()"
-						class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
-						<svg v-if="isSending" class="animate-spin" fill="#ffffff" viewBox="0 0 32 32" version="1.1"
-							xmlns="http://www.w3.org/2000/svg" stroke="#ffffff">
-							<g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-							<g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
-							<g id="SVGRepo_iconCarrier">
-								<title>spinner-one-third</title>
-								<path
-									d="M16 1.25c-0.414 0-0.75 0.336-0.75 0.75s0.336 0.75 0.75 0.75v0c7.318 0.001 13.25 5.933 13.25 13.251 0 3.659-1.483 6.972-3.881 9.37v0c-0.14 0.136-0.227 0.327-0.227 0.537 0 0.414 0.336 0.75 0.75 0.75 0.212 0 0.403-0.088 0.539-0.228l0-0c2.668-2.669 4.318-6.356 4.318-10.428 0-8.146-6.604-14.751-14.75-14.751h-0z">
-								</path>
-							</g>
+						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+						:placeholder="`Message ${selectedConversation.name}`" />
+
+					<button @click="sendMessage" :disabled="isSending || (!newMessage.trim() && !selectedFile)"
+						class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed bg-primary text-primary-foreground shadow hover:bg-primary/90 h-9 px-4 py-2">
+						<svg v-if="isSending" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+							viewBox="0 0 24 24">
+							<title xmlns="">270-ring</title>
+							<path fill="currentColor"
+								d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z">
+								<animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite"
+									type="rotate" values="0 12 12;360 12 12" />
+							</path>
 						</svg>
 
 						<PlaneIcon v-else />

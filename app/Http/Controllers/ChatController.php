@@ -7,6 +7,7 @@ use App\Http\Resources\MessageResource;
 use App\Http\Resources\UserResource;
 use App\Mail\NewChatMessageMail;
 use App\Models\Conversation;
+use App\Models\File;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -225,7 +226,8 @@ class ChatController extends Controller
     public function sendMessage(Request $request, Conversation $conversation)
     {
         $request->validate([
-            'message' => ['required', 'string', 'max:5000'],
+            'message' => ['nullable', 'string', 'max:5000'],
+            'file' => ['nullable', 'file', 'max:10240'],
         ]);
 
         abort_unless(
@@ -235,11 +237,39 @@ class ChatController extends Controller
             403
         );
 
+        abort_if(
+            !$request->filled('message') && !$request->hasFile('file'),
+            422,
+            'Message or attachment is required.'
+        );
+
+        $file = null;
+
+        if ($request->hasFile('file')) {
+            $uploadedFile = $request->file('file');
+
+            $path = $uploadedFile->store('chat-attachments', 'public');
+
+            $file = File::create([
+                'name' => pathinfo(
+                    $uploadedFile->getClientOriginalName(),
+                    PATHINFO_FILENAME
+                ),
+                'original_name' => $uploadedFile->getClientOriginalName(),
+                'path' => $path,
+                'mime_type' => $uploadedFile->getMimeType(),
+                'size' => $uploadedFile->getSize(),
+                'disk' => 'public',
+                'uploaded_by' => auth()->id(),
+            ]);
+        }
+
         $message = Message::create([
             'conversation_id' => $conversation->id,
             'sender_id' => auth()->id(),
-            'type' => 'text',
-            'message' => $request->message,
+            'type' => $request->hasFile('file') ? 'file' : 'text',
+            'message' => $request->input('message') ?? '',
+            'file_id' => $file?->id,
         ]);
 
         $conversation->touch();
@@ -247,9 +277,10 @@ class ChatController extends Controller
         $message->load([
             'sender',
             'conversation',
+            'file',
         ]);
 
-        // Notify other members via email
+        // Email notification
         $recipients = $conversation->members()
             ->where('users.id', '!=', auth()->id())
             ->where('email_chat_notifications', true)
