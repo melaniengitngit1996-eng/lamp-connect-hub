@@ -171,7 +171,7 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="h-screen flex">
+	<div class="h-full min-h-0 overflow-hidden flex">
 
 		<aside :class="[
 			'border-r bg-card/30',
@@ -324,6 +324,9 @@ onMounted(() => {
 					<div v-if="selectedConversation?.type !== 'direct'" class="text-xs text-muted-foreground">
 						{{ selectedConversation?.members_count }} members
 					</div>
+					<div v-else-if="selectedConversation?.type === 'direct'" class="text-xs text-muted-foreground">
+						Direct Message
+					</div>
 				</div>
 				<button v-if="
 					selectedConversation?.type === 'group' &&
@@ -333,58 +336,61 @@ onMounted(() => {
 					<GroupIcon /> Members
 				</button>
 			</header>
-			<div ref="messagesContainer" class="flex-1 overflow-y-auto px-4 py-6 space-y-4" style="min-height: 85vh;">
-				<div v-if="!messages.length" class="h-full flex items-center justify-center text-muted-foreground">
-					No messages yet.
-					Start the conversation.
-				</div>
-				<div v-else v-for="(message, index) in messages" :key="message.id">
-					<!-- Date separator -->
-					<div v-if="
-						index === 0 ||
-						messages[index - 1]?.date_key !== message.date_key
-					" class="flex items-center gap-3 my-6">
-						<div class="flex-1"></div>
-
-						<span class="text-[11px] font-medium text-muted-foreground">
-							{{ message.date_label }}
-						</span>
-
-						<div class="flex-1"></div>
+			<div v-if="selectedConversation" class="overflow-hidden" style="height: calc(100vh - 140px);">
+				<div ref="messagesContainer" class="flex-1 h-full overflow-y-auto px-4 py-6 space-y-4">
+					<div v-if="!messages.length" class="h-full flex items-center justify-center text-muted-foreground">
+						No messages yet.
+						Start the conversation.
 					</div>
+					<div v-else v-for="(message, index) in messages" :key="message.id">
+						<!-- Date separator -->
+						<div v-if="
+							index === 0 ||
+							messages[index - 1]?.date_key !== message.date_key
+						" class="flex items-center gap-3 my-6">
+							<div class="flex-1"></div>
 
-					<!-- Message -->
-					<div :class="[
-						'flex gap-2 mb-4',
-						message.sender.id === user.id
-							? 'flex-row-reverse'
-							: ''
-					]">
-						<span class="relative flex overflow-hidden rounded-full h-8 w-8 shrink-0">
-							<span class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
-								{{ message.sender.initials }}
+							<span class="text-[11px] font-medium text-muted-foreground">
+								{{ message.date_label }}
 							</span>
-						</span>
 
+							<div class="flex-1"></div>
+						</div>
+
+						<!-- Message -->
 						<div :class="[
-							'max-w-[75%] flex flex-col gap-1',
+							'flex gap-2 mb-4',
 							message.sender.id === user.id
-								? 'items-end'
-								: 'items-start'
+								? 'flex-row-reverse'
+								: ''
 						]">
-							<div class="text-xs text-muted-foreground">
-								{{ message.sender.name }}
-								<span class="mx-1">·</span>
-								{{ message.created_at_formatted }}
-							</div>
+							<span class="relative flex overflow-hidden rounded-full h-8 w-8 shrink-0">
+								<span
+									class="flex h-full w-full items-center justify-center rounded-full bg-muted text-xs">
+									{{ message.sender.initials }}
+								</span>
+							</span>
 
 							<div :class="[
-								'rounded-2xl px-3.5 py-2 text-sm break-words',
+								'max-w-[75%] flex flex-col gap-1',
 								message.sender.id === user.id
-									? 'bg-primary text-primary-foreground'
-									: 'bg-muted'
+									? 'items-end'
+									: 'items-start'
 							]">
-								{{ message.message }}
+								<div class="text-xs text-muted-foreground">
+									{{ message.sender.name }}
+									<span class="mx-1">·</span>
+									{{ message.created_at_formatted }}
+								</div>
+
+								<div :class="[
+									'rounded-2xl px-3.5 py-2 text-sm break-words',
+									message.sender.id === user.id
+										? 'bg-primary text-primary-foreground'
+										: 'bg-muted'
+								]">
+									{{ message.message }}
+								</div>
 							</div>
 						</div>
 					</div>
