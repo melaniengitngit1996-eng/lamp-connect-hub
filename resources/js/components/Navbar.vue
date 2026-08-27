@@ -1,86 +1,104 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuth } from '../stores/auth'
 
 const { logout, user, fetchUser, can } = useAuth()
 
+const mobileMenuOpen = ref(false)
+
+const closeMobileMenu = () => {
+   mobileMenuOpen.value = false
+}
+
 onMounted(async () => {
-    if (!user.value) {
-        await fetchUser()
-    }
+   if (!user.value) {
+      await fetchUser()
+   }
 })
 </script>
 
+<style scoped>
+.drawer-enter-active,
+.drawer-leave-active {
+   transition: transform 0.25s ease;
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+   transform: translateX(-100%);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+   transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+   opacity: 0;
+}
+</style>
+
 <template>
-    <aside class="hidden md:flex w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
+   <aside class="hidden md:flex w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground">
       <div class="border-b flex items-center px-6 py-5">
-         <img
-            src="../../../public/images/logo.png"
-            alt="LAMP Logo"
-            class="h-14 object-contain w-14"
-         >
+         <img src="../../../public/images/logo.png" alt="LAMP Logo" class="h-14 object-contain w-14">
          <div>
             <div class="font-display text-lg leading-none">LAMP</div>
             <div class="text-xs text-muted-foreground">Church Portal</div>
          </div>
       </div>
       <nav class="flex-1 p-3 space-y-1">
-         <RouterLink
-               to="/"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house h-4 w-4" aria-hidden="true">
+         <RouterLink to="/" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/'
+            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+            : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+            ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-house h-4 w-4" aria-hidden="true">
                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-               <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+               <path
+                  d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z">
+               </path>
             </svg>
             Feed
          </RouterLink>
-         <RouterLink
-               v-if="can('chat.view')"
-               to="/chat"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/chat'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square h-4 w-4" aria-hidden="true">
-               <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
+         <RouterLink v-if="can('chat.view')" to="/chat"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/chat'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-message-square h-4 w-4" aria-hidden="true">
+               <path
+                  d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z">
+               </path>
             </svg>
             Chat
          </RouterLink>
-         <RouterLink
-               v-if="can('drive.view')"
-               to="/drive"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/drive'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open h-4 w-4" aria-hidden="true">
-               <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path>
+         <RouterLink v-if="can('drive.view')" to="/drive"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/drive'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-folder-open h-4 w-4" aria-hidden="true">
+               <path
+                  d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2">
+               </path>
             </svg>
             Drive
          </RouterLink>
-         <RouterLink
-               v-if="can('members.view')"
-               to="/signups"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/signups'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users h-4 w-4" aria-hidden="true">
+         <RouterLink v-if="can('members.view')" to="/signups"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/signups'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-users h-4 w-4" aria-hidden="true">
                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
                <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
@@ -88,75 +106,84 @@ onMounted(async () => {
             </svg>
             Sign Ups
          </RouterLink>
-         <RouterLink
-               v-if="can('users.view')"
-               to="/users"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/users'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-4 w-4" aria-hidden="true">
-               <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
+         <RouterLink v-if="can('users.view')" to="/users"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/users'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-shield h-4 w-4" aria-hidden="true">
+               <path
+                  d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+               </path>
             </svg>
             Users
          </RouterLink>
-         <RouterLink
-                v-if="can('content.view')"
-               to="/content"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/content'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:65:17"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
+         <RouterLink v-if="can('content.view')" to="/content"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/content'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-layout-grid h-4 w-4" aria-hidden="true"
+               data-tsd-source="/src/components/app-shell.tsx:65:17">
+               <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+               <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+               <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+               <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+            </svg>
             Content
          </RouterLink>
-         <RouterLink
-                v-if="can('lookups.view')"
-               to="/lookups"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/lookups'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tags h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:64:17">
-               <path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"></path>
+         <RouterLink v-if="can('lookups.view')" to="/lookups"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/lookups'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-tags h-4 w-4" aria-hidden="true"
+               data-tsd-source="/src/components/app-shell.tsx:64:17">
+               <path
+                  d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z">
+               </path>
                <path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"></path>
                <circle cx="10.5" cy="6.5" r=".5" fill="currentColor"></circle>
             </svg>
             Lookups
          </RouterLink>
-         <RouterLink
-                v-if="can('settings.update')"
-               to="/settings"
-               class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition"
-               :class="
-                  $route.path === '/settings'
-                     ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                     : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
-               "
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings h-4 w-4" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
+         <RouterLink v-if="can('settings.update')" to="/settings"
+            class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition" :class="$route.path === '/settings'
+               ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+               : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+               ">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-settings h-4 w-4" aria-hidden="true">
+               <path
+                  d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915">
+               </path>
+               <circle cx="12" cy="12" r="3"></circle>
+            </svg>
             Settings
          </RouterLink>
       </nav>
       <div class="p-3 border-t flex items-center gap-3">
          <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
-            <span class="flex h-full w-full items-center justify-center rounded-full bg-muted">{{ user?.initials }}</span>
+            <span class="flex h-full w-full items-center justify-center rounded-full bg-muted">{{ user?.initials
+            }}</span>
          </span>
          <div class="flex-1 min-w-0">
             <div class="text-sm font-medium truncate">{{ user?.name }}</div>
             <div class="text-xs text-muted-foreground truncate">{{ user?.email }}</div>
          </div>
-         <button @click="logout" class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9" title="Sign out">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out h-4 w-4" aria-hidden="true">
+         <button @click="logout"
+            class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 w-9"
+            title="Sign out">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="lucide lucide-log-out h-4 w-4" aria-hidden="true">
                <path d="m16 17 5-5-5-5"></path>
                <path d="M21 12H9"></path>
                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -164,56 +191,246 @@ onMounted(async () => {
          </button>
       </div>
    </aside>
-   <div class="md:hidden fixed bottom-0 inset-x-0 z-40 border-t bg-card flex justify-around py-2">
-      <a class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" href="/" data-status="active" aria-current="page">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-house h-5 w-5" aria-hidden="true">
-            <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
-            <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+   <!-- Mobile Header -->
+   <div class="md:hidden fixed top-0 inset-x-0 z-40 border-b bg-card flex items-center px-4" style="height: 84px;">
+      <button type="button" @click="mobileMenuOpen = true"
+         class="inline-flex items-center justify-center h-10 w-10 rounded-md hover:bg-accent"
+         aria-label="Open navigation">
+         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" x2="20" y1="6" y2="6"></line>
+            <line x1="4" x2="20" y1="12" y2="12"></line>
+            <line x1="4" x2="20" y1="18" y2="18"></line>
          </svg>
-         Feed
-      </a>
-      <a v-if="can('chat.view')" href="/chat" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square h-5 w-5" aria-hidden="true">
-            <path d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z"></path>
-         </svg>
-         Chat
-      </a>
-      <a v-if="can('drive.view')" href="/drive" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open h-5 w-5" aria-hidden="true">
-            <path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"></path>
-         </svg>
-         Drive
-      </a>
-      <a v-if="can('members.view')" href="/members" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-muted-foreground">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-users h-5 w-5" aria-hidden="true">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-         </svg>
-         Sign Ups
-      </a>
-      <a v-if="can('users.view')" href="/users" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield h-5 w-5" aria-hidden="true">
-            <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path>
-         </svg>
-         Users
-      </a>
-      <a v-if="can('content.view')" href="/content" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layout-grid h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:65:17"><rect width="7" height="7" x="3" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="3" rx="1"></rect><rect width="7" height="7" x="14" y="14" rx="1"></rect><rect width="7" height="7" x="3" y="14" rx="1"></rect></svg>
-         Content   
-      </a>
-      <a v-if="can('lookups.view')" href="/lookups" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tags h-4 w-4" aria-hidden="true" data-tsd-source="/src/components/app-shell.tsx:64:17">
-            <path d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2 2 0 0 1 6 9.172V3a1 1 0 0 1 1-1z"></path>
-            <path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2.4 2.4 0 0 0 3.191.193"></path>
-            <circle cx="10.5" cy="6.5" r=".5" fill="currentColor"></circle>
-         </svg>
-         Lookups
-      </a>
-      <a v-if="can('settings.update')" href="/settings" class="flex flex-col items-center gap-1 px-3 py-1 text-xs text-primary active" data-status="active" aria-current="page">
-         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings h-4 w-4" aria-hidden="true"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"></path><circle cx="12" cy="12" r="3"></circle></svg>
-         Settings
-      </a>
+      </button>
+
+      <div class="flex items-center gap-2 ml-2">
+         <img src="../../../public/images/logo.png" alt="LAMP Logo" class="h-9 w-9 object-contain">
+
+         <div>
+            <div class="font-display text-base leading-none">
+               LAMP
+            </div>
+            <div class="text-[10px] text-muted-foreground">
+               Church Portal
+            </div>
+         </div>
+      </div>
    </div>
+
+
+   <!-- Mobile Overlay -->
+   <Transition name="fade">
+      <div v-if="mobileMenuOpen" class="md:hidden fixed inset-0 z-50 bg-black/40" @click="closeMobileMenu"></div>
+   </Transition>
+
+
+   <!-- Mobile Drawer -->
+   <Transition name="drawer">
+      <aside v-if="mobileMenuOpen"
+         class="md:hidden fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] bg-sidebar text-sidebar-foreground shadow-xl flex flex-col">
+
+         <!-- Drawer Header -->
+         <div class="shrink-0 border-b flex items-center justify-between px-4" style="height: 84px;">
+            <div class="flex items-center gap-2">
+               <img src="../../../public/images/logo.png" alt="LAMP Logo" class="h-10 w-10 object-contain">
+
+               <div>
+                  <div class="font-display text-lg leading-none">
+                     LAMP
+                  </div>
+
+                  <div class="text-xs text-muted-foreground">
+                     Church Portal
+                  </div>
+               </div>
+            </div>
+
+            <button type="button" @click="closeMobileMenu"
+               class="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-accent"
+               aria-label="Close navigation">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 6 6 18"></path>
+                  <path d="m6 6 12 12"></path>
+               </svg>
+            </button>
+         </div>
+
+
+         <!-- Navigation -->
+         <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+
+            <RouterLink to="/" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <!-- house icon -->
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"></path>
+                  <path
+                     d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z">
+                  </path>
+               </svg>
+
+               Feed
+            </RouterLink>
+
+
+            <RouterLink v-if="can('chat.view')" to="/chat" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/chat'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <!-- chat icon -->
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path
+                     d="M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z">
+                  </path>
+               </svg>
+
+               Chat
+            </RouterLink>
+
+
+            <RouterLink v-if="can('drive.view')" to="/drive" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/drive'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <!-- folder icon -->
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path
+                     d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2">
+                  </path>
+               </svg>
+
+               Drive
+            </RouterLink>
+
+
+            <RouterLink v-if="can('members.view')" to="/signups" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/signups'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <path d="M16 3.128a4 4 0 0 1 0 7.744"></path>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+               </svg>
+
+               Sign Ups
+            </RouterLink>
+
+
+            <RouterLink v-if="can('users.view')" to="/users" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/users'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path
+                     d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z">
+                  </path>
+               </svg>
+
+               Users
+            </RouterLink>
+
+
+            <RouterLink v-if="can('content.view')" to="/content" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/content'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="h-5 w-5"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect width="7" height="7" x="3" y="3" rx="1"></rect>
+                  <rect width="7" height="7" x="14" y="3" rx="1"></rect>
+                  <rect width="7" height="7" x="14" y="14" rx="1"></rect>
+                  <rect width="7" height="7" x="3" y="14" rx="1"></rect>
+               </svg>
+
+               Content
+            </RouterLink>
+
+
+            <RouterLink v-if="can('lookups.view')" to="/lookups" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/lookups'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="h-5 w-5"
+                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                     d="M13.172 2a2 2 0 0 1 1.414.586l6.71 6.71a2.4 2.4 0 0 1 0 3.408l-4.592 4.592a2.4 2.4 0 0 1-3.408 0l-6.71-6.71A2.4 2.4 0 0 1 6 9.172V3a1 1 0 0 1 1-1z">
+                  </path>
+                  <path d="M2 7v6.172a2 2 0 0 0 .586 1.414l6.71 6.71a2 2 0 0 0 3.191.193"></path>
+                  <circle cx="10.5" cy="6.5" r=".5" fill="currentColor"></circle>
+               </svg>
+
+               Lookups
+            </RouterLink>
+
+
+            <RouterLink v-if="can('settings.update')" to="/settings" @click="closeMobileMenu"
+               class="flex items-center gap-3 px-3 py-3 rounded-lg text-sm transition" :class="$route.path === '/settings'
+                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                  : 'hover:bg-sidebar-accent/60 text-sidebar-foreground/80'
+                  ">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                  <path
+                     d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 1-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 1-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0-0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915">
+                  </path>
+                  <circle cx="12" cy="12" r="3"></circle>
+               </svg>
+
+               Settings
+            </RouterLink>
+
+         </nav>
+
+
+         <!-- User -->
+         <div class="shrink-0 p-3 border-t flex items-center gap-3">
+
+            <span class="relative flex shrink-0 overflow-hidden rounded-full h-9 w-9">
+               <span class="flex h-full w-full items-center justify-center rounded-full bg-muted">
+                  {{ user?.initials }}
+               </span>
+            </span>
+
+            <div class="flex-1 min-w-0">
+               <div class="text-sm font-medium truncate">
+                  {{ user?.name }}
+               </div>
+
+               <div class="text-xs text-muted-foreground truncate">
+                  {{ user?.email }}
+               </div>
+            </div>
+
+            <button @click="logout" class="inline-flex items-center justify-center h-9 w-9 rounded-md hover:bg-accent"
+               title="Sign out">
+               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                  <path d="m16 17 5-5-5-5"></path>
+                  <path d="M21 12H9"></path>
+                  <path d="M9 21H5a2 2 0 0 0-2-2V5a2 2 0 0 0 2-2h4"></path>
+               </svg>
+            </button>
+
+         </div>
+
+      </aside>
+   </Transition>
 </template>

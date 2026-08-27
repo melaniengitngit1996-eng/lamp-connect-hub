@@ -170,6 +170,18 @@ onMounted(() => {
 })
 </script>
 
+<style scoped>
+.conversation-height {
+	height: calc(100vh - 140px);
+}
+
+@media (max-width: 767px) {
+	.conversation-height {
+		height: calc(100vh - 224px);
+	}
+}
+</style>
+
 <template>
 	<div class="h-full min-h-0 overflow-hidden flex">
 
@@ -336,7 +348,7 @@ onMounted(() => {
 					<GroupIcon /> Members
 				</button>
 			</header>
-			<div v-if="selectedConversation" class="overflow-hidden" style="height: calc(100vh - 140px);">
+			<div v-if="selectedConversation" class="overflow-hidden conversation-height">
 				<div ref="messagesContainer" class="flex-1 h-full overflow-y-auto px-4 py-6 space-y-4">
 					<div v-if="!messages.length" class="h-full flex items-center justify-center text-muted-foreground">
 						No messages yet.
