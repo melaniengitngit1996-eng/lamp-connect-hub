@@ -10,6 +10,7 @@ use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Notifications\NewChatMessage;
 
 class ChatController extends Controller
 {
@@ -241,7 +242,22 @@ class ChatController extends Controller
 
         $conversation->touch();
 
-        $message->load('sender');
+        $message->load([
+            'sender',
+            'conversation',
+        ]);
+
+        // Notify other members
+        $recipients = $conversation->members()
+            ->where('users.id', '!=', auth()->id())
+            ->where('email_chat_notifications', true)
+            ->get();
+
+        foreach ($recipients as $recipient) {
+            $recipient->notify(
+                new NewChatMessage($message)
+            );
+        }
 
         return new MessageResource($message);
     }

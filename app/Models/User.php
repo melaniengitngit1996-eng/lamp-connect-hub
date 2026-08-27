@@ -29,7 +29,8 @@ class User extends Authenticatable implements CanResetPasswordContract
         'email',
         'password',
         'status',
-        'username'
+        'username',
+        'email_chat_notifications',
     ];
 
     protected $appends = [
@@ -61,6 +62,7 @@ class User extends Authenticatable implements CanResetPasswordContract
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'email_chat_notifications' => 'boolean',
         ];
     }
 
