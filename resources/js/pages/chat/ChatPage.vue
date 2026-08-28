@@ -259,6 +259,29 @@ onMounted(() => {
 		height: calc(100vh - 340px);
 	}
 }
+
+.chat-file {
+	width: 280px;
+	max-width: 100%;
+}
+
+.chat-file-info {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+}
+
+.chat-file-name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+	.chat-file {
+		width: 220px;
+	}
+}
 </style>
 
 <template>
@@ -495,15 +518,14 @@ onMounted(() => {
 
 									<!-- Other file types -->
 									<a v-else-if="message.file" :href="message.file.url" target="_blank"
-										rel="noopener noreferrer"
-										class="flex items-center gap-3 px-3.5 py-3 min-w-0 max-w-full">
+										rel="noopener noreferrer" class="chat-file flex items-center gap-3 px-3.5 py-3">
 										<div
 											class="h-9 w-9 shrink-0 rounded-md bg-background/20 flex items-center justify-center">
 											<PaperClipIcon class="h-4 w-4" />
 										</div>
 
-										<div class="min-w-0 max-w-full">
-											<div class="truncate font-medium">
+										<div class="chat-file-info">
+											<div class="chat-file-name">
 												{{ message.file.name }}
 											</div>
 
