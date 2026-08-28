@@ -426,7 +426,7 @@ onMounted(() => {
 						<div v-if="
 							index === 0 ||
 							messages[index - 1]?.date_key !== message.date_key
-						" class="flex items-center gap-3 my-6">
+						" class="flex items-center gap-3 my-5">
 							<div class="flex-1"></div>
 
 							<span class="text-[11px] font-medium text-muted-foreground">
