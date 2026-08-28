@@ -544,8 +544,8 @@ onMounted(() => {
 						<PaperClipIcon v-else />
 					</button>
 
-					<input ref="fileInput" type="file" class="hidden" @change="handleFileSelected"
-						@cancel="handleFileCancelled" @click="isSelectingFile = true" />
+					<input ref="fileInput" type="file" class="absolute w-px h-px opacity-0"
+						@click="isSelectingFile = true" @change="handleFileSelected" @cancel="handleFileCancelled" />
 
 					<input v-model="newMessage" @keydown.enter.prevent="sendMessage" :disabled="isSending"
 						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
