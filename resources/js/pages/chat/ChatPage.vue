@@ -244,7 +244,7 @@ onMounted(() => {
 
 @media (max-width: 767px) {
 	.conversation-height {
-		height: calc(100vh - 224px);
+		height: calc(100vh - 250px);
 	}
 }
 </style>
