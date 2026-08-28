@@ -48,6 +48,7 @@ const directMessages = ref([])
 const newMessage = ref('')
 const messagesContainer = ref(null)
 const isSending = ref(false)
+const sendError = ref('')
 const selectedFile = ref(null)
 const fileInput = ref(null)
 
@@ -130,6 +131,7 @@ const sendMessage = async () => {
 	}
 
 	isSending.value = true
+	sendError.value = ''
 
 	try {
 		const formData = new FormData()
@@ -144,12 +146,7 @@ const sendMessage = async () => {
 
 		const { data } = await axios.post(
 			`/api/chat/conversations/${selectedConversation.value.id}/messages`,
-			formData,
-			{
-				headers: {
-					'Content-Type': 'multipart/form-data',
-				},
-			}
+			formData
 		)
 
 		messages.value.push(data.data)
@@ -164,6 +161,10 @@ const sendMessage = async () => {
 		await scrollToBottom()
 	} catch (error) {
 		console.error(error)
+
+		sendError.value =
+			error.response?.data?.message ||
+			'Unable to send message. Please try again.'
 	} finally {
 		isSending.value = false
 	}
@@ -497,6 +498,14 @@ onMounted(() => {
 				</div>
 			</div>
 			<div v-if="selectedConversation" class="border-t p-3 space-y-2">
+				<div v-if="sendError"
+					class="flex items-center justify-between rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+					<span>{{ sendError }}</span>
+
+					<button type="button" @click="sendError = ''" class="ml-2 text-xs font-medium hover:underline">
+						Dismiss
+					</button>
+				</div>
 				<div v-if="selectedFile" class="flex items-center gap-2 rounded-md bg-muted px-3 py-2 text-sm">
 					<PaperClipIcon class="h-4 w-4 shrink-0" />
 
