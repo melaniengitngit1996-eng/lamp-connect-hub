@@ -56,10 +56,7 @@ const isSelectingFile = ref(false)
 
 const openFilePicker = () => {
 	isSelectingFile.value = true
-
-	setTimeout(() => {
-		fileInput.value?.click()
-	}, 1000)
+	fileInput.value?.click()
 }
 
 const handleFileSelected = (event) => {
