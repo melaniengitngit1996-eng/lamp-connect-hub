@@ -225,9 +225,11 @@ class ChatController extends Controller
 
     public function sendMessage(Request $request, Conversation $conversation)
     {
+        $maxUploadSize = (int) setting('chat.max_upload_size', 50);
+
         $request->validate([
             'message' => ['nullable', 'string', 'max:5000'],
-            'file' => ['nullable', 'file', 'max:10240'],
+            'file' => ['nullable', 'file', 'max:' . ($maxUploadSize * 1024)],
         ]);
 
         abort_unless(

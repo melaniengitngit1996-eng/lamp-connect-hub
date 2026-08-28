@@ -245,6 +245,23 @@ onMounted(loadSettings)
                                         @change="saveSetting('chat.group_chat_enabled', $event)" />
                                 </div>
                             </div>
+                            <div
+                                class="flex flex-col gap-3 py-4 sm:flex-row sm:items-start sm:justify-between sm:gap-8">
+                                <div class="space-y-1">
+                                    <label
+                                        class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-medium"
+                                        for="drive_max_upload_mb">Maximum upload size (MB)</label>
+                                    <p class="text-xs text-muted-foreground max-w-md">Largest single file a member is
+                                        allowed to upload.</p>
+                                </div>
+                                <div class="sm:w-64 shrink-0 sm:text-right">
+                                    <input v-model="settings.chat.max_upload_size" @blur="saveSetting(
+                                        'chat.max_upload_size',
+                                        settings.chat.max_upload_size
+                                    )" class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                                        id="chat_max_upload_mb" min="1" max="1024" type="number" value="50">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

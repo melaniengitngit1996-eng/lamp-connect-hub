@@ -40,6 +40,11 @@ return [
             'default' => true,
             'rules' => ['boolean'],
         ],
+        'max_upload_size' => [
+            'type' => 'number',
+            'default' => 50,
+            'rules' => ['required', 'integer', 'min:1', 'max:1024'],
+        ],
 
     ],
 
