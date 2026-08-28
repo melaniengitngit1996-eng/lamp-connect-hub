@@ -496,13 +496,13 @@ onMounted(() => {
 									<!-- Other file types -->
 									<a v-else-if="message.file" :href="message.file.url" target="_blank"
 										rel="noopener noreferrer"
-										class="flex items-center gap-3 px-3.5 py-3 min-w-[220px]">
+										class="flex items-center gap-3 px-3.5 py-3 min-w-0 max-w-full">
 										<div
 											class="h-9 w-9 shrink-0 rounded-md bg-background/20 flex items-center justify-center">
 											<PaperClipIcon class="h-4 w-4" />
 										</div>
 
-										<div class="min-w-0">
+										<div class="min-w-0 max-w-full">
 											<div class="truncate font-medium">
 												{{ message.file.name }}
 											</div>
