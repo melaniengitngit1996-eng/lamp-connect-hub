@@ -52,18 +52,30 @@ const sendError = ref('')
 const selectedFile = ref(null)
 const fileInput = ref(null)
 
+const isSelectingFile = ref(false)
+
 const openFilePicker = () => {
-	fileInput.value?.click()
+	isSelectingFile.value = true
+
+	setTimeout(() => {
+		fileInput.value?.click()
+	}, 1000)
 }
 
 const handleFileSelected = (event) => {
 	const file = event.target.files?.[0]
 
 	if (!file) {
+		isSelectingFile.value = false
 		return
 	}
 
 	selectedFile.value = file
+	isSelectingFile.value = false
+}
+
+const handleFileCancelled = () => {
+	isSelectingFile.value = false
 }
 
 const loadChats = async () => {
@@ -520,12 +532,23 @@ onMounted(() => {
 				</div>
 
 				<div class="flex gap-2">
-					<button type="button" @click="openFilePicker" :disabled="isSending"
+					<button type="button" @click="openFilePicker" :disabled="isSending || isSelectingFile"
 						class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed border border-input bg-background shadow-sm hover:bg-accent hover:text-accent-foreground h-9 w-9">
-						<PaperClipIcon />
+						<svg v-if="isSelectingFile" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"
+							viewBox="0 0 24 24">
+							<title xmlns="">270-ring</title>
+							<path fill="currentColor"
+								d="M10.72,19.9a8,8,0,0,1-6.5-9.79A7.77,7.77,0,0,1,10.4,4.16a8,8,0,0,1,9.49,6.52A1.54,1.54,0,0,0,21.38,12h.13a1.37,1.37,0,0,0,1.38-1.54,11,11,0,1,0-12.7,12.39A1.54,1.54,0,0,0,12,21.34h0A1.47,1.47,0,0,0,10.72,19.9Z">
+								<animateTransform attributeName="transform" dur="0.75s" repeatCount="indefinite"
+									type="rotate" values="0 12 12;360 12 12" />
+							</path>
+						</svg>
+
+						<PaperClipIcon v-else />
 					</button>
 
-					<input ref="fileInput" type="file" class="hidden" @change="handleFileSelected" />
+					<input ref="fileInput" type="file" class="hidden" @change="handleFileSelected"
+						@cancel="handleFileCancelled" @click="isSelectingFile = true" />
 
 					<input v-model="newMessage" @keydown.enter.prevent="sendMessage" :disabled="isSending"
 						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
