@@ -246,6 +246,18 @@ onMounted(() => {
 	.conversation-height {
 		height: calc(100vh - 250px);
 	}
+
+	.conversation-with-attachment {
+		height: calc(100vh - 295px);
+	}
+
+	.conversation-with-error {
+		height: calc(100vh - 295px);
+	}
+
+	.conversation-with-attachment-error {
+		height: calc(100vh - 340px);
+	}
 }
 </style>
 
@@ -415,7 +427,12 @@ onMounted(() => {
 					<GroupIcon /> Members
 				</button>
 			</header>
-			<div v-if="selectedConversation" class="overflow-hidden conversation-height">
+			<div v-if="selectedConversation" :class="[
+				'overflow-hidden conversation-height',
+				selectedFile && 'conversation-with-attachment',
+				sendError && 'conversation-with-error',
+				selectedFile && sendError && 'conversation-with-attachment-error'
+			]">
 				<div ref="messagesContainer" class="flex-1 h-full overflow-y-auto px-4 py-6 space-y-4">
 					<div v-if="!messages.length" class="h-full flex items-center justify-center text-muted-foreground">
 						No messages yet.
