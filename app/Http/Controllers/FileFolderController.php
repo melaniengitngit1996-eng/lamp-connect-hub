@@ -76,6 +76,7 @@ class FileFolderController extends Controller
                     $query->where('user_id', Auth::id()),
                 ])
                     ->visibleTo(Auth::user())
+                    ->where('is_chat_attachment', false)
                     ->whereHas('favorites', function ($query) {
                         $query->where('user_id', Auth::id());
                     })
@@ -93,6 +94,7 @@ class FileFolderController extends Controller
                     }),
             ]);
         }
+
         if ($search) {
             return response()->json([
                 'folders' => FileFolder::with('owner')
@@ -113,6 +115,7 @@ class FileFolderController extends Controller
                     $query->where('user_id', Auth::id()),
                 ])
                     ->visibleTo(Auth::user())
+                    ->where('is_chat_attachment', false)
                     ->where(function ($query) use ($search) {
                         $query->where('name', 'like', "%{$search}%")
                             ->orWhere('original_name', 'like', "%{$search}%");
@@ -151,6 +154,7 @@ class FileFolderController extends Controller
                 $query->where('user_id', Auth::id()),
             ])
                 ->visibleTo(Auth::user())
+                ->where('is_chat_attachment', false)
                 ->where('folder_id', $request->parent_id)
                 ->latest()
                 ->get()

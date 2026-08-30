@@ -27,6 +27,7 @@ class File extends Model
         'size',
         'visibility',
         'share_token',
+        'is_chat_attachment'
     ];
 
     protected $appends = [

@@ -263,6 +263,7 @@ class ChatController extends Controller
                 'size' => $uploadedFile->getSize(),
                 'disk' => 'public',
                 'uploaded_by' => auth()->id(),
+                'is_chat_attachment' => true,
             ]);
         }
 
