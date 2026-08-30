@@ -9,6 +9,7 @@ use App\Models\File;
 use App\Models\FileActivity;
 use Illuminate\Validation\Rule;
 use App\Models\DriveFavorite;
+use App\Models\FileFolder;
 
 class FileController extends Controller
 {
@@ -27,6 +28,10 @@ class FileController extends Controller
                     'nullable',
                     'exists:file_folders,id',
                 ],
+                'visibility' => [
+                    'required',
+                    'in:inherit,private,public,link',
+                ],
             ],
             [
                 'file.max' => "The file must not be greater than {$maxUploadSize} MB.",
@@ -37,7 +42,7 @@ class FileController extends Controller
 
         $filename = $uploadedFile->getClientOriginalName();
 
-        $exists = File::where('folder_id', $request->folder_id)
+        $exists = File::where('folder_id', $validated['folder_id'] ?? null)
             ->where('name', $filename)
             ->exists();
 
@@ -51,6 +56,63 @@ class FileController extends Controller
             ], 422);
         }
 
+        /*
+    |--------------------------------------------------------------------------
+    | Resolve parent folder and visibility
+    |--------------------------------------------------------------------------
+    */
+
+        $visibility = $validated['visibility'];
+
+        $folder = null;
+
+        if ($validated['folder_id']) {
+            $folder = FileFolder::find($validated['folder_id']);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Validate file visibility against parent folder
+    |--------------------------------------------------------------------------
+    */
+
+        if ($folder && $visibility !== 'inherit') {
+            $visibilityLevels = [
+                'private' => 1,
+                'link' => 2,
+                'public' => 3,
+            ];
+
+            if (
+                $visibilityLevels[$visibility]
+                > $visibilityLevels[$folder->visibility]
+            ) {
+                return response()->json([
+                    'errors' => [
+                        'visibility' => [
+                            'The file cannot have broader access than its parent folder.',
+                        ],
+                    ],
+                ], 422);
+            }
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Inherit parent folder visibility
+    |--------------------------------------------------------------------------
+    */
+
+        if ($visibility === 'inherit') {
+            $visibility = $folder?->visibility ?? 'private';
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Store file
+    |--------------------------------------------------------------------------
+    */
+
         $path = $uploadedFile->store('drive', 'public');
 
         $file = File::create([
@@ -63,7 +125,7 @@ class FileController extends Controller
             'disk' => 'public',
             'path' => $path,
             'uploaded_by' => Auth::id(),
-            'visibility' => 'private'
+            'visibility' => $visibility,
         ]);
 
         return response()->json([
@@ -157,9 +219,31 @@ class FileController extends Controller
             ],
         ]);
 
-        $file->update([
-            'folder_id' => $validated['folder_id'],
-        ]);
+        $destinationFolder = null;
+
+        if ($validated['folder_id']) {
+            $destinationFolder = FileFolder::find(
+                $validated['folder_id']
+            );
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Adjust file visibility when moving into a restricted folder
+    |--------------------------------------------------------------------------
+    */
+
+        if (
+            $destinationFolder &&
+            $destinationFolder->visibility === 'private' &&
+            $file->visibility === 'public'
+        ) {
+            $file->visibility = 'private';
+            $file->share_token = null;
+        }
+
+        $file->folder_id = $validated['folder_id'];
+        $file->save();
 
         return response()->json([
             'message' => 'File moved successfully.',

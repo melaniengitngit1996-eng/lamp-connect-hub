@@ -189,4 +189,47 @@ class FileFolder extends Model
             'favoritable'
         );
     }
+
+    public function restrictPublicFiles(): void
+    {
+        // Restrict this folder if it is public
+        if ($this->visibility === 'public') {
+            $this->update([
+                'visibility' => 'private',
+                'share_token' => null,
+            ]);
+        }
+
+        // Restrict public files directly inside this folder
+        $this->files()
+            ->where('visibility', 'public')
+            ->update([
+                'visibility' => 'private',
+                'share_token' => null,
+            ]);
+
+        // Recursively restrict child folders and their contents
+        $this->children()->each(function ($child) {
+            $child->restrictPublicFiles();
+        });
+    }
+
+    public function isAncestorOf(FileFolder $folder): bool
+    {
+        $current = $folder;
+
+        while ($current->parent_id !== null) {
+            if ($current->parent_id === $this->id) {
+                return true;
+            }
+
+            $current = self::find($current->parent_id);
+
+            if (!$current) {
+                break;
+            }
+        }
+
+        return false;
+    }
 }

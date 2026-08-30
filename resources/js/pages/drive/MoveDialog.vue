@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/Button.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import MiniFolderIcon from '../../icons/MiniFolderIcon.vue'
 import CaretIcon from '../../icons/CaretIcon.vue'
 import HomeIcon from '../../icons/HomeIcon.vue'
@@ -29,6 +30,8 @@ const props = defineProps({
 const folders = ref([])
 const destinationFolder = ref(null)
 const loading = ref(false)
+const confirmDialogOpen = ref(false)
+const pendingMove = ref(false)
 
 const breadcrumbs = ref([
     {
@@ -133,6 +136,61 @@ const destination = computed(() =>
     breadcrumbs.value.map(crumb => crumb.name).join(' / ')
 )
 
+const confirmMove = () => {
+    if (!canMove.value) {
+        return
+    }
+
+    if (!needsMoveConfirmation.value) {
+        move()
+        return
+    }
+
+    confirmDialogOpen.value = true
+}
+
+const confirmAndMove = async () => {
+    confirmDialogOpen.value = false
+
+    await move()
+}
+
+const needsMoveConfirmation = computed(() => {
+    if (!destinationFolder.value) {
+        return false
+    }
+
+    if (props.type === 'folder') {
+        return ['private', 'public'].includes(
+            destinationFolder.value.visibility
+        )
+    }
+
+    return (
+        props.item.visibility !== destinationFolder.value.visibility &&
+        (
+            destinationFolder.value.visibility === 'private' ||
+            destinationFolder.value.visibility === 'public'
+        )
+    )
+})
+
+const moveConfirmMessage = computed(() => {
+    if (
+        destinationFolder.value?.visibility === 'private'
+    ) {
+        return 'Moving this item into a Restricted folder may restrict Public files inside it. Files shared by link will not be affected. Continue?'
+    }
+
+    if (
+        destinationFolder.value?.visibility === 'public'
+    ) {
+        return 'Moving this item into a Public folder will not make existing Restricted files Public. Their current visibility will be preserved. Continue?'
+    }
+
+    return ''
+})
+
 const move = async () => {
     loading.value = true
 
@@ -177,88 +235,55 @@ const move = async () => {
 </script>
 
 <template>
-    <Dialog
-        :open="open"
-        @close="emit('close')"
-    >
-        <div
-            class="flex flex-col space-y-1.5 text-center sm:text-left"
-            data-tsd-source="/src/components/drive-move-dialog.tsx:124:9"
-        >
+    <Dialog :open="open" @close="emit('close')">
+        <div class="flex flex-col space-y-1.5 text-center sm:text-left"
+            data-tsd-source="/src/components/drive-move-dialog.tsx:124:9">
             <h2 class="text-lg font-semibold leading-none tracking-tight">
                 Move "{{ props.item.name }}"
             </h2>
         </div>
         <div class="flex items-center gap-1 text-sm flex-wrap">
-            <template
-                v-for="(crumb, index) in breadcrumbs"
-                :key="crumb.id ?? 'root'"
-            >
-                <button
-                    class="rounded px-2 py-1 hover:bg-accent font-medium"
-                    @click="goToBreadcrumb(index)"
-                >
-                    <HomeIcon
-                        v-if="index === 0"
-                        class="h-4 w-4"
-                    />
+            <template v-for="(crumb, index) in breadcrumbs" :key="crumb.id ?? 'root'">
+                <button class="rounded px-2 py-1 hover:bg-accent font-medium" @click="goToBreadcrumb(index)">
+                    <HomeIcon v-if="index === 0" class="h-4 w-4" />
                     {{ crumb.name }}
                 </button>
 
-                <span
-                    v-if="index < breadcrumbs.length - 1"
-                    class="text-muted-foreground"
-                >
+                <span v-if="index < breadcrumbs.length - 1" class="text-muted-foreground">
                     <CaretIcon />
                 </span>
             </template>
         </div>
-        <div
-            v-if="folders.length"
-            class="border rounded-md divide-y max-h-64 overflow-y-auto"
-        >
-            <button
-                v-for="folder in visibleFolders"
-                :key="folder.id"
+        <div v-if="folders.length" class="border rounded-md divide-y max-h-64 overflow-y-auto">
+            <button v-for="folder in visibleFolders" :key="folder.id"
                 class="w-full flex items-center gap-2 px-3 py-3 text-left hover:bg-accent/40"
-                @click="openFolder(folder)"
-            >
+                @click="openFolder(folder)">
                 <MiniFolderIcon />
-                <span class="truncate flex-1" data-tsd-source="/src/components/drive-move-dialog.tsx:169:19">{{ folder.name }}</span>
+                <span class="truncate flex-1" data-tsd-source="/src/components/drive-move-dialog.tsx:169:19">{{
+                    folder.name
+                }}</span>
                 <CaretIcon />
             </button>
         </div>
-        <div
-            v-else
-            class="border rounded-md divide-y max-h-64 overflow-y-auto"
-        >
-            <div
-                class="py-8 text-center text-sm text-muted-foreground"
-            >
+        <div v-else class="border rounded-md divide-y max-h-64 overflow-y-auto">
+            <div class="py-8 text-center text-sm text-muted-foreground">
                 No subfolders here.
             </div>
         </div>
         <p class="text-xs text-muted-foreground">
             Destination: {{ destination }}
         </p>
-        <div
-            class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"
-            data-tsd-source="/src/components/drive-move-dialog.tsx:181:9"
-        >
-            <Button
-                type="plain"
-                @click="emit('close')"
-            >
+        <div class="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2"
+            data-tsd-source="/src/components/drive-move-dialog.tsx:181:9">
+            <Button type="plain" @click="emit('close')">
                 Cancel
             </Button>
-            <Button
-                :disabled="!canMove || loading"
-                @click="move"
-                type="primary"
-            >
+            <Button :disabled="!canMove || loading" @click="confirmMove" type="primary">
                 Move here
             </Button>
         </div>
 
     </Dialog>
+    <ConfirmDialog :open="confirmDialogOpen" title="Move Content" :message="moveConfirmMessage" confirm-text="Move"
+        :loading="loading" @close="confirmDialogOpen = false" @confirm="confirmAndMove" />
 </template>

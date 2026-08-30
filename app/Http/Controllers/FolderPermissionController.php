@@ -144,7 +144,18 @@ class FolderPermissionController extends Controller
             'visibility' => 'required|in:private,public,link',
         ]);
 
-        if ($request->visibility === 'link') {
+        $oldVisibility = $folder->visibility;
+        $newVisibility = $request->visibility;
+
+        // Public → Restricted
+        if (
+            $oldVisibility === 'public' &&
+            $newVisibility === 'private'
+        ) {
+            $folder->restrictPublicFiles();
+        }
+
+        if ($newVisibility === 'link') {
             if (!$folder->share_token) {
                 $folder->share_token = Str::uuid();
             }
@@ -152,7 +163,7 @@ class FolderPermissionController extends Controller
             $folder->share_token = null;
         }
 
-        $folder->visibility = $request->visibility;
+        $folder->visibility = $newVisibility;
 
         $folder->save();
 

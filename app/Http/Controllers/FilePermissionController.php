@@ -75,6 +75,20 @@ class FilePermissionController extends Controller
             'visibility' => 'required|in:private,public,link',
         ]);
 
+        if (
+            $file->folder &&
+            $file->folder->visibility === 'private' &&
+            $request->visibility === 'public'
+        ) {
+            return response()->json([
+                'errors' => [
+                    'visibility' => [
+                        'A file inside a restricted folder cannot be public.',
+                    ],
+                ],
+            ], 422);
+        }
+
         if ($request->visibility === 'link') {
             if (!$file->share_token) {
                 $file->share_token = Str::uuid();

@@ -337,7 +337,17 @@ class FileFolderController extends Controller
                 'folder' => [
                     'A folder cannot be moved into one of its subfolders.',
                 ],
-            ]);
+            ], 422);
+        }
+
+        /*
+    |--------------------------------------------------------------------------
+    | Restrict public files when moving into a restricted folder
+    |--------------------------------------------------------------------------
+    */
+
+        if ($destination && $destination->visibility === 'private') {
+            $folder->restrictPublicFiles();
         }
 
         $folder->update([

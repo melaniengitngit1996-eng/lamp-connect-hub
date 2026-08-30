@@ -7,6 +7,7 @@ import LinkIcon from '../../icons/LinkIcon.vue'
 
 import Dialog from '@/components/Dialog.vue'
 import Button from '@/components/Button.vue'
+import ConfirmDialog from '@/components/ConfirmDialog.vue'
 
 const props = defineProps({
     open: Boolean,
@@ -17,6 +18,11 @@ const props = defineProps({
     },
 
     type: {
+        type: String,
+        default: null,
+    },
+
+    folderVisibility: {
         type: String,
         default: null,
     },
@@ -34,6 +40,8 @@ const results = ref([])
 const selected = ref(null)
 const role = ref('viewer')
 const selecting = ref(false)
+const visibilityDialogOpen = ref(false)
+const pendingVisibility = ref(null)
 
 const endpoint = computed(() => {
     return props.type === 'folder'
@@ -194,8 +202,8 @@ const updatePermission = async (permission, role) => {
     try {
         await axios.patch(
             permissionEndpoint(permission), {
-                role,
-            }
+            role,
+        }
         )
 
         permission.role = role
@@ -235,6 +243,71 @@ const updateVisibility = async () => {
     shareToken.value = response.data.share_token
 }
 
+const handleVisibilityChange = () => {
+    if (props.type !== 'folder') {
+        updateVisibility()
+        return
+    }
+
+    if (
+        props.item.visibility === 'public' &&
+        visibility.value === 'private'
+    ) {
+        pendingVisibility.value = visibility.value
+        visibilityDialogOpen.value = true
+
+        return
+    }
+
+    if (
+        props.item.visibility === 'private' &&
+        visibility.value === 'public'
+    ) {
+        pendingVisibility.value = visibility.value
+        visibilityDialogOpen.value = true
+
+        return
+    }
+
+    updateVisibility()
+}
+
+const visibilityConfirmMessage = computed(() => {
+    if (
+        props.item?.visibility === 'public' &&
+        pendingVisibility.value === 'private'
+    ) {
+        return 'Changing this folder to Restricted may also restrict the files inside it. Files shared by link will not be affected. Continue?'
+    }
+
+    if (
+        props.item?.visibility === 'private' &&
+        pendingVisibility.value === 'public'
+    ) {
+        return 'Changing this folder to Public will not change the visibility of existing files inside it. Files that are currently Restricted will remain Restricted. Continue?'
+    }
+
+    return ''
+})
+
+const confirmVisibilityChange = async () => {
+    visibilityDialogOpen.value = false
+
+    if (!pendingVisibility.value) {
+        return
+    }
+
+    await updateVisibility()
+
+    pendingVisibility.value = null
+}
+
+const cancelVisibilityChange = () => {
+    visibility.value = props.item.visibility
+    pendingVisibility.value = null
+    visibilityDialogOpen.value = false
+}
+
 const shareLink = computed(() => {
     if (visibility.value !== 'link' || !shareToken.value) {
         return null
@@ -262,31 +335,17 @@ const emit = defineEmits([
 ])
 </script>
 <template>
-    <Dialog
-        :open="open"
-        @close="emit('close')"
-        :title="dialogTitle"
-    >
+    <Dialog :open="open" @close="emit('close')" :title="dialogTitle">
         <div class="flex gap-2">
             <div class="relative flex-1">
-                <input 
-                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm" 
-                    placeholder="Search people, churches, clusters, ministries..." 
-                    v-model="search"
-                >
-                <div
-                    v-if="results.length"
-                    class="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border bg-background shadow-lg"
-                >
-                    <button
-                        v-for="result in results"
-                        :key="`${result.type}-${result.id}`"
-                        @click="selectResult(result)"
-                        class="flex w-full items-center gap-3 px-3 py-3 text-left hover:bg-muted transition-colors"
-                    >
-                        <div
-                            class="flex h-9 w-9 items-center justify-center rounded-full bg-muted"
-                        >
+                <input
+                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+                    placeholder="Search people, churches, clusters, ministries..." v-model="search">
+                <div v-if="results.length"
+                    class="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border bg-background shadow-lg">
+                    <button v-for="result in results" :key="`${result.type}-${result.id}`" @click="selectResult(result)"
+                        class="flex w-full items-center gap-3 px-3 py-3 text-left hover:bg-muted transition-colors">
+                        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
                             <span v-if="result.type === 'user'">👤</span>
                             <span v-else-if="result.type === 'church'">⛪</span>
                             <span v-else-if="result.type === 'cluster'">👥</span>
@@ -305,8 +364,9 @@ const emit = defineEmits([
                     </button>
                 </div>
             </div>
-            
-            <select v-model="role" class="flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-28">
+
+            <select v-model="role"
+                class="flex h-9 items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-28">
                 <option value="viewer">Viewer</option>
                 <option value="contributor">Contributor</option>
                 <option value="manager">Manager</option>
@@ -317,7 +377,9 @@ const emit = defineEmits([
             <div class="text-sm font-medium mb-2">People with access</div>
             <div class="space-y-2">
                 <div v-if="owner" class="flex items-center gap-3">
-                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8"><img class="aspect-square h-full w-full" src="https://lh3.googleusercontent.com/a/ACg8ocJvyec3OlWtfxjG3D5RG9t3tain8GGu6KW5yqx3Jg5V6uoylENt=s96-c"></span>
+                    <span class="relative flex shrink-0 overflow-hidden rounded-full h-8 w-8"><img
+                            class="aspect-square h-full w-full"
+                            src="https://lh3.googleusercontent.com/a/ACg8ocJvyec3OlWtfxjG3D5RG9t3tain8GGu6KW5yqx3Jg5V6uoylENt=s96-c"></span>
 
                     <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium truncate">
@@ -333,14 +395,8 @@ const emit = defineEmits([
                         Owner
                     </span>
                 </div>
-                <div
-                    v-for="permission in permissions"
-                    :key="permission.id"
-                    class="flex items-center gap-3 py-2"
-                >
-                    <div
-                        class="h-8 w-8 rounded-full bg-muted flex items-center justify-center"
-                    >
+                <div v-for="permission in permissions" :key="permission.id" class="flex items-center gap-3 py-2">
+                    <div class="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
                         {{ permissionIcon(permission.principal_type) }}
                     </div>
 
@@ -354,19 +410,17 @@ const emit = defineEmits([
                         </div>
                     </div>
 
-                    <select
-                        @change="updatePermission(
-                            permission,
-                            $event.target.value
-                        )"
-                        class="text-sm border rounded-md px-2 py-1"
-                        :value="permission.role"
-                    >
+                    <select @change="updatePermission(
+                        permission,
+                        $event.target.value
+                    )" class="text-sm border rounded-md px-2 py-1" :value="permission.role">
                         <option value="viewer">Viewer</option>
                         <option value="contributor">Contributor</option>
                         <option value="manager">Manager</option>
                     </select>
-                    <Button type="icon" @click.stop="deletePermission(permission)"><TrashIcon /></Button>
+                    <Button type="icon" @click.stop="deletePermission(permission)">
+                        <TrashIcon />
+                    </Button>
                 </div>
             </div>
         </div>
@@ -374,27 +428,30 @@ const emit = defineEmits([
             <div class="text-sm font-medium mb-2">General access</div>
             <div class="flex items-start gap-3 rounded-md border p-3">
                 <div class="h-9 w-9 rounded-full bg-muted grid place-items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock h-4 w-4" aria-hidden="true">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="lucide lucide-lock h-4 w-4" aria-hidden="true">
                         <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                 </div>
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
-                        <select
-                            v-model="visibility"
-                            @change="updateVisibility"
-                            class="flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-44 text-sm"
-                        >
+                        <select v-model="visibility" @change="handleVisibilityChange"
+                            class="flex items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 shadow-sm ring-offset-background cursor-pointer data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&amp;&gt;span]:line-clamp-1 w-44 text-sm">
                             <option value="private">
                                 Restricted
                             </option>
 
-                            <option value="public">
+                            <option v-if="
+                                type === 'folder' ||
+                                !folderVisibility ||
+                                folderVisibility === 'public'
+                            " value="public">
                                 Public
                             </option>
 
-                            <option v-show="type === 'file'" value="link">
+                            <option v-if="type === 'file'" value="link">
                                 Anyone with the link
                             </option>
                         </select>
@@ -404,13 +461,13 @@ const emit = defineEmits([
             </div>
         </div>
         <div v-if="visibility === 'link'" class="flex items-center justify-between pt-2">
-            <Button
-                type="secondary"
-                @click="copyLink"
-            >
+            <Button type="secondary" @click="copyLink">
                 <LinkIcon />
                 Copy link
             </Button>
         </div>
     </Dialog>
+
+    <ConfirmDialog :open="visibilityDialogOpen" title="Change Folder Access" :message="visibilityConfirmMessage"
+        confirm-text="Continue" :loading="loading" @close="cancelVisibilityChange" @confirm="confirmVisibilityChange" />
 </template>

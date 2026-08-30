@@ -259,6 +259,17 @@ const toggleStarred = async () => {
     await loadFolders(currentFolder.value?.id)
 }
 
+const visibilityLabel = (visibility) => {
+    const labels = {
+        private: 'Restricted',
+        public: 'Public',
+        link: 'Anyone with the link',
+        inherit: 'Same access as folder',
+    }
+
+    return labels[visibility] ?? visibility
+}
+
 const handleFolderClick = async (folder) => {
     if (search.value) {
         return openFolderLocation(folder)
@@ -368,7 +379,7 @@ const handleActivity = (file, close) => {
                         </div>
 
                         <div class="text-xs text-muted-foreground">
-                            Folder · {{ folder.created_human }}
+                            Folder · {{ visibilityLabel(folder.visibility) }} · {{ folder.created_human }}
                         </div>
                     </div>
                 </button>
@@ -436,7 +447,13 @@ const handleActivity = (file, close) => {
             <div v-for="file in files" :key="file.id"
                 class="flex items-center gap-3 px-4 py-3 hover:bg-accent/40 transition">
                 <button class="flex items-center gap-3 flex-1 min-w-0 text-left">
-                    <FileBlueIcon />
+                    <div
+                        class="h-10 w-10 shrink-0 overflow-hidden rounded-md border bg-muted flex items-center justify-center">
+                        <img v-if="file.mime_type?.startsWith('image/')" :src="file.url" :alt="file.name"
+                            class="h-full w-full object-cover">
+
+                        <FileBlueIcon v-else />
+                    </div>
 
                     <div class="flex-1 min-w-0" @click="previewFile(file)">
                         <div class="text-sm font-medium truncate">
@@ -444,7 +461,7 @@ const handleActivity = (file, close) => {
                         </div>
 
                         <div class="text-xs text-muted-foreground">
-                            {{ file.size_human }} · {{ file.created_human }}
+                            {{ file.size_human }} · {{ visibilityLabel(file.visibility) }} · {{ file.created_human }}
                         </div>
                     </div>
                 </button>
@@ -525,12 +542,14 @@ const handleActivity = (file, close) => {
         <DeleteFileDialog :open="showDeleteFileDialog" :file="selectedFile" @close="showDeleteFileDialog = false"
             @deleted="refreshFolders" />
 
-        <UploadFileDialog :open="showUploadDialog" :folder-id="currentFolder?.id" @close="showUploadDialog = false"
+        <UploadFileDialog :open="showUploadDialog" :folder-id="currentFolder?.id"
+            :folder-visibility="currentFolder?.visibility" @close="showUploadDialog = false"
             @uploaded="refreshFolders" />
 
         <PreviewDialog :open="showPreviewDialog" :file="selectedFile" @close="showPreviewDialog = false" />
 
-        <ShareDialog :open="showShareDialog" :item="selectedItem" :type="itemType" @close="showShareDialog = false" />
+        <ShareDialog :open="showShareDialog" :item="selectedItem" :type="itemType"
+            :folder-visibility="selectedItem?.folder?.visibility" @close="showShareDialog = false" />
 
         <ActivityDialog :open="showPulseDialog" :file="selectedFile" @close="showPulseDialog = false" />
 
