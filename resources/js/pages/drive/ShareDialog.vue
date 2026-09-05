@@ -55,39 +55,35 @@ const permissionEndpoint = (permission) => {
         : `/api/drive/file-permissions/${permission.id}`
 }
 
-const permissionIcon = (type) => {
+const permissionIcon = type => {
     switch (type) {
         case 'user':
             return '👤'
-
         case 'church':
-            return '⛪'
-
+            return '🏘️'
         case 'cluster':
             return '👥'
-
         case 'ministry':
-            return '🎵'
-
+            return '🤝'
+        case 'role':
+            return '🛡️'
         default:
-            return '📄'
+            return '👤'
     }
 }
 
-const permissionLabel = (type) => {
+const permissionLabel = type => {
     switch (type) {
         case 'user':
             return 'User'
-
         case 'church':
             return 'Local Church'
-
         case 'cluster':
             return 'Cluster'
-
         case 'ministry':
             return 'Ministry'
-
+        case 'role':
+            return 'Role'
         default:
             return ''
     }
@@ -340,7 +336,7 @@ const emit = defineEmits([
             <div class="relative flex-1">
                 <input
                     class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
-                    placeholder="Search people, churches, clusters, ministries..." v-model="search">
+                    placeholder="Search people, churches, clusters, ministries, role..." v-model="search">
                 <div v-if="results.length"
                     class="absolute z-50 mt-1 w-full overflow-hidden rounded-lg border bg-background shadow-lg">
                     <button v-for="result in results" :key="`${result.type}-${result.id}`" @click="selectResult(result)"
@@ -403,6 +399,13 @@ const emit = defineEmits([
                     <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium truncate">
                             {{ permission.principal_name }}
+
+                            <template v-if="
+                                permission.principal_type === 'ministry' &&
+                                permission.principal_local_church
+                            ">
+                                - {{ permission.principal_local_church }}
+                            </template>
                         </div>
 
                         <div class="text-xs text-muted-foreground">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use App\Models\FilePermission;
+use App\Models\Ministry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -16,9 +17,30 @@ class FilePermissionController extends Controller
             'permissions',
         ]);
 
+        $file->permissions->loadMorph('principal', [
+            Ministry::class => [
+                'localChurch',
+            ],
+        ]);
+
+        $permissions = $file->permissions->map(function ($permission) {
+            return [
+                'id' => $permission->id,
+                'folder_id' => $permission->folder_id,
+                'principal_type' => $permission->principal_type,
+                'principal_name' => $permission->principal->name,
+                'principal_local_church' => $permission->principal_type === 'ministry'
+                    ? $permission->principal->localChurch?->name
+                    : null,
+                'role' => $permission->role,
+                'updated_at' => $permission->updated_at,
+                'created_at' => $permission->created_at,
+            ];
+        });
+
         return response()->json([
-            'owner' => $file->uploader,
-            'permissions' => $file->permissions,
+            'owner' => $file->owner,
+            'permissions' => $permissions,
             'visibility' => $file->visibility,
             'share_token' => $file->share_token,
         ]);
@@ -27,7 +49,7 @@ class FilePermissionController extends Controller
     public function store(Request $request, File $file)
     {
         $request->validate([
-            'principal_type' => 'required|in:user,church,cluster,ministry',
+            'principal_type' => 'required|in:user,church,cluster,ministry,role',
             'principal_id' => 'required',
             'role' => 'required|in:viewer,contributor,manager',
         ]);

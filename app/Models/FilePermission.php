@@ -43,4 +43,16 @@ class FilePermission extends Model
             }
         });
     }
+
+    public function getPrincipalAttribute()
+    {
+        return match ($this->principal_type) {
+            'user' => User::find($this->principal_id),
+            'church' => LocalChurch::find($this->principal_id),
+            'cluster' => Cluster::find($this->principal_id),
+            'ministry' => Ministry::find($this->principal_id),
+            'role' => Role::find($this->principal_id),
+            default => null,
+        };
+    }
 }

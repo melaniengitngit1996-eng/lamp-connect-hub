@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\FolderPermission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class FolderPermissionController extends Controller
 {
@@ -21,9 +22,30 @@ class FolderPermissionController extends Controller
             'permissions',
         ]);
 
+        $folder->permissions->loadMorph('principal', [
+            Ministry::class => [
+                'localChurch',
+            ],
+        ]);
+
+        $permissions = $folder->permissions->map(function ($permission) {
+            return [
+                'id' => $permission->id,
+                'folder_id' => $permission->folder_id,
+                'principal_type' => $permission->principal_type,
+                'principal_name' => $permission->principal->name,
+                'principal_local_church' => $permission->principal_type === 'ministry'
+                    ? $permission->principal->localChurch?->name
+                    : null,
+                'role' => $permission->role,
+                'updated_at' => $permission->updated_at,
+                'created_at' => $permission->created_at,
+            ];
+        });
+
         return response()->json([
             'owner' => $folder->owner,
-            'permissions' => $folder->permissions,
+            'permissions' => $permissions,
             'visibility' => $folder->visibility,
             'share_token' => $folder->share_token,
         ]);
@@ -73,14 +95,29 @@ class FolderPermissionController extends Controller
 
         // Ministries
         $ministries = Ministry::query()
+            ->with('localChurch')
             ->where('name', 'like', "%{$search}%")
             ->limit(10)
             ->get()
             ->map(fn($ministry) => [
                 'type' => 'ministry',
                 'id' => $ministry->id,
-                'label' => $ministry->name,
+                'label' => $ministry->localChurch
+                    ? "{$ministry->name} - {$ministry->localChurch->name}"
+                    : $ministry->name,
                 'subtitle' => 'Ministry',
+            ]);
+
+        // Roles
+        $roles = Role::query()
+            ->where('name', 'like', "%{$search}%")
+            ->limit(10)
+            ->get()
+            ->map(fn($role) => [
+                'type' => 'role',
+                'id' => $role->id,
+                'label' => $role->name,
+                'subtitle' => 'Role',
             ]);
 
         return response()->json(
@@ -89,6 +126,7 @@ class FolderPermissionController extends Controller
                 ->merge($churches)
                 ->merge($clusters)
                 ->merge($ministries)
+                ->merge($roles)
                 ->values()
         );
     }
@@ -96,7 +134,7 @@ class FolderPermissionController extends Controller
     public function store(Request $request, FileFolder $folder)
     {
         $request->validate([
-            'principal_type' => 'required',
+            'principal_type' => 'required|in:user,church,cluster,ministry,role',
             'principal_id' => 'required',
             'role' => 'required|in:viewer,contributor,manager',
         ]);

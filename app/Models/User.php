@@ -111,6 +111,13 @@ class User extends Authenticatable implements CanResetPasswordContract
             ];
         }
 
+        foreach ($this->roles as $role) {
+            $principals[] = [
+                'type' => 'role',
+                'id' => $role->id,
+            ];
+        }
+
         return $principals;
     }
 
