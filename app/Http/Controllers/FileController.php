@@ -10,6 +10,7 @@ use App\Models\FileActivity;
 use Illuminate\Validation\Rule;
 use App\Models\DriveFavorite;
 use App\Models\FileFolder;
+use App\Models\FilePermission;
 
 class FileController extends Controller
 {
@@ -57,10 +58,10 @@ class FileController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Resolve parent folder and visibility
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Resolve parent folder and visibility
+        |--------------------------------------------------------------------------
+        */
 
         $visibility = $validated['visibility'];
 
@@ -71,10 +72,10 @@ class FileController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Validate file visibility against parent folder
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Validate file visibility against parent folder
+        |--------------------------------------------------------------------------
+        */
 
         if ($folder && $visibility !== 'inherit') {
             $visibilityLevels = [
@@ -98,20 +99,22 @@ class FileController extends Controller
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Inherit parent folder visibility
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Inherit parent folder visibility
+        |--------------------------------------------------------------------------
+        */
 
-        if ($visibility === 'inherit') {
+        $inheritPermissions = $visibility === 'inherit';
+
+        if ($inheritPermissions) {
             $visibility = $folder?->visibility ?? 'private';
         }
 
         /*
-    |--------------------------------------------------------------------------
-    | Store file
-    |--------------------------------------------------------------------------
-    */
+        |--------------------------------------------------------------------------
+        | Store file
+        |--------------------------------------------------------------------------
+        */
 
         $path = $uploadedFile->store('drive', 'public');
 
@@ -127,6 +130,25 @@ class FileController extends Controller
             'uploaded_by' => Auth::id(),
             'visibility' => $visibility,
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Inherit parent folder permissions
+        |--------------------------------------------------------------------------
+        */
+
+        if ($inheritPermissions && $folder) {
+            $folder->load('permissions');
+
+            foreach ($folder->permissions as $permission) {
+                FilePermission::create([
+                    'file_id' => $file->id,
+                    'principal_type' => $permission->principal_type,
+                    'principal_id' => $permission->principal_id,
+                    'role' => $permission->role,
+                ]);
+            }
+        }
 
         return response()->json([
             'file' => $file,

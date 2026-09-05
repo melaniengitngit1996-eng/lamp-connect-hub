@@ -133,23 +133,62 @@ class FolderPermissionController extends Controller
 
     public function store(Request $request, FileFolder $folder)
     {
-        $request->validate([
+        $validated = $request->validate([
             'principal_type' => 'required|in:user,church,cluster,ministry,role',
             'principal_id' => 'required',
             'role' => 'required|in:viewer,contributor,manager',
+            'apply_to_files' => 'boolean',
         ]);
 
         $permission = $folder->permissions()->updateOrCreate(
             [
-                'principal_type' => $request->principal_type,
-                'principal_id' => $request->principal_id,
+                'principal_type' => $validated['principal_type'],
+                'principal_id' => $validated['principal_id'],
             ],
             [
-                'role' => $request->role,
+                'role' => $validated['role'],
             ]
         );
 
+        if ($request->boolean('apply_to_files')) {
+            $this->applyPermissionToFiles(
+                $folder,
+                $validated['principal_type'],
+                $validated['principal_id'],
+                $validated['role']
+            );
+        }
+
         return response()->json($permission);
+    }
+
+    private function applyPermissionToFiles(FileFolder $folder, string $principalType, int|string $principalId, string $role): void
+    {
+        $folder->load([
+            'files',
+            'children',
+        ]);
+
+        foreach ($folder->files as $file) {
+            $file->permissions()->updateOrCreate(
+                [
+                    'principal_type' => $principalType,
+                    'principal_id' => $principalId,
+                ],
+                [
+                    'role' => $role,
+                ]
+            );
+        }
+
+        foreach ($folder->children as $childFolder) {
+            $this->applyPermissionToFiles(
+                $childFolder,
+                $principalType,
+                $principalId,
+                $role
+            );
+        }
     }
 
     public function update(Request $request, FolderPermission $permission)

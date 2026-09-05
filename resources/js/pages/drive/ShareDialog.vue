@@ -43,6 +43,14 @@ const selecting = ref(false)
 const visibilityDialogOpen = ref(false)
 const pendingVisibility = ref(null)
 
+const applyPermissionDialogOpen = ref(false)
+const savingPermission = ref(false)
+const pendingPermission = ref(null)
+
+const deletePermissionDialogOpen = ref(false)
+const permissionToDelete = ref(null)
+const deletingPermission = ref(false)
+
 const endpoint = computed(() => {
     return props.type === 'folder'
         ? `/api/drive/folders/${props.item.id}/permissions`
@@ -168,19 +176,50 @@ const addPermission = async () => {
         return
     }
 
-    await axios.post(
-        endpoint.value,
-        {
-            principal_type: selected.value.type,
-            principal_id: selected.value.id,
-            role: role.value,
-        }
-    )
+    if (props.type === 'file') {
+        await savePermission()
+        return
+    }
 
-    await loadPermissions()
+    pendingPermission.value = {
+        principal_type: selected.value.type,
+        principal_id: selected.value.id,
+        role: role.value,
+    }
 
-    selected.value = null
-    search.value = ''
+    applyPermissionDialogOpen.value = true
+}
+
+const savePermission = async (applyToFiles = false) => {
+    const permission = pendingPermission.value ?? {
+        principal_type: selected.value.type,
+        principal_id: selected.value.id,
+        role: role.value,
+    }
+
+    savingPermission.value = true
+
+    try {
+        await axios.post(
+            endpoint.value,
+            {
+                ...permission,
+                ...(props.type === 'folder'
+                    ? { apply_to_files: applyToFiles }
+                    : {}),
+            }
+        )
+
+        await loadPermissions()
+
+        selected.value = null
+        search.value = ''
+
+        pendingPermission.value = null
+        applyPermissionDialogOpen.value = false
+    } finally {
+        savingPermission.value = false
+    }
 }
 
 const loadPermissions = async () => {
@@ -208,21 +247,33 @@ const updatePermission = async (permission, role) => {
     }
 }
 
-const deletePermission = async (permission) => {
-    if (!confirm('Remove access?')) {
+const deletePermission = (permission) => {
+    permissionToDelete.value = permission
+    deletePermissionDialogOpen.value = true
+}
+
+const confirmDeletePermission = async () => {
+    if (!permissionToDelete.value) {
         return
     }
 
+    deletingPermission.value = true
+
     try {
         await axios.delete(
-            permissionEndpoint(permission)
+            permissionEndpoint(permissionToDelete.value)
         )
 
         permissions.value = permissions.value.filter(
-            item => item.id !== permission.id
+            item => item.id !== permissionToDelete.value.id
         )
+
+        deletePermissionDialogOpen.value = false
+        permissionToDelete.value = null
     } catch (error) {
         console.error(error)
+    } finally {
+        deletingPermission.value = false
     }
 }
 
@@ -343,9 +394,11 @@ const emit = defineEmits([
                         class="flex w-full items-center gap-3 px-3 py-3 text-left hover:bg-muted transition-colors">
                         <div class="flex h-9 w-9 items-center justify-center rounded-full bg-muted">
                             <span v-if="result.type === 'user'">👤</span>
-                            <span v-else-if="result.type === 'church'">⛪</span>
+                            <span v-else-if="result.type === 'church'">🏘️</span>
                             <span v-else-if="result.type === 'cluster'">👥</span>
-                            <span v-else-if="result.type === 'ministry'">🎵</span>
+                            <span v-else-if="result.type === 'ministry'">🤝</span>
+                            <span v-else-if="result.type === 'role'">🛡️</span>
+                            <span v-else>👤</span>
                         </div>
 
                         <div class="min-w-0 flex-1">
@@ -473,4 +526,14 @@ const emit = defineEmits([
 
     <ConfirmDialog :open="visibilityDialogOpen" title="Change Folder Access" :message="visibilityConfirmMessage"
         confirm-text="Continue" :loading="loading" @close="cancelVisibilityChange" @confirm="confirmVisibilityChange" />
+
+    <ConfirmDialog :open="applyPermissionDialogOpen" title="Apply Permission to Files?"
+        message="Would you also like to apply this permission to all files inside this folder, including files in subfolders?"
+        confirm-text="Apply to All Files" :loading="savingPermission" @close="savePermission(false)"
+        cancel-text="Folder Only" @confirm="savePermission(true)" />
+
+    <ConfirmDialog :open="deletePermissionDialogOpen" title="Remove Access?"
+        :message="`Remove access for '${permissionToDelete?.principal_name}'? This action cannot be undone.`"
+        confirm-text="Remove Access" :loading="deletingPermission" @close="deletePermissionDialogOpen = false"
+        @confirm="confirmDeletePermission" />
 </template>

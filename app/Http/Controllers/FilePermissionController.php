@@ -39,7 +39,7 @@ class FilePermissionController extends Controller
         });
 
         return response()->json([
-            'owner' => $file->owner,
+            'owner' => $file->uploader,
             'permissions' => $permissions,
             'visibility' => $file->visibility,
             'share_token' => $file->share_token,
