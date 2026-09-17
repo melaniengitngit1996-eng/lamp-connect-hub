@@ -231,6 +231,36 @@ const formatFileSize = (bytes) => {
 	return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`
 }
 
+const handlePaste = (event) => {
+	const items = event.clipboardData?.items
+
+	if (!items) {
+		return
+	}
+
+	for (const item of items) {
+		if (item.type.startsWith('image/')) {
+			const file = item.getAsFile()
+
+			if (!file) {
+				continue
+			}
+
+			selectedFile.value = new File(
+				[file],
+				`pasted-image-${Date.now()}.${file.type.split('/')[1]}`,
+				{
+					type: file.type,
+				}
+			)
+
+			event.preventDefault()
+
+			return
+		}
+	}
+}
+
 onMounted(() => {
 	loadChats()
 	settings.load()
@@ -589,6 +619,7 @@ onMounted(() => {
 						@click="isSelectingFile = true" @change="handleFileSelected" @cancel="handleFileCancelled" />
 
 					<input v-model="newMessage" @keydown.enter.prevent="sendMessage" :disabled="isSending"
+						@paste="handlePaste"
 						class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
 						:placeholder="`Message ${selectedConversation.name}`" />
 
