@@ -32,12 +32,18 @@ class MessageReactionController extends Controller
             ]
         );
 
+        $reaction->load('user');
+
         return response()->json([
-            'message' => 'Reaction added.',
             'reaction' => [
                 'id' => $reaction->id,
                 'user_id' => $reaction->user_id,
                 'reaction' => $reaction->reaction,
+                'user' => [
+                    'id' => $reaction->user->id,
+                    'name' => $reaction->user->name,
+                    'initials' => $reaction->user->initials,
+                ],
             ],
         ]);
     }

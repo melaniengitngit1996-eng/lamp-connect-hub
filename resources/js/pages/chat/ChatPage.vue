@@ -1,5 +1,11 @@
 <script setup>
-import { ref, onMounted, nextTick, computed } from 'vue'
+import {
+	ref,
+	onMounted,
+	onBeforeUnmount,
+	nextTick,
+	computed
+} from 'vue'
 import { useAuth } from '../../stores/auth'
 import { useSettings } from '../../stores/settings'
 const { logout, user, fetchUser, can } = useAuth()
@@ -323,9 +329,37 @@ const handlePaste = (event) => {
 	}
 }
 
+const canRemoveReaction = (message, reaction) => {
+	return message.reactions?.some(
+		r =>
+			r.user_id === user.value.id &&
+			r.reaction === reaction
+	)
+}
+
+const handleClickOutsideReaction = (event) => {
+	const target = event.target
+
+	if (!target.closest('.reaction-details')) {
+		openReactionDetails.value = null
+	}
+}
+
+onBeforeUnmount(() => {
+	document.removeEventListener(
+		'click',
+		handleClickOutsideReaction
+	)
+})
+
 onMounted(() => {
 	loadChats()
 	settings.load()
+
+	document.addEventListener(
+		'click',
+		handleClickOutsideReaction
+	)
 })
 </script>
 
@@ -663,22 +697,63 @@ onMounted(() => {
 										</div>
 
 										<!-- Existing reactions -->
+										<!-- Existing reactions -->
 										<div v-if="message.reactions?.length" :class="[
 											'flex flex-wrap gap-1 mt-1',
 											message.sender.id === user.id
 												? 'justify-end'
 												: 'justify-start'
 										]">
-											<button v-for="reaction in reactionOptions" :key="reaction.key"
-												v-show="getReactionCount(message, reaction.key)" type="button"
-												@click="reactToMessage(message, reaction.key)"
-												class="flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs shadow-sm hover:bg-accent"
-												:class="hasReacted(message, reaction.key)
-													? 'border-primary bg-primary/10'
-													: ''">
-												<span>{{ reaction.emoji }}</span>
-												<span>{{ getReactionCount(message, reaction.key) }}</span>
-											</button>
+											<template v-for="reaction in reactionOptions" :key="reaction.key">
+												<div v-if="getReactionCount(message, reaction.key) > 0"
+													class="relative">
+													<!-- Reaction count -->
+													<button type="button" @click.stop="
+														openReactionDetails =
+														openReactionDetails === `${message.id}-${reaction.key}`
+															? null
+															: `${message.id}-${reaction.key}`
+														" class="flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs shadow-sm hover:bg-accent"
+														:class="hasReacted(message, reaction.key)
+															? 'border-primary bg-primary/10'
+															: ''
+															">
+														<span>{{ reaction.emoji }}</span>
+														<span>{{ getReactionCount(message, reaction.key) }}</span>
+													</button>
+
+													<!-- Who reacted -->
+													<div v-if="
+														openReactionDetails ===
+														`${message.id}-${reaction.key}`
+													" class="reaction-details absolute z-40 bottom-full left-0 mb-2 min-w-[180px] rounded-lg border bg-background p-2 shadow-lg">
+														<div class="mb-1 px-2 text-xs font-medium">
+															{{ reaction.emoji }} Reactions
+														</div>
+
+														<div v-for="item in getReactionUsers(message, reaction.key)"
+															:key="item.id"
+															class="flex items-center gap-2 rounded-md px-2 py-1.5 text-sm">
+															<span
+																class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs">
+																{{ item.user?.initials }}
+															</span>
+
+															<span class="truncate">
+																{{ item.user?.name }}
+															</span>
+														</div>
+
+														<!-- Remove my reaction -->
+														<button v-if="canRemoveReaction(message, reaction.key)"
+															type="button"
+															@click.stop="reactToMessage(message, reaction.key)"
+															class="mt-1 w-full rounded-md px-2 py-1.5 text-left text-xs text-destructive hover:bg-destructive/10">
+															Remove reaction
+														</button>
+													</div>
+												</div>
+											</template>
 										</div>
 
 									</div>
