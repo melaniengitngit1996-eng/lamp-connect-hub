@@ -128,6 +128,7 @@ class ChatController extends Controller
                         'sender',
                         'reply.sender',
                         'file',
+                        'reactions.user',
                     ])
                     ->oldest()
                     ->get()
@@ -281,6 +282,7 @@ class ChatController extends Controller
             'sender',
             'conversation',
             'file',
+            'reactions',
         ]);
 
         // Email notification

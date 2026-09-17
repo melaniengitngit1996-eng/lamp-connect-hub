@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Contracts\Auth\CanResetPassword as CanResetPasswordContract;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements CanResetPasswordContract
 {
@@ -178,5 +179,10 @@ class User extends Authenticatable implements CanResetPasswordContract
     public function sentMessages()
     {
         return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    public function messageReactions(): HasMany
+    {
+        return $this->hasMany(MessageReaction::class);
     }
 }

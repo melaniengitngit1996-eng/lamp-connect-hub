@@ -51,8 +51,23 @@ const isSending = ref(false)
 const sendError = ref('')
 const selectedFile = ref(null)
 const fileInput = ref(null)
-
 const isSelectingFile = ref(false)
+const openReactionMessage = ref(null)
+const openReactionDetails = ref(null)
+const reactionOptions = [
+	{ key: 'like', emoji: '👍' },
+	{ key: 'love', emoji: '❤️' },
+	{ key: 'haha', emoji: '😂' },
+	{ key: 'wow', emoji: '😮' },
+	{ key: 'sad', emoji: '😢' },
+	{ key: 'angry', emoji: '😡' },
+]
+
+const getReactionUsers = (message, reaction) => {
+	return message.reactions?.filter(
+		r => r.reaction === reaction
+	) || []
+}
 
 const openFilePicker = () => {
 	isSelectingFile.value = true
@@ -93,6 +108,53 @@ const loadChats = async () => {
 			await loadConversation(firstConversation)
 		}
 	}
+}
+
+const reactToMessage = async (message, reaction) => {
+	try {
+		const existingReaction = message.reactions?.find(
+			r => r.user_id === user.value.id
+		)
+
+		if (existingReaction?.reaction === reaction) {
+			await axios.delete(`/api/chat/messages/${message.id}/reactions`)
+
+			message.reactions = message.reactions.filter(
+				r => r.user_id !== user.value.id
+			)
+		} else {
+			const { data } = await axios.post(
+				`/api/chat/messages/${message.id}/reactions`,
+				{ reaction }
+			)
+
+			message.reactions = (message.reactions || []).filter(
+				r => r.user_id !== user.value.id
+			)
+
+			message.reactions.push(data.reaction)
+		}
+
+		// close picker
+		openReactionMessage.value = null
+
+	} catch (error) {
+		console.error(error)
+	}
+}
+
+const getReactionCount = (message, reaction) => {
+	return message.reactions?.filter(
+		r => r.reaction === reaction
+	).length || 0
+}
+
+const hasReacted = (message, reaction) => {
+	return message.reactions?.some(
+		r =>
+			r.user_id === user.value.id &&
+			r.reaction === reaction
+	)
 }
 
 const loadConversation = async (conversation) => {
@@ -312,6 +374,14 @@ onMounted(() => {
 		width: 220px;
 	}
 }
+
+.reaction-picker {
+	display: none;
+}
+
+.group:hover .reaction-picker {
+	display: flex;
+}
 </style>
 
 <template>
@@ -521,7 +591,7 @@ onMounted(() => {
 							</span>
 
 							<div :class="[
-								'max-w-[75%] flex flex-col gap-1',
+								'max-w-[75%] min-w-0 flex flex-col gap-1',
 								message.sender.id === user.id
 									? 'items-end'
 									: 'items-start'
@@ -532,43 +602,117 @@ onMounted(() => {
 									{{ message.created_at_formatted }}
 								</div>
 
-								<div :class="[
-									'rounded-2xl text-sm break-words overflow-hidden',
-									message.sender.id === user.id
-										? 'bg-primary text-primary-foreground'
-										: 'bg-muted'
-								]">
-									<!-- Image attachment -->
-									<a v-if="message.file && message.file.mime_type?.startsWith('image/')"
-										:href="message.file.url" target="_blank" rel="noopener noreferrer"
-										class="block">
-										<img :src="message.file.url" :alt="message.file.name"
-											class="w-48 h-40 object-cover rounded-lg" />
-									</a>
+								<!-- Message + reaction -->
+								<div class="flex items-center gap-2">
 
-									<!-- Other file types -->
-									<a v-else-if="message.file" :href="message.file.url" target="_blank"
-										rel="noopener noreferrer" class="chat-file flex items-center gap-3 px-3.5 py-3">
+									<!-- Bubble -->
+									<div class="relative min-w-0">
+
+										<!-- Reaction picker -->
 										<div
-											class="h-9 w-9 shrink-0 rounded-md bg-background/20 flex items-center justify-center">
-											<PaperClipIcon class="h-4 w-4" />
+											class="reaction-picker absolute z-30 bottom-full mb-2 left-0 items-center gap-1 rounded-full border bg-background px-2 py-1.5 shadow-lg">
+											<button v-for="reaction in reactionOptions" :key="reaction.key"
+												type="button" @click="reactToMessage(message, reaction.key)"
+												class="flex h-8 w-8 items-center justify-center rounded-full text-lg hover:bg-accent"
+												:class="hasReacted(message, reaction.key) ? 'bg-accent' : ''">
+												{{ reaction.emoji }}
+											</button>
 										</div>
 
-										<div class="chat-file-info">
-											<div class="chat-file-name">
-												{{ message.file.name }}
+										<!-- Existing message bubble -->
+										<div :class="[
+											'rounded-2xl text-sm break-words overflow-hidden',
+											message.sender.id === user.id
+												? 'bg-primary text-primary-foreground'
+												: 'bg-muted'
+										]">
+
+											<!-- Image attachment -->
+											<a v-if="message.file && message.file.mime_type?.startsWith('image/')"
+												:href="message.file.url" target="_blank" rel="noopener noreferrer"
+												class="block">
+												<img :src="message.file.url" :alt="message.file.name"
+													class="w-48 h-40 object-cover rounded-lg" />
+											</a>
+
+											<!-- Other file types -->
+											<a v-else-if="message.file" :href="message.file.url" target="_blank"
+												rel="noopener noreferrer"
+												class="chat-file flex items-center gap-3 px-3.5 py-3">
+												<div
+													class="h-9 w-9 shrink-0 rounded-md bg-background/20 flex items-center justify-center">
+													<PaperClipIcon class="h-4 w-4" />
+												</div>
+
+												<div class="chat-file-info">
+													<div class="chat-file-name">
+														{{ message.file.name }}
+													</div>
+
+													<div class="text-xs opacity-70">
+														{{ formatFileSize(message.file.size) }}
+													</div>
+												</div>
+											</a>
+
+											<!-- Text -->
+											<div v-if="message.message" class="px-3.5 py-2">
+												{{ message.message }}
 											</div>
 
-											<div class="text-xs opacity-70">
-												{{ formatFileSize(message.file.size) }}
-											</div>
 										</div>
-									</a>
 
-									<!-- Text -->
-									<div v-if="message.message" class="px-3.5 py-2">
-										{{ message.message }}
+										<!-- Existing reactions -->
+										<div v-if="message.reactions?.length" :class="[
+											'flex flex-wrap gap-1 mt-1',
+											message.sender.id === user.id
+												? 'justify-end'
+												: 'justify-start'
+										]">
+											<button v-for="reaction in reactionOptions" :key="reaction.key"
+												v-show="getReactionCount(message, reaction.key)" type="button"
+												@click="reactToMessage(message, reaction.key)"
+												class="flex items-center gap-1 rounded-full border bg-background px-2 py-0.5 text-xs shadow-sm hover:bg-accent"
+												:class="hasReacted(message, reaction.key)
+													? 'border-primary bg-primary/10'
+													: ''">
+												<span>{{ reaction.emoji }}</span>
+												<span>{{ getReactionCount(message, reaction.key) }}</span>
+											</button>
+										</div>
+
 									</div>
+
+									<!-- React button + picker -->
+									<div v-if="message.sender.id != user.id" class="relative"
+										@mouseenter="openReactionMessage = message.id"
+										@mouseleave="openReactionMessage = null">
+										<!-- Reaction picker -->
+										<div v-if="openReactionMessage === message.id" class="absolute z-30 bottom-full mb-1 right-0
+           flex items-center gap-1 rounded-full border
+           bg-background px-2 py-1.5 shadow-lg">
+											<button v-for="reaction in reactionOptions" :key="reaction.key"
+												type="button" @click.stop="reactToMessage(message, reaction.key)" class="flex h-8 w-8 items-center justify-center rounded-full
+             text-lg hover:bg-accent" :class="hasReacted(message, reaction.key) ? 'bg-accent' : ''">
+												{{ reaction.emoji }}
+											</button>
+										</div>
+
+										<!-- React button -->
+										<button type="button"
+											class="bg-background border flex h-5 hover:bg-accent items-center justify-center rounded-full shadow-sm shrink-0 text-sm w-5"
+											title="React">
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+												viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+												stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+												<circle cx="12" cy="12" r="10" />
+												<path d="M8 14s1.5 2 4 2 4-2 4-2" />
+												<line x1="9" y1="9" x2="9.01" y2="9" />
+												<line x1="15" y1="9" x2="15.01" y2="9" />
+											</svg>
+										</button>
+									</div>
+
 								</div>
 							</div>
 						</div>

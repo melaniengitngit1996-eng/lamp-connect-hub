@@ -21,6 +21,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\TestimonyController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\MessageReactionController;
 
 
 Route::get('/drive/folders', [FileFolderController::class, 'index']);
@@ -173,3 +174,6 @@ Route::post('/chat/conversations/{conversation}/read', [ChatController::class, '
 
 Route::get('/settings', [SettingController::class, 'index']);
 Route::patch('/settings', [SettingController::class, 'update']);
+
+Route::post('/chat/messages/{message}/reactions', [MessageReactionController::class, 'store']);
+Route::delete('/chat/messages/{message}/reactions', [MessageReactionController::class, 'destroy']);
